@@ -35,6 +35,11 @@ fn main() {
 	win.extra_map['zoom'] = '1'
 
 	mut file := ui.menuitem('File')
+    
+    mut save_as := ui.menuitem('Save As...')
+    save_as.set_click(save_as_click)
+    file.add_child(save_as)
+    
 	win.bar.add_child(file)
 
 	mut help := ui.menuitem('Help')
@@ -202,6 +207,48 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	copy.set_pos(120, 185)
 	copy.set_config(12, true, false)
 	about.add_child(copy)
+
+	win.add_child(about)
+}
+
+fn save_as_click(mut win ui.Window, com ui.MenuItem) {
+	mut about := ui.modal(win, 'Save As')
+
+    mut l1 := ui.label(win, 'File path:')
+    l1.pack()
+    l1.set_pos(30, 70)
+    about.add_child(l1)
+
+	mut path := ui.textbox(win, '')
+    path.set_id(mut win, 'save-as-path')
+	path.set_bounds(140, 70, 300, 25)
+    path.multiline = false
+	about.add_child(path)
+    
+    mut l2 := ui.label(win, 'Save as type: ')
+    l2.pack()
+    l2.set_pos(30, 100)
+    about.add_child(l2)
+    
+    mut typeb := ui.selector(win, 'PNG (*.png)')
+    typeb.items << 'PNG (*.png)'
+    typeb.set_bounds(140, 100, 300, 25)
+    about.add_child(typeb)
+
+    about.needs_init = false
+    
+    mut save := ui.button(win, 'Save')
+    save.set_bounds(150, 250, 100, 25)
+    save.set_click(fn (mut win ui.Window, btn ui.Button) {
+        mut path := &ui.Textbox(win.get_from_id('save-as-path'))
+        canvas := &KA(win.id_map['pixels'])
+        file := canvas.file
+
+        file.write(path.text)
+
+        win.components = win.components.filter(mut it !is ui.Modal)
+	})
+    about.add_child(save)
 
 	win.add_child(about)
 }
