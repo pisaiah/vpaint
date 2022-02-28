@@ -2,7 +2,6 @@ module main
 
 import vpng
 import os
-import math
 import gg
 import iui as ui
 import gx
@@ -16,12 +15,13 @@ pub mut:
 	ggim   int
 	strr   int
 	iid    int
+    draw_size int = 1
+    brush Brush = PencilBrush{}
 }
 
 [console]
 fn main() {
-	mut png_file := vpng.read(os.resource_abs_path('card_sunflower.png')) or { panic(err) }
-
+	mut png_file := vpng.read(os.resource_abs_path('test.png')) or { panic(err) }
 	mut win := ui.window(ui.get_system_theme(), 'vPaint', 800, 550)
 
 	win.bar = ui.menubar(win, win.theme)
@@ -35,11 +35,11 @@ fn main() {
 	win.extra_map['zoom'] = '1'
 
 	mut file := ui.menuitem('File')
-    
-    mut save_as := ui.menuitem('Save As...')
-    save_as.set_click(save_as_click)
-    file.add_child(save_as)
-    
+
+	mut save_as := ui.menuitem('Save As...')
+	save_as.set_click(save_as_click)
+	file.add_child(save_as)
+
 	win.bar.add_child(file)
 
 	mut help := ui.menuitem('Help')
@@ -47,6 +47,7 @@ fn main() {
 	mut about_this := ui.menuitem('About vPaint')
 	about_this.set_click(about_click)
 
+    // Zoom menu
 	mut mz := ui.menuitem('Zoom')
 
 	mut zoomm := ui.menuitem('Decrease (-)')
@@ -63,6 +64,9 @@ fn main() {
 	})
 	mz.add_child(zoomp)
 	win.bar.add_child(mz)
+    
+    make_brush_menu(mut win)
+    make_draw_size_menu(mut win)
 
 	mut theme_menu := ui.menuitem('Theme')
 	mut themes := [ui.theme_default(), ui.theme_dark()]
@@ -130,62 +134,6 @@ fn make_sliders(mut win ui.Window) {
 	win.add_child(x_slide)
 }
 
-fn make_status_bar(mut win ui.Window) {
-	mut status_bar := ui.menubar(win, win.theme)
-	status_bar.z_index = 10
-	status_bar.set_id(mut win, 'status_bar')
-	status_bar.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
-		size := gg.window_size()
-		mut this := *com
-		this.y = size.height - 25
-		win.gg.draw_line(this.x, this.y - 1, size.width, this.y, gx.rgb(200, 200, 200))
-	}
-	win.add_child(status_bar)
-
-	mut zoom_status := ui.menuitem('Zoom: 1')
-	zoom_status.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
-		mut this := *com
-
-		if mut this is ui.MenuItem {
-			if this.show_items {
-				win.extra_map['zoom'] = '1'
-			}
-			zoom := win.extra_map['zoom'].f32()
-			if zoom > 10 {
-				win.extra_map['zoom'] = '10'
-			}
-			this.text = (zoom * 100).str() + '%'
-		}
-	}
-
-	mut zoom_plus := ui.menuitem('+')
-	zoom_plus.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
-		mut this := *com
-		if mut this is ui.MenuItem {
-			if this.is_mouse_rele {
-				win.extra_map['zoom'] = (win.extra_map['zoom'].f32() + .25).str()
-				this.is_mouse_rele = false
-			}
-			this.width = ui.text_width(win, ' ++ ')
-		}
-	}
-
-	mut zoom_min := ui.menuitem('-')
-	zoom_min.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
-		mut this := *com
-		if mut this is ui.MenuItem {
-			if this.is_mouse_rele {
-				win.extra_map['zoom'] = (win.extra_map['zoom'].f32() - .25).str()
-				this.is_mouse_rele = false
-			}
-			this.width = ui.text_width(win, ' -- ')
-		}
-	}
-
-	status_bar.add_child(zoom_min)
-	status_bar.add_child(zoom_status)
-	status_bar.add_child(zoom_plus)
-}
 
 fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut about := ui.modal(win, 'About vPaint')
@@ -212,54 +160,51 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 }
 
 fn save_as_click(mut win ui.Window, com ui.MenuItem) {
-	mut about := ui.modal(win, 'Save As')
+	mut modal := ui.modal(win, 'Save As')
 
-    mut l1 := ui.label(win, 'File path:')
-    l1.pack()
-    l1.set_pos(30, 70)
-    about.add_child(l1)
+	mut l1 := ui.label(win, 'File path:')
+	l1.pack()
+	l1.set_pos(30, 70)
+	modal.add_child(l1)
 
 	mut path := ui.textbox(win, '')
-    path.set_id(mut win, 'save-as-path')
+	path.set_id(mut win, 'save-as-path')
 	path.set_bounds(140, 70, 300, 25)
-    path.multiline = false
-	about.add_child(path)
-    
-    mut l2 := ui.label(win, 'Save as type: ')
-    l2.pack()
-    l2.set_pos(30, 100)
-    about.add_child(l2)
-    
-    mut typeb := ui.selector(win, 'PNG (*.png)')
-    typeb.items << 'PNG (*.png)'
-    typeb.set_bounds(140, 100, 300, 25)
-    about.add_child(typeb)
+	path.multiline = false
+	modal.add_child(path)
 
-    about.needs_init = false
-    
-    mut save := ui.button(win, 'Save')
-    save.set_bounds(150, 250, 100, 25)
-    save.set_click(fn (mut win ui.Window, btn ui.Button) {
-        mut path := &ui.Textbox(win.get_from_id('save-as-path'))
-        canvas := &KA(win.id_map['pixels'])
-        file := canvas.file
+	mut l2 := ui.label(win, 'Save as type: ')
+	l2.pack()
+	l2.set_pos(30, 100)
+	modal.add_child(l2)
 
-        file.write(path.text)
+	mut typeb := ui.selector(win, 'PNG (*.png)')
+	typeb.items << 'PNG (*.png)'
+	typeb.set_bounds(140, 100, 300, 25)
+	modal.add_child(typeb)
 
-        win.components = win.components.filter(mut it !is ui.Modal)
+	modal.needs_init = false
+
+	mut save := ui.button(win, 'Save')
+	save.set_bounds(150, 250, 100, 25)
+	save.set_click(fn (mut win ui.Window, btn ui.Button) {
+		mut path := &ui.Textbox(win.get_from_id('save-as-path'))
+		canvas := &KA(win.id_map['pixels'])
+		file := canvas.file
+
+		file.write(path.text)
+
+		win.components = win.components.filter(mut it !is ui.Modal)
 	})
-    about.add_child(save)
+	modal.add_child(save)
 
-	win.add_child(about)
+	win.add_child(modal)
 }
 
 fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut pixels := &KA(win.id_map['pixels'])
 	zoom := win.extra_map['zoom'].f32()
 	mut this := *com
-
-	mut y := f32(0)
-	mut x := f32(0)
 
 	mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
 	mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
@@ -271,35 +216,25 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 		size := gg.window_size()
 		if win.mouse_y < (size.height - 25) && cy < this.height && cx < this.width
 			&& (cy * zoom) >= 0 && (cx * zoom) >= 0 {
-			pixels.file.set_pixel(cx, cy, vpng.TrueColorAlpha{
-				red: 0
-				green: 0
-				blue: 0
-				alpha: 255
-			})
-			make_gg_image(mut pixels, mut win.gg, false)
-		}
-	}
 
-	mut min_x := f32(0)
-	for y < (pixels.height * zoom) {
-		for x < (pixels.width * zoom) {
-			x += zoom
-			if min_x < x {
-				min_x = x
-			}
+            
+            color := vpng.TrueColorAlpha{0, 0, 0, 255}
+            dsize := pixels.draw_size
+            pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
+
+            // Update canvas
+			make_gg_image(mut pixels, mut win, false)
 		}
-		y += zoom
-		x = 0
 	}
 
 	this.height = int(pixels.height * zoom) + 1
 	this.width = int(pixels.width * zoom) + 1
 
 	if pixels.ggim == -1 {
-		make_gg_image(mut pixels, mut win.gg, true)
+		make_gg_image(mut pixels, mut win, true)
 	}
 
+    // Draw Image
 	config := gg.DrawImageConfig{
 		img_id: pixels.ggim
 		img_rect: gg.Rect{
@@ -312,17 +247,32 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut gg := win.gg
 	gg.draw_image_with_config(config)
 
-	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width,
-		this.height, gx.rgb(215, 215, 215))
+    // Draw canvas border
+	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width+1,
+		this.height+1, gx.rgb(215, 215, 215))
+
+    // Draw brush hint
+    cx := int((win.mouse_x - this.x) / zoom)
+    cy := int((win.mouse_y - this.y) / zoom)
+
+    dsize := pixels.draw_size
+    pixels.brush.draw_hint(win, this.x, this.y, cx, cy, gx.blue, dsize)
 
 	// Draw box-shadow
-	shadows := [gx.rgb(171, 183, 203), gx.rgb(176, 188, 207),
-		gx.rgb(182, 193, 212), gx.rgb(187, 198, 215), gx.rgb(193, 203, 220),
-		gx.rgb(198, 208, 225), gx.rgb(204, 213, 230), gx.rgb(209, 218, 234)]
+    draw_box_shadow(this, y_slide, x_slide, gg)
+}
 
-	mut si := this.y + this.height
-	mut sx := this.x + this.width
-	for shadow in shadows {
+//
+// Draw box shadow around image canvas
+//
+fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg gg.Context) {
+    mut shadows := [gx.rgb(171, 183, 203), gx.rgb(176, 188, 207),
+	gx.rgb(182, 193, 212), gx.rgb(187, 198, 215), gx.rgb(193, 203, 220),
+	gx.rgb(198, 208, 225), gx.rgb(204, 213, 230), gx.rgb(209, 218, 234)]
+
+	mut si := this.y + this.height + 2
+	mut sx := this.x + this.width + 1
+	for mut shadow in shadows {
 		gg.draw_line(this.x + 10 - int(x_slide.cur), si - int(y_slide.cur), this.width + this.x + 1 - int(x_slide.cur),
 			si - int(y_slide.cur), shadow)
 		gg.draw_line(sx - int(x_slide.cur), this.y + 10 - int(y_slide.cur), sx - int(x_slide.cur),
@@ -330,25 +280,25 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 		si += 1
 		sx += 1
 	}
+    
 }
 
 //
 // Update the canvas image
 //
-fn make_gg_image(mut storage KA, mut ctx gg.Context, first bool) {
+fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 	if first {
-		storage.ggim = ctx.new_streaming_image(storage.file.width, storage.file.height,
+		storage.ggim = win.gg.new_streaming_image(storage.file.width, storage.file.height,
 			4, gg.StreamingImageConfig{ pixel_format: .rgba8 })
-		ctx.set_bg_color(gx.rgb(210, 220, 240))
+		win.gg.set_bg_color(gx.rgb(210, 220, 240))
 	}
 	bytess := storage.file.get_unfiltered()
-	ctx.update_pixel_data(storage.ggim, bytess.data)
+	win.gg.update_pixel_data(storage.ggim, bytess.data)
 }
 
-fn get_min(num byte) byte {
-	return byte(math.min(((num / 10) * 10) + 5, 255))
-}
-
+//
+// Change Window Theme
+// 
 fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	text := com.text
 	mut theme := ui.theme_by_name(text)
