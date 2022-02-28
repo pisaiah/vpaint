@@ -9,14 +9,14 @@ import gx
 // Our storage
 struct KA {
 pub mut:
-	width  int
-	height int
-	file   vpng.PngFile
-	ggim   int
-	strr   int
-	iid    int
-    draw_size int = 1
-    brush Brush = PencilBrush{}
+	width     int
+	height    int
+	file      vpng.PngFile
+	ggim      int
+	strr      int
+	iid       int
+	draw_size int   = 1
+	brush     Brush = PencilBrush{}
 }
 
 [console]
@@ -47,7 +47,7 @@ fn main() {
 	mut about_this := ui.menuitem('About vPaint')
 	about_this.set_click(about_click)
 
-    // Zoom menu
+	// Zoom menu
 	mut mz := ui.menuitem('Zoom')
 
 	mut zoomm := ui.menuitem('Decrease (-)')
@@ -64,9 +64,9 @@ fn main() {
 	})
 	mz.add_child(zoomp)
 	win.bar.add_child(mz)
-    
-    make_brush_menu(mut win)
-    make_draw_size_menu(mut win)
+
+	make_brush_menu(mut win)
+	make_draw_size_menu(mut win)
 
 	mut theme_menu := ui.menuitem('Theme')
 	mut themes := [ui.theme_default(), ui.theme_dark()]
@@ -133,7 +133,6 @@ fn make_sliders(mut win ui.Window) {
 	x_slide.z_index = 15
 	win.add_child(x_slide)
 }
-
 
 fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut about := ui.modal(win, 'About vPaint')
@@ -216,13 +215,11 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 		size := gg.window_size()
 		if win.mouse_y < (size.height - 25) && cy < this.height && cx < this.width
 			&& (cy * zoom) >= 0 && (cx * zoom) >= 0 {
+			color := vpng.TrueColorAlpha{0, 0, 0, 255}
+			dsize := pixels.draw_size
+			pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
 
-            
-            color := vpng.TrueColorAlpha{0, 0, 0, 255}
-            dsize := pixels.draw_size
-            pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
-
-            // Update canvas
+			// Update canvas
 			make_gg_image(mut pixels, mut win, false)
 		}
 	}
@@ -234,7 +231,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 		make_gg_image(mut pixels, mut win, true)
 	}
 
-    // Draw Image
+	// Draw Image
 	config := gg.DrawImageConfig{
 		img_id: pixels.ggim
 		img_rect: gg.Rect{
@@ -247,28 +244,28 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut gg := win.gg
 	gg.draw_image_with_config(config)
 
-    // Draw canvas border
-	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width+1,
-		this.height+1, gx.rgb(215, 215, 215))
+	// Draw canvas border
+	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width + 1,
+		this.height + 1, gx.rgb(215, 215, 215))
 
-    // Draw brush hint
-    cx := int((win.mouse_x - this.x) / zoom)
-    cy := int((win.mouse_y - this.y) / zoom)
+	// Draw brush hint
+	cx := int((win.mouse_x - this.x) / zoom)
+	cy := int((win.mouse_y - this.y) / zoom)
 
-    dsize := pixels.draw_size
-    pixels.brush.draw_hint(win, this.x, this.y, cx, cy, gx.blue, dsize)
+	dsize := pixels.draw_size
+	pixels.brush.draw_hint(win, this.x, this.y, cx, cy, gx.blue, dsize)
 
 	// Draw box-shadow
-    draw_box_shadow(this, y_slide, x_slide, gg)
+	draw_box_shadow(this, y_slide, x_slide, gg)
 }
 
 //
 // Draw box shadow around image canvas
 //
 fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg gg.Context) {
-    mut shadows := [gx.rgb(171, 183, 203), gx.rgb(176, 188, 207),
-	gx.rgb(182, 193, 212), gx.rgb(187, 198, 215), gx.rgb(193, 203, 220),
-	gx.rgb(198, 208, 225), gx.rgb(204, 213, 230), gx.rgb(209, 218, 234)]
+	mut shadows := [gx.rgb(171, 183, 203), gx.rgb(176, 188, 207),
+		gx.rgb(182, 193, 212), gx.rgb(187, 198, 215), gx.rgb(193, 203, 220),
+		gx.rgb(198, 208, 225), gx.rgb(204, 213, 230), gx.rgb(209, 218, 234)]
 
 	mut si := this.y + this.height + 2
 	mut sx := this.x + this.width + 1
@@ -280,7 +277,6 @@ fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg
 		si += 1
 		sx += 1
 	}
-    
 }
 
 //
@@ -298,7 +294,7 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 
 //
 // Change Window Theme
-// 
+//
 fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	text := com.text
 	mut theme := ui.theme_by_name(text)
