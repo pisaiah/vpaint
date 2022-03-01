@@ -24,11 +24,17 @@ pub mut:
 [console]
 fn main() {
 	mut path := os.resource_abs_path('test.png')
-
-	mut png_file := vpng.read(path) or { panic(err) }
 	mut win := ui.window(ui.get_system_theme(), 'vPaint', 800, 550)
 
+	if os.args.len > 1 {
+		// Open file
+		path = os.args[1]
+		win.extra_map['save_path'] = path
+	}
+
+	mut png_file := vpng.read(path) or { panic(err) }
 	win.bar = ui.menubar(win, win.theme)
+
 	mut storage := &KA{
 		window: win
 		file: png_file
@@ -40,6 +46,10 @@ fn main() {
 	win.extra_map['zoom'] = '1'
 
 	mut file := ui.menuitem('File')
+
+	mut save_btn := ui.menuitem('Save...')
+	save_btn.set_click(save_as_click)
+	file.add_child(save_btn)
 
 	mut save_as := ui.menuitem('Save As...')
 	save_as.set_click(save_as_click)
@@ -177,6 +187,10 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	path.set_id(mut win, 'save-as-path')
 	path.set_bounds(140, 70, 300, 25)
 	path.multiline = false
+
+	if 'save_path' in win.extra_map {
+		path.text = win.extra_map['save_path']
+	}
 	modal.add_child(path)
 
 	mut l2 := ui.label(win, 'Save as type: ')
@@ -198,6 +212,7 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 		canvas := &KA(win.id_map['pixels'])
 		file := canvas.file
 
+		win.extra_map['save_path'] = path.text
 		file.write(path.text)
 
 		win.components = win.components.filter(mut it !is ui.Modal)
