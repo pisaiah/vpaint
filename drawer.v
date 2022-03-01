@@ -19,6 +19,8 @@ pub mut:
 	draw_size int = 1
 	color     gx.Color
 	brush     Brush = PencilBrush{}
+	lx        int
+	ly        int
 }
 
 [console]
@@ -243,6 +245,17 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			dsize := pixels.draw_size
 			pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
 
+			if pixels.lx != -1 {
+				midx := ((pixels.lx + cx) / 2)
+				midy := ((pixels.ly + cy) / 2)
+				if midx != cx && midy != cy {
+					pixels.brush.set_pixels(pixels, midx, midy, color, dsize)
+				}
+			}
+
+			pixels.lx = cx
+			pixels.ly = cy
+
 			// Update canvas
 			make_gg_image(mut pixels, mut win, false)
 		}
@@ -250,6 +263,12 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 
 	this.height = int(pixels.height * zoom) + 1
 	this.width = int(pixels.width * zoom) + 1
+
+	if this.is_mouse_rele {
+		pixels.lx = -1
+		pixels.ly = -1
+		this.is_mouse_rele = false
+	}
 
 	if pixels.ggim == -1 {
 		make_gg_image(mut pixels, mut win, true)
