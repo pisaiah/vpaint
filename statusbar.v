@@ -26,7 +26,7 @@ fn make_status_bar(mut win ui.Window) {
 			}
 			zoom := win.extra_map['zoom'].f32()
 			if zoom > 20 {
-				win.extra_map['zoom'] = '10'
+				win.extra_map['zoom'] = '20'
 			}
 			this.text = (zoom * 100).str() + '%'
 		}

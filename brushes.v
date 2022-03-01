@@ -75,9 +75,18 @@ struct PencilBrush {
 
 fn (brush PencilBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
 	mut pixels := &KA(ptr)
+	wid := size / 2
+
 	for i in 0 .. size {
 		for j in 0 .. size {
-			pixels.file.set_pixel(x + i, y + j, color)
+			xx := x + i - wid
+			yy := y + j - wid
+			if xx >= 0 && yy >= 0 && xx <= pixels.width {
+				if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
+					&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
+					pixels.file.set_pixel(xx, yy, color)
+				}
+			}
 		}
 	}
 }
@@ -85,10 +94,14 @@ fn (brush PencilBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColo
 fn (brush PencilBrush) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, color gx.Color, size int) {
 	mut win := &ui.Window(ptr)
 	zoom := win.extra_map['zoom'].f32()
+	wid := (size / 2) * zoom
 	for i in 0 .. size {
 		for j in 0 .. size {
-			win.gg.draw_rect_empty(tx + ((cx + i) * zoom), ty + ((cy + j) * zoom), zoom,
-				zoom, gx.blue)
+			if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
+				&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
+				win.gg.draw_rect_empty(tx + ((cx + i) * zoom) - wid, ty + ((cy + j) * zoom) - wid,
+					zoom, zoom, gx.blue)
+			}
 		}
 	}
 }

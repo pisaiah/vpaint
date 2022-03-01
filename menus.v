@@ -32,7 +32,7 @@ fn make_brush_menu(mut win ui.Window) {
 fn make_draw_size_menu(mut win ui.Window) {
 	mut mz := ui.menuitem('Size')
 
-	for i in 1 .. 5 {
+	for i in 1 .. 10 {
 		mut zoomm := draw_size_item(i)
 		mz.add_child(zoomm)
 	}
