@@ -26,16 +26,28 @@ fn make_brush_menu(mut win ui.Window) {
 	})
 	bm.add_child(calli_)
 
+	mut spray := ui.menuitem('Spraycan Brush')
+	spray.set_click(fn (mut win ui.Window, com ui.MenuItem) {
+		mut pixels := &KA(win.id_map['pixels'])
+		pixels.brush = SpraycanBrush{}
+	})
+	bm.add_child(spray)
+
 	win.bar.add_child(bm)
 }
 
 fn make_draw_size_menu(mut win ui.Window) {
 	mut mz := ui.menuitem('Size')
 
-	for i in 1 .. 10 {
+	for i in 1 .. 16 {
 		mut zoomm := draw_size_item(i)
-		mz.add_child(zoomm)
+		if i % 2 == 0 || i <= 4 {
+			mz.add_child(zoomm)
+		}
 	}
+
+	mut zoomm := draw_size_item(99)
+	mz.add_child(zoomm)
 
 	win.bar.add_child(mz)
 }

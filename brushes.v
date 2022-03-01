@@ -4,6 +4,7 @@ import vpng
 import gg
 import iui as ui
 import gx
+import rand
 
 //
 // Brushes
@@ -101,6 +102,50 @@ fn (brush PencilBrush) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, co
 				&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
 				win.gg.draw_rect_empty(tx + ((cx + i) * zoom) - wid, ty + ((cy + j) * zoom) - wid,
 					zoom, zoom, gx.blue)
+			}
+		}
+	}
+}
+
+//
+// Brush: Spraycan
+//
+struct SpraycanBrush {
+	name string = 'Spraycan'
+}
+
+fn (brush SpraycanBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+	mut pixels := &KA(ptr)
+	wid := size / 2
+
+	for i in 0 .. size {
+		for j in 0 .. size {
+			xx := x + i - wid
+			yy := y + j - wid
+			if xx >= 0 && yy >= 0 && xx <= pixels.width && yy <= pixels.height {
+				if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
+					&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
+					if rand.intn(size) == 0 {
+						pixels.file.set_pixel(xx, yy, color)
+					}
+				}
+			}
+		}
+	}
+}
+
+fn (brush SpraycanBrush) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, color gx.Color, size int) {
+	mut win := &ui.Window(ptr)
+	zoom := win.extra_map['zoom'].f32()
+	wid := (size / 2) * zoom
+	for i in 0 .. size {
+		for j in 0 .. size {
+			if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
+				&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
+				if rand.intn(size) == 0 {
+					win.gg.draw_rect_empty(tx + ((cx + i) * zoom) - wid, ty + ((cy + j) * zoom) - wid,
+						zoom, zoom, gx.blue)
+				}
 			}
 		}
 	}
