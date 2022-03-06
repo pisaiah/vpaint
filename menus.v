@@ -33,6 +33,14 @@ fn make_brush_menu(mut win ui.Window) {
 	})
 	bm.add_child(spray)
 
+	// testing
+	mut test := ui.menuitem('Testing of Select')
+	test.set_click(fn (mut win ui.Window, com ui.MenuItem) {
+		mut pixels := &KA(win.id_map['pixels'])
+		pixels.brush = SelectionTool{}
+	})
+	bm.add_child(test)
+
 	win.bar.add_child(bm)
 }
 

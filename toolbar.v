@@ -10,6 +10,60 @@ pub mut:
 	kids []ui.Component
 }
 
+// Toolbar - Shape Select
+fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
+	// Colors (taken from MSPaint)
+	mut colors := [Brush(RectShape{}), Brush(SquareShape{}), Brush(LineShape{})]
+
+	mut sx := 450
+
+	mut x := this.x + (sw - sx)
+	mut y := this.y
+
+	// Shape Click
+	if this.is_mouse_rele {
+		mx := win.mouse_x
+		my := win.mouse_y
+
+		if mx > x && mx < sw && my < (this.y + 44) {
+			mut indx := 0
+
+			indx = (mx - x) / 24
+			if my > (this.y + 21) {
+				indx += 5
+			}
+
+			mut storage := &KA(win.id_map['pixels'])
+			if indx < colors.len && indx >= 0 {
+				storage.brush = colors[indx]
+			}
+
+			this.is_mouse_rele = false
+		}
+	}
+
+	// Draw Shape
+	mut index := 0
+	for mut shape in colors {
+		win.draw_bordered_rect(x, y, 22, 20, 4, gx.white, gx.rgb(160, 160, 160))
+		if mut shape is RectShape {
+			win.gg.draw_rect_empty(x + 4, y + 5, 15, 11, win.theme.text_color)
+		}
+		if mut shape is SquareShape {
+			win.gg.draw_rect_empty(x + 4, y + 4, 14, 14, win.theme.text_color)
+		}
+
+		x += 24
+
+		index += 1
+		if index >= 5 {
+			x = this.x + (sw - sx)
+			y += 22
+			index = 0
+		}
+	}
+}
+
 // Toolbar - Color Select
 fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 	// Colors (taken from MSPaint)
@@ -23,23 +77,45 @@ fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 
 	mut sx := 250
 
-	mut x := this.x + (sw - sx)
+	mut x := this.x + (sw - 320)
 	mut y := this.y
+
+	// Draw Primary Color
+	win.draw_filled_rect(x, y + 2, 30, 40, 0, gx.white, win.theme.button_border_hover)
+	mut canvas := &KA(win.id_map['pixels'])
+	win.gg.draw_rect_filled(x + 1, y + 3, 27, 20, canvas.color)
+	win.gg.draw_text_def(x, y + 24, '1')
+
+	x += 34
+
+	// Draw 2nt Color
+	win.draw_filled_rect(x, y + 2, 30, 40, 0, gx.white, gx.rgb(160, 160, 160))
+	win.gg.draw_rect_filled(x + 1, y + 3, 27, 20, canvas.off_color)
+	win.gg.draw_text_def(x, y + 24, '2')
+
+	x = this.x + (sw - sx)
 
 	// Color Click
 	if this.is_mouse_rele {
 		mx := win.mouse_x
 		my := win.mouse_y
 
-		if mx > x && mx < sw {
+		if mx > (this.x + (sw - 320)) && mx < x {
+			off_color := canvas.off_color
+			canvas.off_color = canvas.color
+			canvas.color = off_color
+			this.is_mouse_rele = false
+		}
+
+		if mx > x && mx < sw && my < (this.y + 44) {
 			mut indx := 0
 
 			indx = (mx - x) / 25
 			if my > (this.y + 21) {
 				indx += 10
 			}
-			mut canvas := &KA(win.id_map['pixels'])
 			canvas.color = colors[indx]
+
 			this.is_mouse_rele = false
 		}
 	}
@@ -66,6 +142,15 @@ fn make_toolbar(mut win ui.Window) {
 	toolbar.z_index = 5
 	toolbar.set_pos(0, 25)
 
+	mut sel_btn := ui.button(win, 'Select')
+	sel_btn.z_index = 6
+	sel_btn.set_bounds(20, 26, 70, 40)
+	sel_btn.click_event_fn = fn (mut win ui.Window, com ui.Button) {
+		mut pixels := &KA(win.id_map['pixels'])
+		pixels.brush = SelectionTool{}
+	}
+	win.add_child(sel_btn)
+
 	mut picker_btn := ui.button(win, 'Picker')
 	picker_btn.z_index = 6
 	picker_btn.set_id(mut win, 'picker_btn')
@@ -91,6 +176,7 @@ fn make_toolbar(mut win ui.Window) {
 				gx.rgb(200, 200, 200))
 
 			com.draw_colors(mut win, picker_btn.x)
+			com.draw_shapes(mut win, picker_btn.x)
 		}
 	}
 

@@ -18,7 +18,8 @@ pub mut:
 	iid       int
 	draw_size int = 1
 	color     gx.Color
-	brush     Brush = PencilBrush{}
+	off_color gx.Color = gx.gray
+	brush     Brush    = PencilBrush{}
 	lx        int
 	ly        int
 }
@@ -224,6 +225,11 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	win.add_child(modal)
 }
 
+struct Point {
+	x int
+	y int
+}
+
 fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut pixels := &KA(win.id_map['pixels'])
 	zoom := win.extra_map['zoom'].f32()
@@ -246,10 +252,24 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
 
 			if pixels.lx != -1 {
-				midx := ((pixels.lx + cx) / 2)
-				midy := ((pixels.ly + cy) / 2)
-				if midx != cx && midy != cy {
-					pixels.brush.set_pixels(pixels, midx, midy, color, dsize)
+				mut mids := []Point{}
+				mids << Point{pixels.lx, pixels.ly}
+
+				for i in 0 .. 9 {
+					last := mids[mids.len - 1]
+					midx_3 := ((last.x + cx) / 2)
+					midy_3 := ((last.y + cy) / 2)
+					mut dooo := true
+					for point in mids {
+						if point.x == midx_3 && point.y == midy_3 {
+							dooo = false
+						}
+					}
+
+					if dooo {
+						pixels.brush.set_pixels(pixels, midx_3, midy_3, color, dsize)
+					}
+					mids << Point{midx_3, midy_3}
 				}
 			}
 
@@ -267,6 +287,8 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	if this.is_mouse_rele {
 		pixels.lx = -1
 		pixels.ly = -1
+		pixels.brush.down_x = -1
+		pixels.brush.down_y = -1
 		this.is_mouse_rele = false
 	}
 
@@ -284,22 +306,24 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			height: this.height
 		}
 	}
-	mut gg := win.gg
-	gg.draw_image_with_config(config)
+	gg := win.gg
 
 	// Draw canvas border
 	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width + 1,
 		this.height + 1, gx.rgb(215, 215, 215))
+
+	// Draw box-shadow
+	draw_box_shadow(this, y_slide, x_slide, gg)
+
+	// Draw Image
+	gg.draw_image_with_config(config)
 
 	// Draw brush hint
 	cx := int((win.mouse_x - this.x) / zoom)
 	cy := int((win.mouse_y - this.y) / zoom)
 
 	dsize := pixels.draw_size
-	pixels.brush.draw_hint(win, this.x, this.y, cx, cy, gx.blue, dsize)
-
-	// Draw box-shadow
-	draw_box_shadow(this, y_slide, x_slide, gg)
+	pixels.brush.draw_hint(win, this.x, this.y, cx, cy, pixels.color, dsize)
 }
 
 //
