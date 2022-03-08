@@ -49,7 +49,7 @@ jobs:
     env:
       CC: clang
       ZIPNAME: vpaint_macos.zip
-    steps
+    steps:
       - name: Setup V
         uses: vlang/setup-v@v1
         with:
