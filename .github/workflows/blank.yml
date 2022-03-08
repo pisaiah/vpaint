@@ -31,7 +31,7 @@ jobs:
           git clone https://github.com/isaiahpatton/ui iui
           cd iui
           git clone https://github.com/isaiahpatton/vpaint
-          ./v -cc $CC -skip-unused -gc boehm vpaint
+          v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
            rm -rf .git
@@ -70,7 +70,7 @@ jobs:
           git clone https://github.com/isaiahpatton/ui iui
           cd iui
           git clone https://github.com/isaiahpatton/vpaint
-          ./v -cc $CC -skip-unused -gc boehm vpaint
+          v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
            rm -rf .git
@@ -114,7 +114,7 @@ jobs:
           cd iui
           v install --git https://github.com/isaiahpatton/vpng
           git clone https://github.com/isaiahpatton/vpaint
-          v -skip-unused -gc boehm vpaint
+          v -cc gcc -skip-unused -gc boehm vpaint
       - name: Remove excluded
         shell: msys2 {0}
         run: |
