@@ -31,7 +31,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			dsize := pixels.draw_size
 			pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
 
-			if pixels.lx != -1 && pixels.cl > 1{
+			if pixels.lx != -1 && pixels.cl > 1 {
 				mut mids := []Point{}
 				mids << Point{pixels.lx, pixels.ly}
 
@@ -55,7 +55,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 
 			pixels.lx = cx
 			pixels.ly = cy
-            pixels.cl += 1
+			pixels.cl += 1
 
 			// Update canvas
 			make_gg_image(mut pixels, mut win, false)

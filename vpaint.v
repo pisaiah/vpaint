@@ -22,15 +22,15 @@ pub mut:
 	brush     Brush    = PencilBrush{}
 	lx        int
 	ly        int
-    cl        int
+	cl        int
 }
 
 pub fn get_pixel(x int, y int, mut this vpng.PngFile) vpng.Pixel {
-    ind := y * this.width + x
-    if ind > this.pixels.len {
-        return vpng.TrueColorAlpha{0,0,0,0}
-    }
-    return this.pixels[ind]
+	ind := y * this.width + x
+	if ind > this.pixels.len {
+		return vpng.TrueColorAlpha{0, 0, 0, 0}
+	}
+	return this.pixels[ind]
 }
 
 [console]
@@ -74,7 +74,7 @@ fn main() {
 	mut about_this := ui.menuitem('About vPaint')
 	about_this.set_click(about_click)
 
-    make_zoom_menu(mut win)
+	make_zoom_menu(mut win)
 	make_brush_menu(mut win)
 	make_draw_size_menu(mut win)
 

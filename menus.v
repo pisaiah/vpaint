@@ -40,8 +40,8 @@ fn make_brush_menu(mut win ui.Window) {
 		pixels.brush = SelectionTool{}
 	})
 	bm.add_child(test)
-    
-    // testing
+
+	// testing
 	mut fillcan := ui.menuitem('Fillcan')
 	fillcan.set_click(fn (mut win ui.Window, com ui.MenuItem) {
 		mut pixels := &KA(win.id_map['pixels'])
@@ -102,11 +102,11 @@ fn make_zoom_menu(mut win ui.Window) {
 }
 
 fn zoom_decrease_click(mut win ui.Window, com ui.MenuItem) {
-    zoom := win.extra_map['zoom'].f32()
+	zoom := win.extra_map['zoom'].f32()
 	win.extra_map['zoom'] = (zoom - 0.5).str()
 }
 
 fn zoom_increase_click(mut win ui.Window, com ui.MenuItem) {
-    zoom := win.extra_map['zoom'].f32()
+	zoom := win.extra_map['zoom'].f32()
 	win.extra_map['zoom'] = (zoom + 0.5).str()
 }
