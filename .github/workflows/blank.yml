@@ -100,7 +100,14 @@ jobs:
       - uses: msys2/setup-msys2@v2
       - name: Compile
         run: |
-          .\v.exe -skip-unused -gc boehm .
+          git clone https://github.com/vlang/v
+          cd v
+          .\make.bat
+          git clone https://github.com/isaiahpatton/ui iui
+          .\v.exe symlink
+          cd iui
+          git clone https://github.com/isaiahpatton/vpaint
+          v -skip-unused -gc boehm vpaint
       - name: Remove excluded
         shell: msys2 {0}
         run: |
