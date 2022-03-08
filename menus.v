@@ -92,13 +92,15 @@ fn make_zoom_menu(mut win ui.Window) {
 	mz.add_child(zoomp)
 
 	mut zoom_full := ui.menuitem('Increase by 1000%')
-	zoom_full.set_click(fn (mut win ui.Window, com ui.MenuItem) {
-		zoom := win.extra_map['zoom'].f32()
-		win.extra_map['zoom'] = (zoom + 10).str()
-	})
+	zoom_full.set_click(zoom_increase_big_click)
 	mz.add_child(zoom_full)
 
 	win.bar.add_child(mz)
+}
+
+fn zoom_increase_big_click(mut win ui.Window, com ui.MenuItem) {
+    zoom := win.extra_map['zoom'].f32()
+	win.extra_map['zoom'] = (zoom + 10).str()
 }
 
 fn zoom_decrease_click(mut win ui.Window, com ui.MenuItem) {
