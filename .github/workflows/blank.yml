@@ -18,7 +18,7 @@ jobs:
         uses: vlang/setup-v@v1
         with:
           # Default: ${{ github.token }}
-          token: ''
+          token: ${{ github.token }}
           version: 'weekly.2022.10'
           version-file: ''
           check-latest: false
@@ -54,7 +54,7 @@ jobs:
         uses: vlang/setup-v@v1
         with:
           # Default: ${{ github.token }}
-          token: ''
+          token: ${{ github.token }}
           version: 'weekly.2022.10'
           version-file: ''
           check-latest: false
@@ -90,7 +90,7 @@ jobs:
         uses: vlang/setup-v@v1
         with:
           # Default: ${{ github.token }}
-          token: ''
+          token: ${{ github.token }}
           version: 'weekly.2022.10'
           version-file: ''
           check-latest: false
