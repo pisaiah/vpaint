@@ -3,6 +3,7 @@ module main
 import gg
 import iui as ui
 import gx
+import math
 
 fn make_status_bar(mut win ui.Window) {
 	mut status_bar := ui.menubar(win, win.theme)
@@ -25,9 +26,6 @@ fn make_status_bar(mut win ui.Window) {
 				win.extra_map['zoom'] = '1'
 			}
 			zoom := win.extra_map['zoom'].f32()
-			if zoom > 20 {
-				win.extra_map['zoom'] = '20'
-			}
 			this.text = (zoom * 100).str() + '%'
 		}
 	}
@@ -37,7 +35,7 @@ fn make_status_bar(mut win ui.Window) {
 		mut this := *com
 		if mut this is ui.MenuItem {
 			if this.is_mouse_rele {
-				win.extra_map['zoom'] = (win.extra_map['zoom'].f32() + .25).str()
+				win.extra_map['zoom'] = math.min(win.extra_map['zoom'].f32() + .25, 20).str()
 				this.is_mouse_rele = false
 			}
 			this.width = ui.text_width(win, ' ++ ')
@@ -49,7 +47,7 @@ fn make_status_bar(mut win ui.Window) {
 		mut this := *com
 		if mut this is ui.MenuItem {
 			if this.is_mouse_rele {
-				win.extra_map['zoom'] = (win.extra_map['zoom'].f32() - .25).str()
+				win.extra_map['zoom'] = math.min(win.extra_map['zoom'].f32() - .25, 20).str()
 				this.is_mouse_rele = false
 			}
 			this.width = ui.text_width(win, ' -- ')

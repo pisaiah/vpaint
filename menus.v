@@ -40,6 +40,14 @@ fn make_brush_menu(mut win ui.Window) {
 		pixels.brush = SelectionTool{}
 	})
 	bm.add_child(test)
+    
+    // testing
+	mut fillcan := ui.menuitem('Fillcan')
+	fillcan.set_click(fn (mut win ui.Window, com ui.MenuItem) {
+		mut pixels := &KA(win.id_map['pixels'])
+		pixels.brush = FillBrush{}
+	})
+	bm.add_child(fillcan)
 
 	win.bar.add_child(bm)
 }
@@ -62,9 +70,43 @@ fn make_draw_size_menu(mut win ui.Window) {
 
 fn draw_size_item(ds int) &ui.MenuItem {
 	mut item := ui.menuitem(ds.str() + 'px')
-	item.set_click(fn (mut win ui.Window, com ui.MenuItem) {
-		mut storage := &KA(win.id_map['pixels'])
-		storage.draw_size = com.text.replace('px', '').int()
-	})
+	item.set_click(draw_size_click)
 	return item
+}
+
+fn draw_size_click(mut win ui.Window, com ui.MenuItem) {
+	mut storage := &KA(win.id_map['pixels'])
+	storage.draw_size = com.text.replace('px', '').int()
+}
+
+fn make_zoom_menu(mut win ui.Window) {
+	// Zoom menu
+	mut mz := ui.menuitem('Zoom')
+
+	mut zoomm := ui.menuitem('Decrease (-)')
+	zoomm.set_click(zoom_decrease_click)
+	mz.add_child(zoomm)
+
+	mut zoomp := ui.menuitem('Increase (+)')
+	zoomp.set_click(zoom_increase_click)
+	mz.add_child(zoomp)
+
+	mut zoom_full := ui.menuitem('Increase by 1000%')
+	zoom_full.set_click(fn (mut win ui.Window, com ui.MenuItem) {
+		zoom := win.extra_map['zoom'].f32()
+		win.extra_map['zoom'] = (zoom + 10).str()
+	})
+	mz.add_child(zoom_full)
+
+	win.bar.add_child(mz)
+}
+
+fn zoom_decrease_click(mut win ui.Window, com ui.MenuItem) {
+    zoom := win.extra_map['zoom'].f32()
+	win.extra_map['zoom'] = (zoom - 0.5).str()
+}
+
+fn zoom_increase_click(mut win ui.Window, com ui.MenuItem) {
+    zoom := win.extra_map['zoom'].f32()
+	win.extra_map['zoom'] = (zoom + 0.5).str()
 }

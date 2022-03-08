@@ -13,9 +13,9 @@ pub mut:
 // Toolbar - Shape Select
 fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
 	// Colors (taken from MSPaint)
-	mut colors := [Brush(RectShape{}), Brush(SquareShape{}), Brush(LineShape{})]
+	mut shapes := [Brush(RectShape{}), Brush(SquareShape{}), Brush(LineShape{})]
 
-	mut sx := 450
+	mut sx := 410
 
 	mut x := this.x + (sw - sx)
 	mut y := this.y
@@ -34,23 +34,28 @@ fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
 			}
 
 			mut storage := &KA(win.id_map['pixels'])
-			if indx < colors.len && indx >= 0 {
-				storage.brush = colors[indx]
+			if indx < shapes.len && indx >= 0 {
+				storage.brush = shapes[indx]
 			}
 
 			this.is_mouse_rele = false
 		}
 	}
 
+	win.draw_bordered_rect(x, y, 24 * shapes.len, 42, 4, gx.white, gx.rgb(160, 160, 160))
+
 	// Draw Shape
 	mut index := 0
-	for mut shape in colors {
-		win.draw_bordered_rect(x, y, 22, 20, 4, gx.white, gx.rgb(160, 160, 160))
-		if mut shape is RectShape {
+	for shape in shapes {
+		// win.draw_bordered_rect(x, y, 22, 20, 4, gx.white, gx.rgb(160, 160, 160))
+		if shape is RectShape {
 			win.gg.draw_rect_empty(x + 4, y + 5, 15, 11, win.theme.text_color)
 		}
-		if mut shape is SquareShape {
+		if shape is SquareShape {
 			win.gg.draw_rect_empty(x + 4, y + 4, 14, 14, win.theme.text_color)
+		}
+		if shape is LineShape {
+			win.gg.draw_line(x + 4, y + 4, x + 17, y + 17, win.theme.text_color)
 		}
 
 		x += 24
@@ -62,6 +67,9 @@ fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
 			index = 0
 		}
 	}
+
+	// TODO end of draw
+	this.is_mouse_rele = false
 }
 
 // Toolbar - Color Select
@@ -144,7 +152,7 @@ fn make_toolbar(mut win ui.Window) {
 
 	mut sel_btn := ui.button(win, 'Select')
 	sel_btn.z_index = 6
-	sel_btn.set_bounds(20, 26, 70, 40)
+	sel_btn.set_bounds(10, 26, 70, 40)
 	sel_btn.click_event_fn = fn (mut win ui.Window, com ui.Button) {
 		mut pixels := &KA(win.id_map['pixels'])
 		pixels.brush = SelectionTool{}
