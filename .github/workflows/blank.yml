@@ -44,7 +44,7 @@ jobs:
         run: |
            cd iui
            zip -r9 --symlinks $ZIPNAME vpaint/
-           mv $ZIPNAME vpaint/
+           mv $ZIPNAME ../
            cd ..
       - name: Create artifact
         uses: actions/upload-artifact@v2
@@ -83,7 +83,7 @@ jobs:
         run: |
            cd iui
            zip -r9 --symlinks $ZIPNAME vpaint/
-           mv $ZIPNAME vpaint/
+           mv $ZIPNAME ../
            cd ..
       - name: Create artifact
         uses: actions/upload-artifact@v2
@@ -124,16 +124,22 @@ jobs:
         shell: msys2 {0}
         run: |
            rm -rf .git
+           cd v
+           cd iui
+           cd vpaint
+           rm -rf *.v
+           cd ..
+           cd ..
+           cd ..
       - name: Create archive
         shell: msys2 {0}
         run: |
            cd v
            cd iui
            cd vpaint
-           del *.v
            cd ..
            powershell Compress-Archive vpaint $ZIPNAME
-           mv $ZIPNAME vpaint/
+           mv $ZIPNAME ../../
            cd ..
            cd ..
 # NB: the powershell Compress-Archive line is from:
