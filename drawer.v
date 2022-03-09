@@ -140,6 +140,13 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 	win.gg.update_pixel_data(storage.ggim, bytess.data)
 }
 
+// Create an new ui.Image
+fn make_icon(mut win ui.Window, width int, height int, data []byte) int {
+    ggim := win.gg.new_streaming_image(width, height, 4, gg.StreamingImageConfig{ pixel_format: .rgba8 })
+    win.gg.update_pixel_data(ggim, data.data)
+    return ggim
+}
+
 //
 // Change Window Theme
 //

@@ -158,12 +158,12 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	mut lbl := ui.label(win,
 		'Simple Image Viewer & Editor written\nin the V Programming Language.' +
-		'\n\nThis program is free software licensed under\nthe GNU General Public License v2')
+		'\n\nThis program is free software licensed under\nthe GNU General Public License v2.\n\nIcons by Icons8')
 	lbl.set_pos(120, 70)
 	about.add_child(lbl)
 
 	mut copy := ui.label(win, 'Copyright © 2021-2022 Isaiah. All Rights Reserved')
-	copy.set_pos(120, 185)
+	copy.set_pos(120, 195)
 	copy.set_config(12, true, false)
 	about.add_child(copy)
 

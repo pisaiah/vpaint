@@ -3,6 +3,7 @@ module main
 import iui as ui
 import gg
 import gx
+import os
 
 struct Toolbar {
 	ui.Component_A
@@ -150,30 +151,44 @@ fn make_toolbar(mut win ui.Window) {
 	toolbar.z_index = 5
 	toolbar.set_pos(0, 25)
 
-	mut sel_btn := ui.button(win, 'Select')
+	/*mut sel_btn := ui.button(win, 'Select')
 	sel_btn.z_index = 6
 	sel_btn.set_bounds(10, 26, 70, 40)
 	sel_btn.click_event_fn = fn (mut win ui.Window, com ui.Button) {
 		mut pixels := &KA(win.id_map['pixels'])
 		pixels.brush = SelectionTool{}
 	}
-	win.add_child(sel_btn)
+	win.add_child(sel_btn)*/
 
-	mut picker_btn := ui.button(win, 'Picker')
+    rgb_data := os.read_bytes(os.resource_abs_path('resources/icons8-color-wheel-2-48.png')) or {[byte(0)]}
+    pencil_data := os.read_bytes(os.resource_abs_path('resources/icons8-pencil-24.png')) or {[byte(0)]}
+
+    mut pencil_btn :=  ui.image_from_byte_array_with_size(mut win, pencil_data, 24, 24)
+    pencil_btn.z_index = 6
+    pencil_btn.set_id(mut win, 'pencil_btn')
+    pencil_btn.set_bounds(0, 25, 24, 24)
+    win.add_child(pencil_btn)
+
+	mut picker_btn := ui.image_from_byte_array_with_size(mut win, rgb_data, 48, 48)// ui.button(win, 'Picker')
 	picker_btn.z_index = 6
 	picker_btn.set_id(mut win, 'picker_btn')
-	picker_btn.set_bounds(0, 26, 70, 40)
-	picker_btn.click_event_fn = fn (mut win ui.Window, com ui.Button) {
-		show_rgb_picker(mut win)
-	}
+	picker_btn.set_bounds(0, 22, 48, 48)
+
+    picker_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
+        if com.is_mouse_rele {
+            mut this := *com
+            show_rgb_picker(mut win)
+            this.is_mouse_rele = false
+        }
+    }
 	win.add_child(picker_btn)
 
 	toolbar.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if mut com is Toolbar {
-			mut picker_btn := &ui.Button(win.get_from_id('picker_btn'))
+			mut picker_btn := &ui.Image(win.get_from_id('picker_btn'))
 			size := gg.window_size()
 
-			picker_btn.x = size.width - picker_btn.width - 23
+			picker_btn.x = size.width - picker_btn.width //- 23
 
 			com.x = 0
 			com.y = 25
