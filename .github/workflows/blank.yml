@@ -32,7 +32,6 @@ jobs:
           sudo apt install build-essential
           sudo apt-get --yes --force-yes install libxi-dev libxcursor-dev mesa-common-dev
           sudo apt-get --yes --force-yes install libgl1-mesa-glx
-          sudo ln -f -s /usr/lib/x86_64-linux-gnu/libGL.so.1.0.0 /usr/lib/x86_64-linux-gnu/libGL.so
           v install --git https://github.com/isaiahpatton/vpng
           git clone https://github.com/isaiahpatton/ui iui
           cd iui
