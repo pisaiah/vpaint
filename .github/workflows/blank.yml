@@ -42,10 +42,10 @@ jobs:
            rm -rf .git
       - name: Create ZIP archive
         run: |
-           cd ..
+           cd iui
            zip -r9 --symlinks $ZIPNAME vpaint/
            mv $ZIPNAME vpaint/
-           cd vpaint/
+           cd ..
       - name: Create artifact
         uses: actions/upload-artifact@v2
         with:
@@ -81,10 +81,10 @@ jobs:
            rm -rf .git
       - name: Create ZIP archive
         run: |
-           cd ..
+           cd iui
            zip -r9 --symlinks $ZIPNAME vpaint/
            mv $ZIPNAME vpaint/
-           cd vpaint/
+           cd ..
       - name: Create artifact
         uses: actions/upload-artifact@v2
         with:
@@ -127,10 +127,15 @@ jobs:
       - name: Create archive
         shell: msys2 {0}
         run: |
+           cd v
+           cd iui
+           cd vpaint
+           del *.v
            cd ..
            powershell Compress-Archive vpaint $ZIPNAME
            mv $ZIPNAME vpaint/
-           cd vpaint/
+           cd ..
+           cd ..
 # NB: the powershell Compress-Archive line is from:
 # https://superuser.com/a/1336434/194881
 # It is needed, because `zip` is not installed by default :-|
