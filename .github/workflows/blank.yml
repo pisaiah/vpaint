@@ -27,6 +27,12 @@ jobs:
       - uses: actions/checkout@v1
       - name: Compile
         run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install libgc-dev
+          sudo apt install build-essential
+          sudo apt-get --yes --force-yes install libxi-dev libxcursor-dev mesa-common-dev
+          sudo apt-get --yes --force-yes install libgl1-mesa-glx
+          sudo ln -f -s /usr/lib/x86_64-linux-gnu/libGL.so.1.0.0 /usr/lib/x86_64-linux-gnu/libGL.so
           v install --git https://github.com/isaiahpatton/vpng
           git clone https://github.com/isaiahpatton/ui iui
           cd iui
@@ -38,9 +44,9 @@ jobs:
       - name: Create ZIP archive
         run: |
            cd ..
-           zip -r9 --symlinks $ZIPNAME v/
-           mv $ZIPNAME v/
-           cd v/
+           zip -r9 --symlinks $ZIPNAME vpaint/
+           mv $ZIPNAME vpaint/
+           cd vpaint/
       - name: Create artifact
         uses: actions/upload-artifact@v2
         with:
@@ -77,9 +83,9 @@ jobs:
       - name: Create ZIP archive
         run: |
            cd ..
-           zip -r9 --symlinks $ZIPNAME v/
-           mv $ZIPNAME v/
-           cd v/
+           zip -r9 --symlinks $ZIPNAME vpaint/
+           mv $ZIPNAME vpaint/
+           cd vpaint/
       - name: Create artifact
         uses: actions/upload-artifact@v2
         with:
@@ -123,9 +129,9 @@ jobs:
         shell: msys2 {0}
         run: |
            cd ..
-           powershell Compress-Archive v $ZIPNAME
-           mv $ZIPNAME v/
-           cd v/
+           powershell Compress-Archive vpaint $ZIPNAME
+           mv $ZIPNAME vpaint/
+           cd vpaint/
 # NB: the powershell Compress-Archive line is from:
 # https://superuser.com/a/1336434/194881
 # It is needed, because `zip` is not installed by default :-|
