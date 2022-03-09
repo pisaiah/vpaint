@@ -151,7 +151,8 @@ fn make_toolbar(mut win ui.Window) {
 	toolbar.z_index = 5
 	toolbar.set_pos(0, 25)
 
-	/*mut sel_btn := ui.button(win, 'Select')
+	/*
+	mut sel_btn := ui.button(win, 'Select')
 	sel_btn.z_index = 6
 	sel_btn.set_bounds(10, 26, 70, 40)
 	sel_btn.click_event_fn = fn (mut win ui.Window, com ui.Button) {
@@ -160,27 +161,49 @@ fn make_toolbar(mut win ui.Window) {
 	}
 	win.add_child(sel_btn)*/
 
-    rgb_data := os.read_bytes(os.resource_abs_path('resources/icons8-color-wheel-2-48.png')) or {[byte(0)]}
-    pencil_data := os.read_bytes(os.resource_abs_path('resources/icons8-pencil-24.png')) or {[byte(0)]}
+	rgb_data := os.read_bytes(os.resource_abs_path('resources/icons8-color-wheel-2-48.png')) or {
+		[byte(0)]
+	}
 
-    mut pencil_btn :=  ui.image_from_byte_array_with_size(mut win, pencil_data, 24, 24)
-    pencil_btn.z_index = 6
-    pencil_btn.set_id(mut win, 'pencil_btn')
-    pencil_btn.set_bounds(0, 25, 24, 24)
-    win.add_child(pencil_btn)
+	pencil_data := os.read_bytes(os.resource_abs_path('resources/icons8-pencil-drawing-48.png')) or {
+		[byte(0)]
+	}
+	mut pencil_btn := ui.image_from_byte_array_with_size(mut win, pencil_data, 22, 22)
+	pencil_btn.z_index = 6
+	pencil_btn.set_id(mut win, 'pencil_btn')
+	pencil_btn.set_bounds(10, 25, 22, 22)
+	win.add_child(pencil_btn)
 
-	mut picker_btn := ui.image_from_byte_array_with_size(mut win, rgb_data, 48, 48)// ui.button(win, 'Picker')
+	pen_data := os.read_bytes(os.resource_abs_path('resources/icons8-pen-48.png')) or {
+		[byte(0)]
+	}
+	mut pen_btn := ui.image_from_byte_array_with_size(mut win, pen_data, 48, 48)
+	pen_btn.z_index = 6
+	pen_btn.set_id(mut win, 'pen_btn')
+	pen_btn.set_bounds(10, 47, 22, 22)
+	win.add_child(pen_btn)
+
+	spray_data := os.read_bytes(os.resource_abs_path('resources/icons8-paint-sprayer-48.png')) or {
+		[byte(0)]
+	}
+	mut spray_btn := ui.image_from_byte_array_with_size(mut win, spray_data, 48, 48)
+	spray_btn.z_index = 6
+	spray_btn.set_id(mut win, 'spray_btn')
+	spray_btn.set_bounds(35, 25, 22, 22)
+	win.add_child(spray_btn)
+
+	mut picker_btn := ui.image_from_byte_array_with_size(mut win, rgb_data, 48, 48) // ui.button(win, 'Picker')
 	picker_btn.z_index = 6
 	picker_btn.set_id(mut win, 'picker_btn')
 	picker_btn.set_bounds(0, 22, 48, 48)
 
-    picker_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
-        if com.is_mouse_rele {
-            mut this := *com
-            show_rgb_picker(mut win)
-            this.is_mouse_rele = false
-        }
-    }
+	picker_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
+		if com.is_mouse_rele {
+			mut this := *com
+			show_rgb_picker(mut win)
+			this.is_mouse_rele = false
+		}
+	}
 	win.add_child(picker_btn)
 
 	toolbar.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
@@ -194,7 +217,7 @@ fn make_toolbar(mut win ui.Window) {
 			com.y = 25
 			com.width = size.width
 			com.height = 45
-			win.gg.draw_rect_filled(com.x, com.y, com.width, com.height, win.theme.menubar_background)
+			win.gg.draw_rect_filled(com.x, com.y, com.width, com.height, win.theme.background)
 			win.gg.draw_line(com.x, com.y + com.height, size.width, com.y + com.height,
 				gx.rgb(200, 200, 200))
 

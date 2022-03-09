@@ -99,7 +99,7 @@ fn make_zoom_menu(mut win ui.Window) {
 }
 
 fn zoom_increase_big_click(mut win ui.Window, com ui.MenuItem) {
-    zoom := win.extra_map['zoom'].f32()
+	zoom := win.extra_map['zoom'].f32()
 	win.extra_map['zoom'] = (zoom + 10).str()
 }
 

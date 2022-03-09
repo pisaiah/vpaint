@@ -18,11 +18,10 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
 	mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
 
+	size := gg.window_size()
 	if this.is_mouse_down && win.bar.tik > 90 {
 		mut cx := int((win.mouse_x - (this.x - int(x_slide.cur))) / zoom)
 		mut cy := int((win.mouse_y - (this.y - int(y_slide.cur))) / zoom)
-
-		size := gg.window_size()
 
 		if win.mouse_y < (size.height - 25) && cy < this.height && cx < this.width
 			&& (cy * zoom) >= 0 && (cx * zoom) >= 0 {
@@ -90,14 +89,74 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	gg := win.gg
 
 	// Draw canvas border
-	gg.draw_rect_empty(this.x - int(x_slide.cur), this.y - int(y_slide.cur), this.width + 1,
-		this.height + 1, gx.rgb(215, 215, 215))
+	gg.draw_rect_empty(this.x - int(x_slide.cur * zoom), this.y - int(y_slide.cur * zoom),
+		this.width + 1, this.height + 1, gx.rgb(215, 215, 215))
 
 	// Draw box-shadow
 	draw_box_shadow(this, y_slide, x_slide, gg)
 
 	// Draw Image
 	gg.draw_image_with_config(config)
+
+	mut total := 0
+	cap := 4096
+
+	// No Blending;
+	// TODO: Find way to draw canvas like this
+	for x in 0 .. pixels.width {
+		if ((pixels.width * pixels.height) / zoom) > (cap * 2) {
+			break
+		}
+
+		xp := (this.x - x_slide.cur) + (x * zoom)
+		if xp > size.width {
+			break
+		}
+		if xp < this.x {
+			continue
+		}
+		for y in 0 .. pixels.height {
+			if total > cap {
+				break
+			}
+
+			yp := this.y + (y * zoom) - y_slide.cur
+			if yp < (size.height - x_slide.height - 20) {
+				im_color := get_pixel(x, y, mut pixels.file)
+
+				if x == 0 || y == 0 || x == pixels.width - 1 || y == pixels.height - 1 {
+					continue
+				}
+
+				l_im := get_pixel(x - 1, y, mut pixels.file)
+				r_im := get_pixel(x + 1, y, mut pixels.file)
+				t_im := get_pixel(x, y - 1, mut pixels.file)
+				b_im := get_pixel(x, y + 1, mut pixels.file)
+
+				if l_im == r_im && r_im == t_im && t_im == b_im && b_im == im_color {
+					c_im := get_pixel(x + 1, y + 1, mut pixels.file)
+					d_im := get_pixel(x - 1, y + 1, mut pixels.file)
+					e_im := get_pixel(x + 1, y - 1, mut pixels.file)
+					f_im := get_pixel(x - 1, y - 1, mut pixels.file)
+
+					if c_im == d_im && d_im == b_im && e_im == f_im && f_im == b_im {
+						continue
+					}
+				}
+
+				if mut im_color is vpng.TrueColorAlpha {
+					if im_color.alpha == 0 || im_color.alpha == 255 {
+						gg.draw_rect_filled(xp, yp, zoom, zoom, gx.rgba(im_color.red,
+							im_color.green, im_color.blue, im_color.alpha))
+					}
+				}
+				total += 1
+			}
+		}
+		if total > cap {
+			break
+		}
+	}
 
 	// Draw brush hint
 	cx := int((win.mouse_x - this.x) / zoom)
@@ -142,9 +201,11 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 
 // Create an new ui.Image
 fn make_icon(mut win ui.Window, width int, height int, data []byte) int {
-    ggim := win.gg.new_streaming_image(width, height, 4, gg.StreamingImageConfig{ pixel_format: .rgba8 })
-    win.gg.update_pixel_data(ggim, data.data)
-    return ggim
+	ggim := win.gg.new_streaming_image(width, height, 4, gg.StreamingImageConfig{
+		pixel_format: .rgba8
+	})
+	win.gg.update_pixel_data(ggim, data.data)
+	return ggim
 }
 
 //
