@@ -37,6 +37,9 @@ pub fn get_pixel(x int, y int, mut this vpng.PngFile) vpng.Pixel {
 fn main() {
 	mut path := os.resource_abs_path('test.png')
 	mut win := ui.window(ui.get_system_theme(), 'vPaint', 800, 550)
+    
+    background := gx.rgb(210, 220, 240)
+    win.id_map['background'] = &background
 
 	if os.args.len > 1 {
 		// Open file

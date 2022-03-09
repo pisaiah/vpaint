@@ -145,10 +145,13 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 				}
 
 				if mut im_color is vpng.TrueColorAlpha {
-					if im_color.alpha == 0 || im_color.alpha == 255 {
+                    if im_color.alpha < 100 {
+                        color := &gx.Color(win.id_map['background'])
+                        gg.draw_rect_filled(xp, yp, zoom, zoom, color)
+                    } else {
 						gg.draw_rect_filled(xp, yp, zoom, zoom, gx.rgba(im_color.red,
 							im_color.green, im_color.blue, im_color.alpha))
-					}
+                    }
 				}
 				total += 1
 			}
@@ -217,8 +220,12 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	win.set_theme(theme)
 
 	if text.contains('Dark') {
+        background := gx.rgb(25, 42, 77)
 		win.gg.set_bg_color(gx.rgb(25, 42, 77))
+        win.id_map['background'] = &background
 	} else {
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))
+        background := gx.rgb(210, 220, 240)
+        win.id_map['background'] = &background
 	}
 }
