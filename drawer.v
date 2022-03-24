@@ -12,13 +12,13 @@ struct Point {
 
 fn mouse_down_loop(mut win ui.Window, mut this ui.Component) {
 	if this.is_mouse_down && win.bar.tik > 90 {
-        mut pixels := &KA(win.id_map['pixels'])
-        zoom := win.extra_map['zoom'].f32()
+		mut pixels := &KA(win.id_map['pixels'])
+		zoom := win.extra_map['zoom'].f32()
 
-        mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
-        mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
+		mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
+		mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
 
-        size := gg.window_size()
+		size := gg.window_size()
 
 		mut cx := int((win.mouse_x - (this.x - int(x_slide.cur))) / zoom)
 		mut cy := int((win.mouse_y - (this.y - int(y_slide.cur))) / zoom)
@@ -70,7 +70,6 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
 	mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
 
-	size := gg.window_size()
 	mouse_down_loop(mut win, mut this)
 
 	this.height = int(pixels.height * zoom) + 1
@@ -97,7 +96,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			width: this.width
 			height: this.height
 		}
-        part_rect: gg.Rect{0, 0, pixels.width, pixels.height}
+		part_rect: gg.Rect{0, 0, pixels.width, pixels.height}
 	}
 	gg := win.gg
 
@@ -120,9 +119,9 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 }
 
 fn color_from_string(st string) gx.Color {
-    val := st.split('{')[1].split('}')[0]
-    spl := val.split(', ')
-    return gx.rgb(spl[0].byte(), spl[1].byte(), spl[2].byte())
+	val := st.split('{')[1].split('}')[0]
+	spl := val.split(', ')
+	return gx.rgb(spl[0].byte(), spl[1].byte(), spl[2].byte())
 }
 
 //
@@ -152,9 +151,9 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 	if first {
 		storage.ggim = win.gg.new_streaming_image(storage.file.width, storage.file.height,
 			4, gg.StreamingImageConfig{
-                pixel_format: .rgba8,
-                mag_filter: .nearest
-            })
+			pixel_format: .rgba8
+			mag_filter: .nearest
+		})
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))
 	}
 	bytess := storage.file.get_unfiltered()
@@ -179,12 +178,12 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	win.set_theme(theme)
 
 	if text.contains('Dark') {
-        background := gx.rgb(25, 42, 77)
+		background := gx.rgb(25, 42, 77)
 		win.gg.set_bg_color(gx.rgb(25, 42, 77))
-        win.id_map['background'] = &background
+		win.id_map['background'] = &background
 	} else {
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))
-        background := gx.rgb(210, 220, 240)
-        win.id_map['background'] = &background
+		background := gx.rgb(210, 220, 240)
+		win.id_map['background'] = &background
 	}
 }
