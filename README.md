@@ -3,6 +3,9 @@
 ## About
 Image Viewer & Editor written in the V Programming Language.
 
+![image](https://user-images.githubusercontent.com/16439221/159845337-eb4e132b-0264-46db-9056-fb6154db5cb9.png)
+
+
 ## Compile dependencies
 - [iUI](https://github.com/isaiahpatton/ui)
 - [vpng](https://github.com/Henrixounez/vpng) (my fork [here](https://github.com/isaiahpatton/vpng))
