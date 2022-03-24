@@ -41,7 +41,7 @@ fn make_brush_menu(mut win ui.Window) {
 	})
 	bm.add_child(test)
 
-	// testing
+	// Fillcan
 	mut fillcan := ui.menuitem('Fillcan')
 	fillcan.set_click(fn (mut win ui.Window, com ui.MenuItem) {
 		mut pixels := &KA(win.id_map['pixels'])

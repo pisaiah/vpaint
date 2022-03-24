@@ -10,16 +10,16 @@ struct Point {
 	y int
 }
 
-fn draw_image(mut win ui.Window, com &ui.Component) {
-	mut pixels := &KA(win.id_map['pixels'])
-	zoom := win.extra_map['zoom'].f32()
-	mut this := *com
-
-	mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
-	mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
-
-	size := gg.window_size()
+fn mouse_down_loop(mut win ui.Window, mut this ui.Component) {
 	if this.is_mouse_down && win.bar.tik > 90 {
+        mut pixels := &KA(win.id_map['pixels'])
+        zoom := win.extra_map['zoom'].f32()
+
+        mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
+        mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
+
+        size := gg.window_size()
+
 		mut cx := int((win.mouse_x - (this.x - int(x_slide.cur))) / zoom)
 		mut cy := int((win.mouse_y - (this.y - int(y_slide.cur))) / zoom)
 
@@ -34,7 +34,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 				mut mids := []Point{}
 				mids << Point{pixels.lx, pixels.ly}
 
-				for i in 0 .. 9 {
+				for _ in 0 .. 9 {
 					last := mids[mids.len - 1]
 					midx_3 := ((last.x + cx) / 2)
 					midy_3 := ((last.y + cy) / 2)
@@ -60,6 +60,18 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			make_gg_image(mut pixels, mut win, false)
 		}
 	}
+}
+
+fn draw_image(mut win ui.Window, com &ui.Component) {
+	mut pixels := &KA(win.id_map['pixels'])
+	zoom := win.extra_map['zoom'].f32()
+	mut this := *com
+
+	mut x_slide := &ui.Slider(win.get_from_id('x_slide'))
+	mut y_slide := &ui.Slider(win.get_from_id('y_slide'))
+
+	size := gg.window_size()
+	mouse_down_loop(mut win, mut this)
 
 	this.height = int(pixels.height * zoom) + 1
 	this.width = int(pixels.width * zoom) + 1
@@ -85,6 +97,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 			width: this.width
 			height: this.height
 		}
+        part_rect: gg.Rect{0, 0, pixels.width, pixels.height}
 	}
 	gg := win.gg
 
@@ -98,75 +111,18 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 	// Draw Image
 	gg.draw_image_with_config(config)
 
-	mut total := 0
-	cap := 4096
-
-	// No Blending;
-	// TODO: Find way to draw canvas like this
-	for x in 0 .. pixels.width {
-		if ((pixels.width * pixels.height) / zoom) > (cap * 2) {
-			break
-		}
-
-		xp := (this.x - x_slide.cur) + (x * zoom)
-		if xp > size.width {
-			break
-		}
-		if xp < this.x {
-			continue
-		}
-		for y in 0 .. pixels.height {
-			if total > cap {
-				break
-			}
-
-			yp := this.y + (y * zoom) - y_slide.cur
-			if yp < (size.height - x_slide.height - 20) {
-				im_color := get_pixel(x, y, mut pixels.file)
-
-				if x == 0 || y == 0 || x == pixels.width - 1 || y == pixels.height - 1 {
-					continue
-				}
-
-				l_im := get_pixel(x - 1, y, mut pixels.file)
-				r_im := get_pixel(x + 1, y, mut pixels.file)
-				t_im := get_pixel(x, y - 1, mut pixels.file)
-				b_im := get_pixel(x, y + 1, mut pixels.file)
-
-				if l_im == r_im && r_im == t_im && t_im == b_im && b_im == im_color {
-					c_im := get_pixel(x + 1, y + 1, mut pixels.file)
-					d_im := get_pixel(x - 1, y + 1, mut pixels.file)
-					e_im := get_pixel(x + 1, y - 1, mut pixels.file)
-					f_im := get_pixel(x - 1, y - 1, mut pixels.file)
-
-					if c_im == d_im && d_im == b_im && e_im == f_im && f_im == b_im {
-						continue
-					}
-				}
-
-				if mut im_color is vpng.TrueColorAlpha {
-                    if im_color.alpha < 100 {
-                        color := &gx.Color(win.id_map['background'])
-                        gg.draw_rect_filled(xp, yp, zoom, zoom, color)
-                    } else {
-						gg.draw_rect_filled(xp, yp, zoom, zoom, gx.rgba(im_color.red,
-							im_color.green, im_color.blue, im_color.alpha))
-                    }
-				}
-				total += 1
-			}
-		}
-		if total > cap {
-			break
-		}
-	}
-
 	// Draw brush hint
 	cx := int((win.mouse_x - this.x) / zoom)
 	cy := int((win.mouse_y - this.y) / zoom)
 
 	dsize := pixels.draw_size
 	pixels.brush.draw_hint(win, this.x, this.y, cx, cy, pixels.color, dsize)
+}
+
+fn color_from_string(st string) gx.Color {
+    val := st.split('{')[1].split('}')[0]
+    spl := val.split(', ')
+    return gx.rgb(spl[0].byte(), spl[1].byte(), spl[2].byte())
 }
 
 //
@@ -195,7 +151,10 @@ fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg
 fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 	if first {
 		storage.ggim = win.gg.new_streaming_image(storage.file.width, storage.file.height,
-			4, gg.StreamingImageConfig{ pixel_format: .rgba8 })
+			4, gg.StreamingImageConfig{
+                pixel_format: .rgba8,
+                mag_filter: .nearest
+            })
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))
 	}
 	bytess := storage.file.get_unfiltered()

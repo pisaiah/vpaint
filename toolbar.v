@@ -147,25 +147,36 @@ fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 
 fn create_img_button(mut win ui.Window, path string, x int, y int, w int, h int) &ui.Image {
 	img_data := os.read_bytes(os.resource_abs_path('resources/' + path)) or { [byte(0)] }
-	mut pen_btn := ui.image_from_byte_array_with_size(mut win, img_data, 48, 48)
-	pen_btn.z_index = 6
-	pen_btn.set_bounds(x, y, w, h)
+	mut pen_btn := ui.image_from_byte_array_with_size(mut win, img_data, 32, 32)
+	pen_btn.z_index = 8
+	
+    if x != 0 {
+        pen_btn.set_bounds(x, y, w, h)
+    }
 	return pen_btn
 }
 
 fn setup_brush_choices(mut win ui.Window) {
-    mut pencil_btn := create_img_button(mut win, 'icons8-pencil-drawing-48.png', 10, 25, 22, 22)
+    mut hbox := ui.hbox(win)
+    hbox.set_bounds(16, 32, 40 * 3, 23)
+    hbox.z_index = 7
+    
+    mut pencil_btn := create_img_button(mut win, 'icons8-pencil-drawing-48.png', 0, 0, 0, 0)
 	pencil_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
 			mut pixels := &KA(win.id_map['pixels'])
-            pixels.brush = PencilBrush{}
+            if mut this is ui.Image {
+                if this.app.bar.tik > 90 {
+                    pixels.brush = PencilBrush{}
+                }
+            }
 			this.is_mouse_rele = false
 		}
 	}
-    win.add_child(pencil_btn)
+    hbox.add_child(pencil_btn)
 
-	mut pen_btn := create_img_button(mut win, 'icons8-pen-48.png', 10, 47, 22, 22)
+	mut pen_btn := create_img_button(mut win, 'icons8-pen-48.png', 0, 0, 0, 0)
     pen_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
@@ -174,9 +185,9 @@ fn setup_brush_choices(mut win ui.Window) {
 			this.is_mouse_rele = false
 		}
 	}
-	win.add_child(pen_btn)
+	hbox.add_child(pen_btn)
 
-	mut spray_btn := create_img_button(mut win, 'icons8-paint-sprayer-48.png', 35, 25, 22, 22)
+	mut spray_btn := create_img_button(mut win, 'icons8-paint-sprayer-48.png', 0, 0, 0, 0)
     spray_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
@@ -185,7 +196,8 @@ fn setup_brush_choices(mut win ui.Window) {
 			this.is_mouse_rele = false
 		}
 	}
-	win.add_child(spray_btn)
+	hbox.add_child(spray_btn)
+    win.add_child(hbox)
 }
 
 // Toolbar - Make Toolbar
@@ -206,7 +218,7 @@ fn make_toolbar(mut win ui.Window) {
     
     setup_brush_choices(mut win)
 
-	mut picker_btn := create_img_button(mut win, 'icons8-color-wheel-2-48.png', 0, 22, 48, 48)
+	mut picker_btn := create_img_button(mut win, 'icons8-color-wheel-2-48.png', 1, 22, 48, 48)
 	picker_btn.set_id(mut win, 'picker_btn')
 	picker_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
@@ -217,7 +229,8 @@ fn make_toolbar(mut win ui.Window) {
 	}
 	win.add_child(picker_btn)
 
-	toolbar.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
+	toolbar.draw_event_fn = fn (mut win ui.Window, comm &ui.Component) {
+        mut com := *comm
 		if mut com is Toolbar {
 			mut picker_btn := &ui.Image(win.get_from_id('picker_btn'))
 			size := gg.window_size()

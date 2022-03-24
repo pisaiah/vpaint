@@ -33,10 +33,20 @@ pub fn get_pixel(x int, y int, mut this vpng.PngFile) vpng.Pixel {
 	return this.pixels[ind]
 }
 
+fn test(mut win ui.Window) {
+   for true {
+    mut tes := os.input(win.extra_map['capp'] +', New Cap?:')
+    win.extra_map['capp'] = tes
+   }
+}
+
 [console]
 fn main() {
 	mut path := os.resource_abs_path('test.png')
 	mut win := ui.window(ui.get_system_theme(), 'vPaint', 800, 550)
+    
+    win.extra_map['capp'] = '9000'
+    go test(mut win)
     
     background := gx.rgb(210, 220, 240)
     win.id_map['background'] = &background
@@ -115,7 +125,8 @@ fn make_sliders(mut win ui.Window) {
 	mut y_slide := ui.slider(win, 0, 0, .vert)
 	y_slide.set_bounds(0, 70, 18, 100)
 	y_slide.set_id(mut win, 'y_slide')
-	y_slide.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
+	y_slide.draw_event_fn = fn (mut win ui.Window, comm &ui.Component) {
+        mut com := *comm
 		if mut com is ui.Slider {
 			mut canvas := &ui.Label(win.get_from_id('canvas'))
 			com.max = canvas.height
@@ -133,7 +144,8 @@ fn make_sliders(mut win ui.Window) {
 	mut x_slide := ui.slider(win, 0, 0, .hor)
 	x_slide.set_bounds(0, 26, 0, 18)
 	x_slide.set_id(mut win, 'x_slide')
-	x_slide.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
+	x_slide.draw_event_fn = fn (mut win ui.Window, comm &ui.Component) {
+        mut com := *comm
 		if mut com is ui.Slider {
 			mut canvas := &ui.Label(win.get_from_id('canvas'))
 			com.max = canvas.width
@@ -152,9 +164,10 @@ fn make_sliders(mut win ui.Window) {
 fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut about := ui.modal(win, 'About vPaint')
 	about.in_height = 250
+    about.in_width = 350
 
-	mut title := ui.label(win, 'vPaint ')
-	title.set_pos(120, 20)
+	mut title := ui.label(win, 'vPaint')
+	title.set_pos(120, 8)
 	title.set_config(16, false, true)
 	title.pack()
 	about.add_child(title)
