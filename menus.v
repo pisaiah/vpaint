@@ -69,8 +69,11 @@ fn make_draw_size_menu(mut win ui.Window) {
 }
 
 fn draw_size_item(ds int) &ui.MenuItem {
-	mut item := ui.menuitem(ds.str() + 'px')
-	item.set_click(draw_size_click)
+	item := ui.menu_item(
+		text: ds.str() + 'px'
+		click_event_fn: draw_size_click
+	)
+
 	return item
 }
 
@@ -81,19 +84,25 @@ fn draw_size_click(mut win ui.Window, com ui.MenuItem) {
 
 fn make_zoom_menu(mut win ui.Window) {
 	// Zoom menu
-	mut mz := ui.menuitem('Zoom')
+	zoomm := ui.menu_item(
+		text: 'Decrease (-)'
+		click_event_fn: zoom_decrease_click
+	)
 
-	mut zoomm := ui.menuitem('Decrease (-)')
-	zoomm.set_click(zoom_decrease_click)
-	mz.add_child(zoomm)
+	zoomp := ui.menu_item(
+		text: 'Increase (+)'
+		click_event_fn: zoom_increase_click
+	)
 
-	mut zoomp := ui.menuitem('Increase (+)')
-	zoomp.set_click(zoom_increase_click)
-	mz.add_child(zoomp)
+	zoom_full := ui.menu_item(
+		text: 'Increase by 1000%'
+		click_event_fn: zoom_increase_big_click
+	)
 
-	mut zoom_full := ui.menuitem('Increase by 1000%')
-	zoom_full.set_click(zoom_increase_big_click)
-	mz.add_child(zoom_full)
+	mz := ui.menu_item(
+		text: 'Zoom'
+		children: [zoomm, zoomp, zoom_full]
+	)
 
 	win.bar.add_child(mz)
 }

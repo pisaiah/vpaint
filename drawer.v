@@ -1,6 +1,5 @@
 module main
 
-import vpng
 import gg
 import iui as ui
 import gx
@@ -26,7 +25,7 @@ fn mouse_down_loop(mut win ui.Window, mut this ui.Component) {
 		if win.mouse_y < (size.height - 25) && cy < this.height && cx < this.width
 			&& (cy * zoom) >= 0 && (cx * zoom) >= 0 {
 			gx_color := pixels.color
-			color := vpng.TrueColorAlpha{gx_color.r, gx_color.g, gx_color.b, gx_color.a}
+			color := gx.Color{gx_color.r, gx_color.g, gx_color.b, gx_color.a}
 			dsize := pixels.draw_size
 			pixels.brush.set_pixels(pixels, cx, cy, color, dsize)
 
@@ -105,7 +104,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 		this.width + 1, this.height + 1, gx.rgb(215, 215, 215))
 
 	// Draw box-shadow
-	draw_box_shadow(this, y_slide, x_slide, gg)
+	draw_box_shadow(this, y_slide, x_slide, gg, win.theme)
 
 	// Draw Image
 	gg.draw_image_with_config(config)
@@ -127,13 +126,19 @@ fn color_from_string(st string) gx.Color {
 //
 // Draw box shadow around image canvas
 //
-fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg gg.Context) {
+fn draw_box_shadow(this ui.Component, y_slide &ui.Slider, x_slide &ui.Slider, gg gg.Context, theme ui.Theme) {
 	mut shadows := [gx.rgb(171, 183, 203), gx.rgb(176, 188, 207),
 		gx.rgb(182, 193, 212), gx.rgb(187, 198, 215), gx.rgb(193, 203, 220),
 		gx.rgb(198, 208, 225), gx.rgb(204, 213, 230), gx.rgb(209, 218, 234)]
 
+	tn := theme.name
+	if tn.contains('Dark') || tn.contains('Black') {
+		// TODO: Dark shadow
+		return
+	}
+
 	mut si := this.y + this.height + 2
-	mut sx := this.x + this.width + 1
+	mut sx := this.x + this.width + 2
 	for mut shadow in shadows {
 		gg.draw_line(this.x + 10 - int(x_slide.cur), si - int(y_slide.cur), this.width + this.x + 1 - int(x_slide.cur),
 			si - int(y_slide.cur), shadow)
@@ -156,8 +161,7 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 		})
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))
 	}
-	bytess := storage.file.get_unfiltered()
-	win.gg.update_pixel_data(storage.ggim, bytess.data)
+	win.gg.update_pixel_data(storage.ggim, storage.file.data)
 }
 
 // Create an new ui.Image
@@ -180,6 +184,10 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	if text.contains('Dark') {
 		background := gx.rgb(25, 42, 77)
 		win.gg.set_bg_color(gx.rgb(25, 42, 77))
+		win.id_map['background'] = &background
+	} else if text.contains('Black') {
+		win.gg.set_bg_color(gx.rgb(0, 0, 0))
+		background := gx.rgb(0, 0, 0)
 		win.id_map['background'] = &background
 	} else {
 		win.gg.set_bg_color(gx.rgb(210, 220, 240))

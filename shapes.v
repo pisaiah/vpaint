@@ -1,6 +1,5 @@
 module main
 
-import vpng
 import gg
 import iui as ui
 import gx
@@ -17,7 +16,7 @@ mut:
 	selected_area Box
 }
 
-fn (brush &RectShape) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush &RectShape) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut storage := &KA(ptr)
 	if storage.brush.down_x == -1 {
 		storage.brush.down_x = x
@@ -42,7 +41,7 @@ fn (brush &RectShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 			if zoom == box.zoom && box.x != -1 {
 				win.gg.draw_rect_empty(box.x, box.y, box.w, box.h, gx.blue)
 
-				tcolor := vpng.TrueColorAlpha{color.r, color.g, color.b, color.a}
+				tcolor := gx.Color{color.r, color.g, color.b, color.a}
 
 				base_x := int(box.w / zoom)
 				base_y := int(box.h / zoom)
@@ -56,7 +55,7 @@ fn (brush &RectShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 				for i in min_x .. max_x {
 					for j in min_y .. max_y {
 						if (i == min_x || i == max_x - 1) || j == min_y || j == max_y - 1 {
-							storage.file.set_pixel(box.x + i, box.y + j, tcolor)
+							set_pixel(storage.file, box.x + i, box.y + j, tcolor)
 						}
 					}
 				}
@@ -100,7 +99,7 @@ mut:
 	selected_area Box
 }
 
-fn (brush &SquareShape) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush &SquareShape) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut storage := &KA(ptr)
 	if storage.brush.down_x == -1 {
 		storage.brush.down_x = x
@@ -125,7 +124,7 @@ fn (brush &SquareShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, c
 			if zoom == box.zoom && box.x != -1 {
 				win.gg.draw_rect_empty(box.x, box.y, box.w, box.h, gx.blue)
 
-				tcolor := vpng.TrueColorAlpha{color.r, color.g, color.b, color.a}
+				tcolor := gx.Color{color.r, color.g, color.b, color.a}
 
 				base_x := int(box.w / zoom)
 				base_y := int(box.h / zoom)
@@ -139,7 +138,7 @@ fn (brush &SquareShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, c
 				for i in min_x .. max_x {
 					for j in min_y .. max_y {
 						if (i == min_x || i == max_x - 1) || j == min_y || j == max_y - 1 {
-							storage.file.set_pixel(box.x + i, box.y + j, tcolor)
+							set_pixel(storage.file, box.x + i, box.y + j, tcolor)
 						}
 					}
 				}

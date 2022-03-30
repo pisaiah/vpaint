@@ -43,7 +43,8 @@ fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
 		}
 	}
 
-	win.draw_bordered_rect(x, y, 24 * shapes.len, 42, 4, gx.white, gx.rgb(160, 160, 160))
+	win.draw_bordered_rect(x, y, 24 * shapes.len, 42, 4, win.theme.textbox_background,
+		gx.rgb(160, 160, 160))
 
 	// Draw Shape
 	mut index := 0

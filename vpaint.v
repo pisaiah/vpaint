@@ -1,6 +1,6 @@
 module main
 
-import vpng
+import stbi
 import os
 import gg
 import iui as ui
@@ -12,7 +12,7 @@ pub mut:
 	window    &ui.Window = 0
 	width     int
 	height    int
-	file      vpng.PngFile
+	file      stbi.Image
 	ggim      int
 	strr      int
 	iid       int
@@ -23,14 +23,6 @@ pub mut:
 	lx        int
 	ly        int
 	cl        int
-}
-
-pub fn get_pixel(x int, y int, mut this vpng.PngFile) vpng.Pixel {
-	ind := y * this.width + x
-	if ind > this.pixels.len {
-		return vpng.TrueColorAlpha{0, 0, 0, 0}
-	}
-	return this.pixels[ind]
 }
 
 [console]
@@ -47,7 +39,7 @@ fn main() {
 		win.extra_map['save_path'] = path
 	}
 
-	mut png_file := vpng.read(path) or { panic(err) }
+	mut png_file := read(path) or { panic(err) }
 	win.bar = ui.menubar(win, win.theme)
 
 	mut storage := &KA{
@@ -60,29 +52,41 @@ fn main() {
 	win.id_map['pixels'] = storage
 	win.extra_map['zoom'] = '1'
 
-	mut file := ui.menuitem('File')
+	file_menu := ui.menu_item(
+		text: 'File'
+		children: [
+			ui.menu_item(
+				text: 'Save...'
+				click_event_fn: save_as_click
+			),
+			ui.menu_item(
+				text: 'Save As...'
+				click_event_fn: save_as_click
+			),
+		]
+	)
 
-	mut save_btn := ui.menuitem('Save...')
-	save_btn.set_click(save_as_click)
-	file.add_child(save_btn)
+	win.bar.add_child(file_menu)
 
-	mut save_as := ui.menuitem('Save As...')
-	save_as.set_click(save_as_click)
-	file.add_child(save_as)
-
-	win.bar.add_child(file)
-
-	mut help := ui.menuitem('Help')
-	mut about := ui.menuitem('About iUI')
-	mut about_this := ui.menuitem('About vPaint')
-	about_this.set_click(about_click)
+	help_menu := ui.menu_item(
+		text: 'Help'
+		children: [
+			ui.menu_item(
+				text: 'About vPaint'
+				click_event_fn: about_click
+			),
+			ui.menu_item(
+				text: 'About iUI'
+			),
+		]
+	)
 
 	make_zoom_menu(mut win)
 	make_brush_menu(mut win)
 	make_draw_size_menu(mut win)
 
 	mut theme_menu := ui.menuitem('Theme')
-	mut themes := [ui.theme_default(), ui.theme_dark()]
+	mut themes := ui.get_all_themes()
 	for theme2 in themes {
 		mut item := ui.menuitem(theme2.name)
 		item.set_click(theme_click)
@@ -90,9 +94,7 @@ fn main() {
 	}
 
 	win.bar.add_child(theme_menu)
-	help.add_child(about_this)
-	help.add_child(about)
-	win.bar.add_child(help)
+	win.bar.add_child(help_menu)
 
 	make_toolbar(mut win)
 
@@ -157,7 +159,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	about.in_width = 350
 
 	mut title := ui.label(win, 'vPaint')
-	title.set_pos(120, 8)
+	title.set_pos(12, 8)
 	title.set_config(16, false, true)
 	title.pack()
 	about.add_child(title)
@@ -165,11 +167,11 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut lbl := ui.label(win,
 		'Simple Image Viewer & Editor written\nin the V Programming Language.' +
 		'\n\nThis program is free software licensed under\nthe GNU General Public License v2.\n\nIcons by Icons8')
-	lbl.set_pos(120, 70)
+	lbl.set_pos(12, 70)
 	about.add_child(lbl)
 
-	mut copy := ui.label(win, 'Copyright © 2021-2022 Isaiah. All Rights Reserved')
-	copy.set_pos(120, 195)
+	mut copy := ui.label(win, 'Copyright © 2021-2022 Isaiah.')
+	copy.set_pos(12, 195)
 	copy.set_config(12, true, false)
 	about.add_child(copy)
 
@@ -214,7 +216,7 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 		file := canvas.file
 
 		win.extra_map['save_path'] = path.text
-		file.write(path.text)
+		write(file, path.text)
 
 		win.components = win.components.filter(mut it !is ui.Modal)
 	})

@@ -1,6 +1,5 @@
 module main
 
-import vpng
 import gg
 import iui as ui
 import gx
@@ -11,7 +10,7 @@ import rand
 //
 interface Brush {
 	name string
-	set_pixels(voidptr, int, int, vpng.TrueColorAlpha, int)
+	set_pixels(voidptr, int, int, gx.Color, int)
 	draw_hint(voidptr, int, int, int, int, gx.Color, int)
 mut:
 	down_x int
@@ -28,11 +27,11 @@ mut:
 	down_y int
 }
 
-fn (brush &CalligraphyBrushLeft) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush &CalligraphyBrushLeft) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut pixels := &KA(ptr)
 	for i in 0 .. size {
-		pixels.file.set_pixel(x + i, y - i, color)
-		pixels.file.set_pixel(x - i, y + i, color)
+		set_pixel(pixels.file, x + i, y - i, color)
+		set_pixel(pixels.file, x - i, y + i, color)
 	}
 }
 
@@ -57,11 +56,11 @@ mut:
 	down_y int
 }
 
-fn (brush &CalligraphyBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
-	mut pixels := &KA(ptr)
+fn (brush &CalligraphyBrush) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
+	mut data := &KA(ptr)
 	for i in 0 .. size {
-		pixels.file.set_pixel(x - i, y - i, color)
-		pixels.file.set_pixel(x + i, y + i, color)
+		set_pixel(data.file, x - i, y - i, color)
+		set_pixel(data.file, x + i, y + i, color)
 	}
 }
 
@@ -86,19 +85,19 @@ mut:
 	down_y int
 }
 
-fn (brush PencilBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
-	mut pixels := &KA(ptr)
+fn (brush PencilBrush) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
+	mut data := &KA(ptr)
 	wid := size / 2
 
 	for i in 0 .. size {
 		for j in 0 .. size {
 			xx := x + i - wid
 			yy := y + j - wid
-			if xx >= 0 && yy >= 0 && xx <= pixels.width {
+			if xx >= 0 && yy >= 0 && xx <= data.width {
 				if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
 					&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
-					if xx < pixels.width && yy < pixels.height {
-						pixels.file.set_pixel(xx, yy, color)
+					if xx < data.width && yy < data.height {
+						set_pixel(data.file, xx, yy, color)
 					}
 				}
 			}
@@ -131,7 +130,7 @@ mut:
 	down_y int
 }
 
-fn (brush SpraycanBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush SpraycanBrush) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut pixels := &KA(ptr)
 	wid := size / 2
 
@@ -146,7 +145,7 @@ fn (brush SpraycanBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueCo
 				if size < 4 || (!(j == size - 1 && i == size - 1) && !(j == size - 1 && i == 0)
 					&& !(j == 0 && i == 0) && !(j == 0 && i == size - 1)) {
 					if rand_int == 0 {
-						pixels.file.set_pixel(xx, yy, color)
+						set_pixel(pixels.file, xx, yy, color)
 					}
 				}
 			}
@@ -193,7 +192,7 @@ struct Box {
 	zoom f32
 }
 
-fn (brush &SelectionTool) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush &SelectionTool) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut storage := &KA(ptr)
 	if storage.brush.down_x == -1 {
 		storage.brush.down_x = x

@@ -1,6 +1,5 @@
 module main
 
-import vpng
 import gg
 import iui as ui
 import gx
@@ -15,7 +14,7 @@ mut:
 	down_y int
 }
 
-fn (brush FillBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush FillBrush) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut pixels := &KA(ptr)
 
 	down_color := get_pixel(x, y, mut pixels.file)
@@ -24,7 +23,7 @@ fn (brush FillBrush) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorA
 }
 
 // TODO: Optimize, improve.
-fn check_pix(x int, y int, mut storage KA, down_color vpng.Pixel, color vpng.TrueColorAlpha) []int {
+fn check_pix(x int, y int, mut storage KA, down_color gx.Color, color gx.Color) []int {
 	mut arr := []int{}
 	if x < 0 || y < 0 {
 		return arr
@@ -60,17 +59,17 @@ fn check_pix(x int, y int, mut storage KA, down_color vpng.Pixel, color vpng.Tru
 	return arr
 }
 
-fn do_y(x int, yy int, mut storage KA, down_color vpng.Pixel, color vpng.TrueColorAlpha) bool {
+fn do_y(x int, yy int, mut storage KA, down_color gx.Color, color gx.Color) bool {
 	main_ := get_pixel(x, yy, mut storage.file)
 
 	if main_ == down_color {
-		storage.file.set_pixel(x, yy, color)
+		set_pixel(storage.file, x, yy, color)
 
 		mut xx := x - 1
 		for xx > 0 {
 			mut color_ := get_pixel(xx, yy, mut storage.file)
 			if color_ == down_color {
-				storage.file.set_pixel(xx, yy, color)
+				set_pixel(storage.file, xx, yy, color)
 			} else {
 				break
 			}
@@ -81,7 +80,7 @@ fn do_y(x int, yy int, mut storage KA, down_color vpng.Pixel, color vpng.TrueCol
 		for xx < storage.width {
 			mut color_ := get_pixel(xx, yy, mut storage.file)
 			if color_ == down_color {
-				storage.file.set_pixel(xx, yy, color)
+				set_pixel(storage.file, xx, yy, color)
 			} else {
 				break
 			}

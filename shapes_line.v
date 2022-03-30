@@ -1,6 +1,5 @@
 module main
 
-import vpng
 import gg
 import iui as ui
 import gx
@@ -17,7 +16,7 @@ mut:
 	selected_area Box
 }
 
-fn (brush &LineShape) set_pixels(ptr voidptr, x int, y int, color vpng.TrueColorAlpha, size int) {
+fn (brush &LineShape) set_pixels(ptr voidptr, x int, y int, color gx.Color, size int) {
 	mut storage := &KA(ptr)
 	if storage.brush.down_x == -1 {
 		storage.brush.down_x = x
@@ -40,7 +39,7 @@ fn (brush &LineShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 		if mut storage.brush is LineShape {
 			box := storage.brush.selected_area
 			if zoom == box.zoom && box.x != -1 {
-				tcolor := vpng.TrueColorAlpha{color.r, color.g, color.b, color.a}
+				tcolor := gx.Color{color.r, color.g, color.b, color.a}
 
 				base_x := int(box.w / zoom)
 				base_y := int(box.h / zoom)
@@ -64,9 +63,9 @@ fn (brush &LineShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 					// y = mx + b
 					y_form := int((point_slope * x_val) + b)
 
-					storage.file.set_pixel(x_val, y_form, tcolor)
+					set_pixel(storage.file, x_val, y_form, tcolor)
 					for j in (0 - (size / 2)) .. size / 2 {
-						storage.file.set_pixel(x_val, y_form + j, tcolor)
+						set_pixel(storage.file, x_val, y_form + j, tcolor)
 					}
 				}
 

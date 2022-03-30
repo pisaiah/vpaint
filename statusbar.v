@@ -11,7 +11,15 @@ fn make_status_bar(mut win ui.Window) {
 	status_bar.set_id(mut win, 'status_bar')
 	status_bar.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		size := gg.window_size()
+
 		mut this := *com
+
+		if mut this is ui.Menubar {
+			if this.theme != win.theme {
+				this.theme = win.theme
+			}
+		}
+
 		this.y = size.height - 25
 		win.gg.draw_line(this.x, this.y - 1, size.width, this.y, gx.rgb(200, 200, 200))
 	}
