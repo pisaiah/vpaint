@@ -147,7 +147,7 @@ fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 }
 
 fn create_img_button(mut win ui.Window, path string, x int, y int, w int, h int) &ui.Image {
-	img_data := os.read_bytes(os.resource_abs_path('resources/' + path)) or { [byte(0)] }
+	img_data := os.read_bytes(os.resource_abs_path('resources/' + path)) or { [u8(0)] }
 	mut pen_btn := ui.image_from_byte_array_with_size(mut win, img_data, 32, 32)
 	pen_btn.z_index = 8
 

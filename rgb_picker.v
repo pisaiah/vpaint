@@ -38,10 +38,10 @@ fn show_rgb_picker(mut win ui.Window) {
 		mut b_slider := &ui.Slider(win.get_from_id('b_slider'))
 		mut a_slider := &ui.Slider(win.get_from_id('a_slider'))
 
-		cr := byte(clamp(r_slider.cur - 2, 0, 255))
-		cg := byte(clamp(g_slider.cur - 2, 0, 255))
-		cb := byte(clamp(b_slider.cur - 2, 0, 255))
-		ca := byte(clamp(a_slider.cur - 2, 0, 255))
+		cr := u8(clamp(r_slider.cur - 2, 0, 255))
+		cg := u8(clamp(g_slider.cur - 2, 0, 255))
+		cb := u8(clamp(b_slider.cur - 2, 0, 255))
+		ca := u8(clamp(a_slider.cur - 2, 0, 255))
 
 		this.text = this.text.split('rgba(')[0] + 'rgba(' + cr.str() + ', ' + cg.str() + ', ' +
 			cb.str() + ', ' + ca.str() + ')'
@@ -75,10 +75,10 @@ fn show_rgb_picker(mut win ui.Window) {
 		mut b_slider := &ui.Slider(win.get_from_id('b_slider'))
 		mut a_slider := &ui.Slider(win.get_from_id('a_slider'))
 
-		cr := byte(clamp(r_slider.cur - 2, 0, 255))
-		cg := byte(clamp(g_slider.cur - 2, 0, 255))
-		cb := byte(clamp(b_slider.cur - 2, 0, 255))
-		ca := byte(clamp(a_slider.cur - 2, 0, 255))
+		cr := u8(clamp(r_slider.cur - 2, 0, 255))
+		cg := u8(clamp(g_slider.cur - 2, 0, 255))
+		cb := u8(clamp(b_slider.cur - 2, 0, 255))
+		ca := u8(clamp(a_slider.cur - 2, 0, 255))
 
 		canvas.color = gx.rgba(cr, cg, cb, ca)
 

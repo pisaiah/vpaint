@@ -186,10 +186,10 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	l1.set_pos(30, 70)
 	modal.add_child(l1)
 
-	mut path := ui.textbox(win, '')
+	mut path := ui.textfield(win, '')
 	path.set_id(mut win, 'save-as-path')
 	path.set_bounds(140, 70, 300, 25)
-	path.multiline = false
+	//path.multiline = false
 
 	if 'save_path' in win.extra_map {
 		path.text = win.extra_map['save_path']
@@ -211,7 +211,7 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	mut save := ui.button(win, 'Save')
 	save.set_bounds(150, 250, 100, 25)
 	save.set_click(fn (mut win ui.Window, btn ui.Button) {
-		mut path := &ui.Textbox(win.get_from_id('save-as-path'))
+		mut path := &ui.TextField(win.get_from_id('save-as-path'))
 		canvas := &KA(win.id_map['pixels'])
 		file := canvas.file
 

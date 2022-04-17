@@ -120,7 +120,7 @@ fn draw_image(mut win ui.Window, com &ui.Component) {
 fn color_from_string(st string) gx.Color {
 	val := st.split('{')[1].split('}')[0]
 	spl := val.split(', ')
-	return gx.rgb(spl[0].byte(), spl[1].byte(), spl[2].byte())
+	return gx.rgb(spl[0].u8(), spl[1].u8(), spl[2].u8())
 }
 
 //
@@ -165,7 +165,7 @@ fn make_gg_image(mut storage KA, mut win ui.Window, first bool) {
 }
 
 // Create an new ui.Image
-fn make_icon(mut win ui.Window, width int, height int, data []byte) int {
+fn make_icon(mut win ui.Window, width int, height int, data []u8) int {
 	ggim := win.gg.new_streaming_image(width, height, 4, gg.StreamingImageConfig{
 		pixel_format: .rgba8
 	})

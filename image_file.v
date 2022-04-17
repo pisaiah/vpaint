@@ -15,7 +15,7 @@ pub fn write(img stbi.Image, path string) {
 pub fn get_pixel(x int, y int, mut this stbi.Image) gx.Color {
 	image := this
 	unsafe {
-		data := &byte(image.data)
+		data := &u8(image.data)
 		p := data + (4 * (y * image.width + x))
 		r := p[0]
 		g := p[1]
@@ -36,7 +36,7 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 	}
 
 	unsafe {
-		data := &byte(image.data)
+		data := &u8(image.data)
 		p := data + (4 * (y * image.width + x))
 		p[0] = color.r
 		p[1] = color.g
