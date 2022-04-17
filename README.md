@@ -8,7 +8,6 @@ Image Viewer & Editor written in the V Programming Language.
 
 ## Compile dependencies
 - [iUI](https://github.com/isaiahpatton/ui)
-- [vpng](https://github.com/Henrixounez/vpng) (my fork [here](https://github.com/isaiahpatton/vpng))
 - `-gc boehm`
 - V 0.2.4 or higher
 
