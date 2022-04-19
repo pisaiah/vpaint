@@ -39,6 +39,11 @@ fn main() {
 		win.extra_map['save_path'] = path
 	}
 
+	if !os.exists(path) {
+		mut blank_png := $embed_file('test.png')
+		os.write_file_array(path, blank_png.to_bytes()) or {}
+	}
+
 	mut png_file := read(path) or { panic(err) }
 	win.bar = ui.menubar(win, win.theme)
 
@@ -189,7 +194,7 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	mut path := ui.textfield(win, '')
 	path.set_id(mut win, 'save-as-path')
 	path.set_bounds(140, 70, 300, 25)
-	//path.multiline = false
+	// path.multiline = false
 
 	if 'save_path' in win.extra_map {
 		path.text = win.extra_map['save_path']
