@@ -43,7 +43,7 @@ fn (mut this Toolbar) draw_shapes(mut win ui.Window, sw int) {
 		}
 	}
 
-	win.draw_bordered_rect(x, y, 24 * shapes.len, 42, 4, win.theme.textbox_background,
+	win.draw_filled_rect(x, y + 1, 24 * shapes.len, 41, 4, win.theme.textbox_background,
 		gx.rgb(160, 160, 160))
 
 	// Draw Shape
@@ -120,7 +120,7 @@ fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 		if mx > x && mx < sw && my < (this.y + 44) {
 			mut indx := 0
 
-			indx = (mx - x) / 25
+			indx = (mx - x) / 24
 			if my > (this.y + 21) {
 				indx += 10
 			}
@@ -133,9 +133,9 @@ fn (mut this Toolbar) draw_colors(mut win ui.Window, sw int) {
 	// Draw Color
 	mut index := 0
 	for color in colors {
-		win.draw_bordered_rect(x, y, 22, 20, 4, gx.white, gx.rgb(160, 160, 160))
-		win.gg.draw_rect_filled(x + 3, y + 2, 16, 16, color)
-		x += 25
+		win.draw_bordered_rect(x, y, 20, 20, 16, gx.white, gx.rgb(160, 160, 160))
+		win.gg.draw_rounded_rect_filled(x + 2, y + 2, 16, 16, 16, color)
+		x += 24
 
 		index += 1
 		if index >= 10 {

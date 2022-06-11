@@ -35,47 +35,58 @@ fn (brush &LineShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 	x_slide := &ui.Slider(win.get_from_id('x_slide'))
 	y_slide := &ui.Slider(win.get_from_id('y_slide'))
 
-	if down_x == -1 {
-		if mut storage.brush is LineShape {
-			box := storage.brush.selected_area
-			if zoom == box.zoom && box.x != -1 {
-				tcolor := gx.Color{color.r, color.g, color.b, color.a}
+	rele := down_x == -1
 
-				base_x := int(box.w / zoom)
-				base_y := int(box.h / zoom)
+	if mut storage.brush is LineShape {
+		box := storage.brush.selected_area
+		if zoom == box.zoom && box.x != -1 {
+			tcolor := gx.Color{color.r, color.g, color.b, color.a}
 
-				min_x := math.min(base_x, 0)
-				max_x := math.max(0, base_x)
+			base_x := int(box.w / zoom)
+			base_y := int(box.h / zoom)
 
-				real_y := box.y + base_y
-				real_x := box.x + base_x
+			min_x := math.min(base_x, 0)
+			max_x := math.max(0, base_x)
 
-				// Calculate slope
-				// m = (y2 - y1) / (x2 - x1)
-				point_slope := f32(real_y - box.y) / (real_x - box.x)
+			real_y := box.y + base_y
+			real_x := box.x + base_x
 
-				// b = y1 - (m * x1)
-				b := real_y - (point_slope * real_x)
+			// Calculate slope
+			// m = (y2 - y1) / (x2 - x1)
+			point_slope := f32(real_y - box.y) / (real_x - box.x)
 
-				for i in min_x .. max_x {
-					x_val := box.x + i
+			// b = y1 - (m * x1)
+			b := real_y - (point_slope * real_x)
 
-					// y = mx + b
-					y_form := int((point_slope * x_val) + b)
+			for i in min_x .. max_x {
+				x_val := box.x + i
 
+				// y = mx + b
+				y_form := int((point_slope * x_val) + b)
+
+				if rele {
 					set_pixel(storage.file, x_val, y_form, tcolor)
 					for j in (0 - (size / 2)) .. size / 2 {
 						set_pixel(storage.file, x_val, y_form + j, tcolor)
 					}
+				} else {
+					draw_x := tx + (x_val * zoom) - int(x_slide.cur)
+					draw_y := ty + (y_form * zoom) - int(y_slide.cur)
+
+					win.gg.draw_rect_filled(draw_x, draw_y, zoom, zoom, color)
+					for j in (0 - (size / 2)) .. size / 2 {
+						draw_y_ := ty + ((y_form + j) * zoom) - int(y_slide.cur)
+						win.gg.draw_rect_filled(draw_x, draw_y_, zoom, zoom, color)
+					}
 				}
+			}
 
-				// Update Canvas
+			// Update Canvas
+			if rele {
 				make_gg_image(mut storage, mut win, false)
-
 				storage.brush.selected_area = Box{}
 			}
 		}
-		return
 	}
 
 	bx := int(down_x * zoom) + tx - int(x_slide.cur)
@@ -91,7 +102,6 @@ fn (brush &LineShape) draw_hint(ptr voidptr, tx int, ty int, cx int, cy int, col
 	}
 
 	if bx > tx && by > ty {
-		win.gg.draw_line(bx, by, win.mouse_x, win.mouse_y, gx.black)
 	} else {
 		storage.brush.down_x = -1
 	}

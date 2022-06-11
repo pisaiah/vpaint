@@ -49,6 +49,14 @@ fn make_brush_menu(mut win ui.Window) {
 	})
 	bm.add_child(fillcan)
 
+	// Eyedropper
+	mut dropper := ui.menuitem('Eyedropper')
+	dropper.set_click(fn (mut win ui.Window, com ui.MenuItem) {
+		mut pixels := &KA(win.id_map['pixels'])
+		pixels.brush = ColorDropper{}
+	})
+	bm.add_child(dropper)
+
 	win.bar.add_child(bm)
 }
 
@@ -62,8 +70,10 @@ fn make_draw_size_menu(mut win ui.Window) {
 		}
 	}
 
-	mut zoomm := draw_size_item(99)
-	mz.add_child(zoomm)
+	for i in [32, 64, 80] {
+		s_80 := draw_size_item(i)
+		mz.add_child(s_80)
+	}
 
 	win.bar.add_child(mz)
 }

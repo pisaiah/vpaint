@@ -55,7 +55,13 @@ fn main() {
 		ggim: -1
 	}
 	win.id_map['pixels'] = storage
-	win.extra_map['zoom'] = '1'
+
+	testt := 430 / png_file.height
+	if testt > 0 {
+		win.extra_map['zoom'] = testt.str()
+	} else {
+		win.extra_map['zoom'] = '1'
+	}
 
 	file_menu := ui.menu_item(
 		text: 'File'
@@ -109,6 +115,19 @@ fn main() {
 	lbl.set_id(mut win, 'canvas')
 	lbl.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		draw_image(mut win, com)
+	}
+
+	lbl.scroll_change_event = fn [win] (lbl &ui.Component, delta int, dir int) {
+		mut slide := &ui.Slider(win.get_from_id('y_slide'))
+		zoom := win.extra_map['zoom']
+		if delta < 0 {
+			slide.scroll_i -= zoom.int()
+		} else {
+			slide.scroll_i += zoom.int()
+		}
+		if slide.scroll_i < 0 {
+			slide.scroll_i = 0
+		}
 	}
 
 	win.add_child(lbl)
@@ -184,48 +203,59 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 }
 
 fn save_as_click(mut win ui.Window, com ui.MenuItem) {
-	mut modal := ui.modal(win, 'Save As')
+	mut modal := ui.page(win, 'Save As')
+	mut vbox := ui.vbox(win)
+	vbox.set_pos(16, 16)
 
 	mut l1 := ui.label(win, 'File path:')
 	l1.pack()
-	l1.set_pos(30, 70)
-	modal.add_child(l1)
+	l1.set_pos(30, 16)
+	vbox.add_child(l1)
 
 	mut path := ui.textfield(win, '')
 	path.set_id(mut win, 'save-as-path')
-	path.set_bounds(140, 70, 300, 25)
-	// path.multiline = false
+	path.set_bounds(32, 2, 300, 25)
 
 	if 'save_path' in win.extra_map {
 		path.text = win.extra_map['save_path']
 	}
-	modal.add_child(path)
+	vbox.add_child(path)
+
+	mut hbox := ui.hbox(win)
+	hbox.set_pos(30, 16)
 
 	mut l2 := ui.label(win, 'Save as type: ')
 	l2.pack()
-	l2.set_pos(30, 100)
-	modal.add_child(l2)
+	l2.set_pos(0, 6)
+	hbox.add_child(l2)
 
 	mut typeb := ui.selector(win, 'PNG (*.png)')
 	typeb.items << 'PNG (*.png)'
-	typeb.set_bounds(140, 100, 300, 25)
-	modal.add_child(typeb)
-
-	modal.needs_init = false
+	typeb.items << 'JPEG (*.jpg)'
+	typeb.set_bounds(8, 0, 200, 25)
+	hbox.add_child(typeb)
 
 	mut save := ui.button(win, 'Save')
-	save.set_bounds(150, 250, 100, 25)
-	save.set_click(fn (mut win ui.Window, btn ui.Button) {
-		mut path := &ui.TextField(win.get_from_id('save-as-path'))
+	save.set_bounds(30, 32, 96, 44)
+	save.set_click(fn [path, typeb] (mut win ui.Window, btn ui.Button) {
 		canvas := &KA(win.id_map['pixels'])
 		file := canvas.file
 
 		win.extra_map['save_path'] = path.text
-		write(file, path.text)
 
-		win.components = win.components.filter(mut it !is ui.Modal)
+		if typeb.text.contains('.jpg') {
+			write_jpg(file, path.text)
+		} else {
+			write_img(file, path.text)
+		}
+
+		win.components = win.components.filter(mut it !is ui.Page)
 	})
-	modal.add_child(save)
+	hbox.pack()
+	hbox.z_index = 1
+	vbox.add_child(hbox)
+	vbox.add_child(save)
 
+	modal.add_child(vbox)
 	win.add_child(modal)
 }
