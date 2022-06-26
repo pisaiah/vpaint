@@ -158,7 +158,7 @@ fn create_img_button(mut win ui.Window, path string, x int, y int, w int, h int)
 }
 
 fn create_img_button_(mut win ui.Window, img_data []u8, x int, y int, w int, h int) &ui.Image {
-	mut pen_btn := ui.image_from_byte_array_with_size(mut win, img_data, 32, 32)
+	mut pen_btn := ui.image_from_byte_array_with_size(mut win, img_data, 48, 48)
 	pen_btn.z_index = 8
 
 	if x != 0 {
@@ -169,14 +169,19 @@ fn create_img_button_(mut win ui.Window, img_data []u8, x int, y int, w int, h i
 
 fn setup_brush_choices(mut win ui.Window) {
 	mut hbox := ui.hbox(win)
-	hbox.set_bounds(16, 32, 40 * 3, 23)
+	hbox.pack()
+	hbox.set_bounds(10, 28, 40 * 3, 23)
 	hbox.z_index = 7
 
-	embed_pencil := $embed_file('resources/icons8-pencil-drawing-48.png')
-	embed_pen := $embed_file('resources/icons8-pen-48.png')
-	embed_spray := $embed_file('resources/icons8-paint-sprayer-48.png')
+	// embed_pencil := $embed_file('resources/icons8-pencil-drawing-48.png')
+	// embed_pen := $embed_file('resources/icons8-pen-48.png')
+	// embed_spray := $embed_file('resources/icons8-paint-sprayer-48.png')
 
-	mut pencil_btn := create_img_button_(mut win, embed_pencil.to_bytes(), 0, 0, 0, 0)
+	path := 'color/38/undefined/'
+	size := 38
+
+	// mut pencil_btn := create_img_button_(mut win, embed_pencil.to_bytes(), 0, 0, 0, 0)
+	mut pencil_btn := img_from_url(mut win, path + 'pencil-tip.png', size)
 	pencil_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
@@ -191,7 +196,8 @@ fn setup_brush_choices(mut win ui.Window) {
 	}
 	hbox.add_child(pencil_btn)
 
-	mut pen_btn := create_img_button_(mut win, embed_pen.to_bytes(), 0, 0, 0, 0)
+	// mut pen_btn := create_img_button_(mut win, embed_pen.to_bytes(), 0, 0, 0, 0)
+	mut pen_btn := img_from_url(mut win, path + 'pen.png', size)
 	pen_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
@@ -202,7 +208,8 @@ fn setup_brush_choices(mut win ui.Window) {
 	}
 	hbox.add_child(pen_btn)
 
-	mut spray_btn := create_img_button_(mut win, embed_spray.to_bytes(), 0, 0, 0, 0)
+	// mut spray_btn := create_img_button_(mut win, embed_spray.to_bytes(), 0, 0, 0, 0)
+	mut spray_btn := img_from_url(mut win, path + 'paint-sprayer.png', size)
 	spray_btn.draw_event_fn = fn (mut win ui.Window, com &ui.Component) {
 		if com.is_mouse_rele {
 			mut this := *com
@@ -212,6 +219,19 @@ fn setup_brush_choices(mut win ui.Window) {
 		}
 	}
 	hbox.add_child(spray_btn)
+
+	// Dropper
+	mut dropper_btn := img_from_url(mut win, path + 'color-dropper.png', size)
+	dropper_btn.draw_event_fn = fn [mut dropper_btn] (mut win ui.Window, com &ui.Component) {
+		if com.is_mouse_rele {
+			// mut this := *com
+			mut pixels := &KA(win.id_map['pixels'])
+			pixels.brush = ColorDropper{}
+			dropper_btn.is_mouse_rele = false
+		}
+	}
+	hbox.add_child(dropper_btn)
+
 	win.add_child(hbox)
 }
 
