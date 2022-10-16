@@ -114,7 +114,7 @@ fn fit_lbl(mut lbl ui.Label) {
 }
 
 // Image canvas ScrollView draw event
-fn image_scrollview_draw_event_fn(win &ui.Window, com &ui.ScrollView) {
+fn image_scrollview_draw_event_fn(win &ui.Window, com &ui.Component) {
 	mut app := &App(win.id_map['app'])
 	ws := win.gg.window_size()
 	x_pos := 72
