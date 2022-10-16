@@ -1,7 +1,7 @@
 Module {
-	name: 'pngtest'
-	description: '0.1'
-	version: '0.1'
-	license: 'GPL'
+	name: 'paint'
+	description: 'vpaint'
+	version: '1.0'
+	license: 'arr'
 	dependencies: []
 }

@@ -1,9 +1,10 @@
 # Binaries for programs and plugins
 main
-pngtest
+paint
 *.exe
 *.exe~
 *.so
 *.dylib
 *.dll
 vls.log
+desktop.ini
