@@ -263,3 +263,31 @@ fn (mut this PencilTool2) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 fn (mut this PencilTool2) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 	this.last_x = -1
 }
+
+// Dropper Tool
+struct DropperTool {
+	tool_name string = 'Eye Dropper'
+}
+
+fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
+	mut img := &Image(a)
+
+	color := img.get(img.mx, img.my)
+
+	width := img.zoom * 4
+	xpos := img.sx + width
+	ypos := img.sy + width
+
+	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, gx.blue)
+	ctx.gg.draw_rounded_rect_filled(xpos, ypos, width, width, 1, color)
+}
+
+fn (mut this DropperTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := &Image(a)
+
+	color := img.get(img.mx, img.my)
+	img.app.set_color(color)
+}
+
+fn (mut this DropperTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+}

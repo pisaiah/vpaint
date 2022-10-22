@@ -65,7 +65,11 @@ fn main() {
 
 	app.make_menubar(mut window)
 
-	path := os.resource_abs_path('v.png')
+	mut path := os.resource_abs_path('v.png')
+
+	if os.args.len > 1 {
+		path = os.real_path(os.args[1])
+	}
 
 	if !os.exists(path) {
 		mut blank_png := $embed_file('v.png')

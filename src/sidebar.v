@@ -49,6 +49,10 @@ fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
 	img_airbrush_file := $embed_file('assets/icons8-paint-sprayer-32.png')
 	mut test7 := app.icon_btn(img_airbrush_file.to_bytes(), &AirbrushTool{})
 
+	// Eye Dropper
+	img_dropper_file := $embed_file('assets/color-dropper.png')
+	mut test8 := app.icon_btn(img_dropper_file.to_bytes(), &DropperTool{})
+
 	mut hbox := ui.hbox(app.win)
 	off := 16
 	hbox.set_bounds(off, 16, 70 - off, 40 * 3)
@@ -60,6 +64,7 @@ fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
 	hbox.add_child(test5)
 	hbox.add_child(test6)
 	hbox.add_child(test7)
+	hbox.add_child(test8)
 	sidebar.add_child(hbox)
 }
 

@@ -20,6 +20,11 @@ fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 	app.canvas.upscale()
 }
 
+fn save_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.data.save()
+}
+
 // Make menubar
 fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
@@ -32,6 +37,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			),
 			ui.menu_item(
 				text: 'Open'
+			),
+			ui.menu_item(
+				text: 'Save'
+				click_event_fn: save_click
 			),
 			ui.menu_item(
 				text: 'About Paint'

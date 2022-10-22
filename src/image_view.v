@@ -11,7 +11,18 @@ struct ImageViewData {
 mut:
 	file      stbi.Image
 	id        int
+	file_name string
 	file_size string
+}
+
+fn (this &ImageViewData) save() {
+	dump(this.file.ext)
+	if this.file_name.ends_with('jpg') {
+		write_jpg(this.file, this.file_name)
+	} else {
+		write_img(this.file, this.file_name)
+	}
+	dump('Saved')
 }
 
 pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.VBox {
@@ -20,6 +31,7 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.VBox {
 	mut png_file := stbi.load(file) or { return vbox }
 	mut data := &ImageViewData{
 		file: png_file
+		file_name: file
 	}
 	app.data = data
 
