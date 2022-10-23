@@ -42,7 +42,30 @@ fn (mut app App) make_ribbon(mut ribbon ui.HBox) {
 
 	// color_box.pack()
 	color_box.set_bounds(20, 1, (size + 6) * 11, 64)
+
+	// Eye Dropper
+	img_picker_file := $embed_file('assets/rgb-picker.png')
+	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
+
 	ribbon.add_child(color_box)
+	ribbon.add_child(btn)
+
+	// Load hsv.png
+	img_file := $embed_file('assets/hsv.png')
+	data := img_file.to_bytes()
+	app.make_hsl_image(data)
+}
+
+fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
+	mut gg := app.win.gg
+	gg_im := gg.create_image_from_byte_array(data)
+	cim := gg.cache_image(gg_im)
+	mut btn := ui.button_with_icon(cim)
+
+	btn.set_bounds(16, 16, 32, 32)
+
+	btn.set_click_fn(rgb_btn_click, 0)
+	return btn
 }
 
 fn current_color_btn_draw(win &ui.Window, mut com ui.Component) {
@@ -56,7 +79,7 @@ fn current_color_btn_draw(win &ui.Window, mut com ui.Component) {
 			width := com.width + (o * 2)
 			heigh := com.height + o
 			win.gg.draw_rounded_rect_empty(com.rx - o, com.ry - (o / 2), width, heigh,
-				4, win.theme.text_color)
+				0, win.theme.text_color)
 		} else if com.is_mouse_rele {
 			app.sele_color = !app.sele_color
 		}
