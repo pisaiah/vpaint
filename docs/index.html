@@ -1,0 +1,66 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<style>
+		body{
+			background:rgb(240,240,240);
+		}
+		.w3-button {
+			padding-left: 4rem;
+			padding-right: 4rem;
+			min-width: 70%;
+			margin-bottom: 1rem;
+			border-radius: 8px;
+		}
+		.copy {
+			font-size: 11px;
+			color: rgba(0, 0, 0, .4)
+		}
+	</style>
+	
+	<div class="w3-container w3-auto w3-margin-top">
+		<div class="w3-row" style="margin-top:10vh">
+	
+		<div class="w3-third w3-mobile">
+			<h1 class="w3-xxxlarge">vPaint</h1>
+			<p class="w3-large">Simple Image Viewer & Editor written in the <a href="https://vlang.io/" target="_blank">V</a> Programming Language.</p>
+			<p>&nbsp;</p>
+			<a href="./demo/index.html"><button class="w3-button w3-blue w3-border">Demo</button></a><br>
+			<a href="https://github.com/isaiahpatton/vpaint" target="_blank"><button class="w3-button w3-lightgray w3-border">Github</button></a><br>
+			<a href="https://discord.gg/NruVtYBf5g" target="_blank"><button class="w3-button w3-lightgray w3-border">Discord</button></a>
+		</div>
+	
+	
+		<div class="w3-twothird w3-mobile">
+			<div style="background-imaage: url('./demo/window.png');float:right">
+				<img src="./demo/titlebar.png" style="float:right">
+				<canvas id="canvas" tabindex=-1></canvas>
+			</div>
+		</div>
+		
+		
+		</div>
+	</div>
+	<div class="copy w3-auto">
+		&copy; 2022 by Isaiah. Icons by Icons8.com
+	</div>
+	<script src="./demo/app.js"></script>
+	<style>
+	#canvas {
+		float:right;
+		width:640px;
+		height:480px;
+		border-left:1px solid rgb(22,50,95);
+		border-right:1px solid rgb(22,50,95);
+		border-bottom:1px solid rgb(22,50,95);
+		border-top:0;
+		border-radius: 1rem;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
+	</style>
+	<script>
+	const m = Module()
+	const e = document.getElementById("canvas");
+	</script>
+</html>

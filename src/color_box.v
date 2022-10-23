@@ -48,8 +48,8 @@ mut:
 	rx    int
 	ry    int
 	color gx.Color
-	h     int
-	s     int
+	h     f64
+	s     f64
 	v     f32
 	a     u8 = 255
 }
@@ -64,8 +64,8 @@ fn (mut data HSLData) set_color(c gx.Color) {
 fn (mut data HSLData) set_rgb(r u8, g u8, b u8, a u8) {
 	h, s, v := rgb_to_hsv(gx.rgba(r, g, b, a))
 
-	data.h = int(h * 360)
-	data.s = int(s * 100)
+	data.h = h // int(h * 360)
+	data.s = s // int(s * 100)
 	data.v = f32(v)
 	data.a = a
 	mut rgb := hsv_to_rgb(h, s, f32(data.v) / 100)
@@ -127,36 +127,48 @@ fn hsl_draw_evnt(win &ui.Window, mut com ui.Component) {
 			h_per := f32(data.mx - com.rx) / 256
 			s_per := f32(256 - (data.my - com.ry)) / 256
 
-			data.h = int(h_per * 360)
-			data.s = int(s_per * 100)
+			data.h = h_per
+			data.s = s_per
 			data.v = 100 - v_slide.cur
 			mut rgb := hsv_to_rgb(h_per, s_per, f32(data.v) / 100)
 			rgb.a = data.a
 			data.color = rgb
 
 			mut r_box := &ui.TextField(win.id_map['rgb-r'])
-			mut g_box := &ui.TextField(win.id_map['rgb-g'])
-			mut b_box := &ui.TextField(win.id_map['rgb-b'])
-			mut a_box := &ui.TextField(win.id_map['rgb-a'])
 
-			r_box.text = '$rgb.r'
-			g_box.text = '$rgb.g'
-			b_box.text = '$rgb.b'
+			if com.is_mouse_down || r_box.text.contains('-1') {
+				mut g_box := &ui.TextField(win.id_map['rgb-g'])
+				mut b_box := &ui.TextField(win.id_map['rgb-b'])
+				mut a_box := &ui.TextField(win.id_map['rgb-a'])
+
+				r_box.text = '$rgb.r'
+				g_box.text = '$rgb.g'
+				b_box.text = '$rgb.b'
+			}
 
 			// a_box.text = '$rgb.a'
 		}
+
 		data.clamp_values(com.rx, com.ry, com.width, com.height)
 		mx = data.mx
 		my = data.my
 
 		mut debug := &ui.Label(win.id_map['color_debug'])
 
-		debug.text = 'Debug:\nhsv($data.h, $data.s, $data.v)\nrgb($data.color)'
+		round_h := round(data.h, 6)
+		round_s := round(data.s, 6)
+		round_v := round(data.v, 4)
+		debug.text = 'Details:\nHSV/HSB:\n\tHue: $round_h\n\tSaturation: $round_s\n\tBrightness: $round_v%\nRGBA: $data.color'
 		debug.pack()
-		win.gg.draw_rect_filled(debug.rx, debug.ry + debug.height, 128, 64, data.color)
+		win.gg.draw_rect_filled(debug.rx - 1, debug.ry + debug.height, 215, 15, data.color)
+		win.gg.draw_rect_empty(debug.rx, debug.ry, 215, debug.height, data.color)
 	}
 
 	win.gg.draw_rounded_rect_empty(mx - 8, my - 8, 16, 16, 16, gx.blue)
+}
+
+fn round(a f64, place int) string {
+	return '$a'.substr_ni(0, place)
 }
 
 fn rgb_btn_click(mut win ui.Window, btn voidptr, dataa voidptr) {
@@ -182,6 +194,8 @@ fn rgb_btn_click(mut win ui.Window, btn voidptr, dataa voidptr) {
 	file_data := img_file.to_bytes()
 	mut hsl_im := app.make_hsl_image(file_data)
 
+	app.color_data.set_color(app.get_color())
+
 	mut v_slide := ui.new_slider(
 		min: 0
 		max: 100
@@ -192,44 +206,21 @@ fn rgb_btn_click(mut win ui.Window, btn voidptr, dataa voidptr) {
 	v_slide.set_bounds(290, 16, 42, 256)
 	win.id_map['v_slide'] = v_slide
 
-	v_slide.after_draw_event_fn = fn (mut win ui.Window, mut com ui.Component) {
-		mut app := &App(win.id_map['app'])
-		mut data := app.color_data
-		mut v := 99
-
-		h := f32(data.h) / 360
-		s := f32(data.s) / 100
-
-		hei := 8
-		for i in 0 .. 32 {
-			mut rgb := hsv_to_rgb(h, s, f32(v) / 100)
-			y := com.ry + 1
-			win.gg.draw_rect_filled(com.rx + 1, y + (i * hei), com.width - 3, hei, rgb)
-			v -= 3
-		}
-
-		if mut com is ui.Slider {
-			mut per := com.cur / com.max
-			wid := (com.height * per) - per * com.thumb_wid
-			win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, com.thumb_wid,
-				32, win.theme.scroll_bar_color)
-			win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, com.thumb_wid,
-				32, gx.blue)
-		}
-	}
+	v_slide.after_draw_event_fn = slide_draw_event
 
 	app.color_data.slid = v_slide
 
 	mut debug := ui.label(win, 'Debug:')
-	debug.set_bounds(355, 24, 200, 256)
+	debug.set_bounds(355, 16, 200, 256)
 	win.id_map['color_debug'] = &debug
 
 	mut vbox := ui.vbox(win)
 
-	mut r_box := app.num_field('rgb-r', 'Red', 0)
-	mut g_box := app.num_field('rgb-g', 'Green', 0)
-	mut b_box := app.num_field('rgb-b', 'Blue', 0)
-	mut a_box := app.num_field('rgb-a', 'Alpha', 255)
+	color := app.get_color()
+	mut r_box := app.num_field('rgb-r', 'Red', color.r)
+	mut g_box := app.num_field('rgb-g', 'Green', color.g)
+	mut b_box := app.num_field('rgb-b', 'Blue', color.b)
+	mut a_box := app.num_field('rgb-a', 'Alpha', color.a)
 
 	mut lbl := ui.label(win, 'RGBA:')
 	lbl.pack()
@@ -267,6 +258,32 @@ fn (mut app App) num_field(id string, name string, val int) &ui.HBox {
 	return hbox
 }
 
+fn slide_draw_event(mut win ui.Window, mut com ui.Component) {
+	mut app := &App(win.id_map['app'])
+	mut data := app.color_data
+	mut v := 99
+
+	h := data.h
+	s := data.s
+
+	hei := 8
+	for i in 0 .. 32 {
+		mut rgb := hsv_to_rgb(h, s, f32(v) / 100)
+		y := com.ry + 1
+		win.gg.draw_rect_filled(com.rx + 1, y + (i * hei), com.width - 3, hei, rgb)
+		v -= 3
+	}
+
+	if mut com is ui.Slider {
+		mut per := com.cur / com.max
+		wid := (com.height * per) - per * com.thumb_wid
+		win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, com.thumb_wid,
+			32, win.theme.scroll_bar_color)
+		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, com.thumb_wid,
+			32, gx.blue)
+	}
+}
+
 fn num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	val := com.text.int()
 
@@ -277,7 +294,10 @@ fn num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	b_box := &ui.TextField(win.id_map['rgb-b'])
 	a_box := &ui.TextField(win.id_map['rgb-a'])
 
+	dump(com.last_letter)
+	// if com.last_letter == 'enter' {
 	app.color_data.set_rgb(r_box.text.u8(), g_box.text.u8(), b_box.text.u8(), a_box.text.u8())
+	//}
 
 	dump(val)
 }
@@ -290,8 +310,13 @@ pub fn default_modal_close_fn(mut win ui.Window, btn ui.Button) {
 }
 
 fn rgb_modal_draw_event(mut win ui.Window, mut com ui.Component) {
-	bottom_color := gx.rgb(230, 230, 230)
-	bottom_border := gx.rgb(210, 210, 210)
+	// bottom_color := gx.rgb(230, 230, 230)
+	bottom_border := gx.rgb(150, 150, 150)
+
+	mut app := &App(win.id_map['app'])
+	mut data := app.color_data
+
+	bottom_color := data.color
 
 	if mut com is ui.Modal {
 		x := com.xs + 5
@@ -300,5 +325,10 @@ fn rgb_modal_draw_event(mut win ui.Window, mut com ui.Component) {
 
 		win.gg.draw_rect_filled(x, y, wid, 60, bottom_color)
 		win.gg.draw_line(x, y, x + wid, y, bottom_border)
+
+		for i in 3 .. 6 {
+			win.gg.draw_rect_empty(com.xs + i, com.top_off + 32 - i, com.in_width - (i * 2),
+				com.in_height, bottom_color)
+		}
 	}
 }

@@ -1,0 +1,55 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<style>
+		body{
+			background:rgb(240,240,240);
+		}
+
+		.copy {
+			font-size: 11px;
+			color: rgba(0, 0, 0, .4);
+			position:fixed;
+			bottom:8px;
+		}
+	</style>
+	
+	<div class="w3-container w3-auto">
+		<div class="w3-row" style="margin-top:4vh">
+			<div class="titlebar">
+				<img src="./winctrl.png" style="float:right">
+			</div>
+			<canvas id="canvas" tabindex=-1></canvas>
+		</div>
+	</div>
+	<div class="copy w3-auto">
+		&copy; 2022 by Isaiah. Icons by Icons8.com
+	</div>
+	<script src="app.js"></script>
+	<style>
+	.titlebar{
+		width:100%;
+		height: 25px;
+		background:rgb(22,50,95);
+		border-top-left-radius:8px;
+		border-top-right-radius:8px;
+		padding-left:1rem;
+		color:rgb(240,240,240);
+	}
+	#canvas {
+		width:100%;
+		height:80vh;
+		border-left:1px solid rgb(22,50,95);
+		border-right:1px solid rgb(22,50,95);
+		border-bottom:1px solid rgb(22,50,95);
+		border-top:0;
+		border-radius: 1rem;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
+	</style>
+	<script>
+	const m = Module()
+	const e = document.getElementById("canvas");
+	</script>
+</html>
