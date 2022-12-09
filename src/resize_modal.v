@@ -8,8 +8,8 @@ fn (mut app App) show_resize_modal(cw int, ch int) {
 	modal.in_width = 300
 	modal.in_height = 200
 
-	mut width_box := ui.textfield(app.win, '$cw')
-	mut heigh_box := ui.textfield(app.win, '$ch')
+	mut width_box := ui.textfield(app.win, '${cw}')
+	mut heigh_box := ui.textfield(app.win, '${ch}')
 
 	mut width_lbl := ui.label(app.win, 'Width')
 	mut heigh_lbl := ui.label(app.win, 'Height')

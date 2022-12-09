@@ -37,6 +37,32 @@ fn (mut this Image) resize(w int, h int) {
 	this.loaded = false
 }
 
+fn (mut this Image) grayscale_filter() {
+	this.note_multichange()
+	for x in 0 .. this.w {
+		for y in 0 .. this.h {
+			rgb := this.get(x, y)
+			gray := (rgb.r + rgb.g + rgb.b) / 3
+			new_color := gx.rgb(gray, gray, gray)
+			this.set2(x, y, new_color, true)
+		}
+	}
+	this.refresh()
+}
+
+fn (mut this Image) invert_filter() {
+	this.note_multichange()
+	for x in 0 .. this.w {
+		for y in 0 .. this.h {
+			rgb := this.get(x, y)
+			new_color := gx.rgb(255 - rgb.r, 255 - rgb.g, 255 - rgb.b)
+			this.set(x, y, new_color)
+			this.mark_batch_change()
+		}
+	}
+	this.refresh()
+}
+
 [heap]
 pub struct Screenshot {
 	width  int
@@ -81,7 +107,7 @@ pub fn (mut ss Screenshot) destroy() {
 
 pub fn (mut this Image) screenshot_png(path string, w int, h int) ? {
 	ss := this.screenshot_window(w, h)
-	stbi.set_flip_vertically_on_write(true)
+	// stbi.set_flip_vertically_on_write(true)
 	stbi.stbi_write_png(path, ss.width, ss.height, 4, ss.pixels, ss.width * 4)?
 	unsafe { ss.destroy() }
 }
@@ -100,23 +126,35 @@ fn (mut this Image) upscale() {
 
 	mut png_file := stbi.load(path) or { panic(err) }
 
+	for x in 0 .. w {
+		for y in 0 .. h {
+			set_pixel(png_file, x, y, gx.rgb(255, 0, 255))
+		}
+	}
+
 	for x in 0 .. this.w {
 		for y in 0 .. this.h {
 			a := get_pixel(x, y, data.file)
 			b := get_pixel(x + 1, y, data.file)
+
 			n := mix_color(a, b)
 
 			// Oringal
 			set_pixel(png_file, x * 2, (y * 2), a)
 
 			// Right
-			set_pixel(png_file, (x * 2) + 1, (y * 2), n)
+			set_pixel(png_file, (x * 2) + 1, (y * 2), n) // Right
+		}
+	}
 
-			// Bottom
-			set_pixel(png_file, x * 2, (y * 2) + 1, a)
+	for x in 0 .. w {
+		for y in 0 .. this.h {
+			a := get_pixel(x, y * 2, png_file)
+			b := get_pixel(x, (y * 2) + 2, png_file)
 
-			// Bottom Right
-			set_pixel(png_file, (x * 2) + 1, (y * 2) + 1, n)
+			n := mix_color(a, b)
+
+			set_pixel(png_file, x, (y * 2) + 1, n) // Right
 		}
 	}
 

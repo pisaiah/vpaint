@@ -3,7 +3,7 @@ module main
 import iui as ui
 import gg
 
-fn statusbar_draw_event(win &ui.Window, com &ui.Component) { //(mut app App)
+fn statusbar_draw_event(mut win ui.Window, com &ui.Component) { //(mut app App)
 	mut app := &App(win.id_map['app'])
 	ws := win.gg.window_size()
 	mut sb := app.status_bar
@@ -36,10 +36,10 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.HBox {
 	mut zoom_lbl := ui.label(window, '100%')
 	mut zl_ref := &zoom_lbl // TODO: make ui.label return reference
 
-	zoom_lbl.draw_event_fn = fn (win &ui.Window, mut com ui.Component) {
+	zoom_lbl.draw_event_fn = fn (mut win ui.Window, mut com ui.Component) {
 		mut app := &App(win.id_map['app']) // Let's avoid closures here to support wasm
 		zoom := app.canvas.get_zoom() * 100
-		com.text = '$zoom%'
+		com.text = '${zoom}%'
 		if mut com is ui.Label {
 			com.pack()
 			ws := win.gg.window_size()
@@ -58,10 +58,10 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.HBox {
 	return sb
 }
 
-fn stat_lbl_draw_event(win &ui.Window, mut com ui.Component) { //(mut app App)
+fn stat_lbl_draw_event(mut win ui.Window, mut com ui.Component) { //(mut app App)
 	app := &App(win.id_map['app'])
-	mouse_details := 'm: ($app.canvas.mx, $app.canvas.my)'
-	com.text = '$app.canvas.w x $app.canvas.h     $app.data.file_size     $mouse_details'
+	mouse_details := 'm: (${app.canvas.mx}, ${app.canvas.my})'
+	com.text = '${app.canvas.w} x ${app.canvas.h}     ${app.data.file_size}     ${mouse_details}'
 	if mut com is ui.Label {
 		com.pack()
 	}

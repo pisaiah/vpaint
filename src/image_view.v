@@ -70,15 +70,15 @@ fn format_size(val f64) string {
 	by := f64(1024)
 
 	kb := val / by
-	str := '$kb'.str()[0..4]
+	str := '${kb}'.str()[0..4]
 
 	if kb > 1024 {
 		mb := kb / by
-		str2 := '$mb'.str()[0..4]
+		str2 := '${mb}'.str()[0..4]
 
-		return '$str KB / $str2 MB'
+		return '${str} KB / ${str2} MB'
 	}
-	return '$str KB'
+	return '${str} KB'
 }
 
 fn make_gg_image(mut storage ImageViewData, mut win ui.Window, first bool) {
@@ -145,7 +145,93 @@ fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
 	return gx.rgba(r, g, b, a)
 }
 
+struct Change {
+	x    int
+	y    int
+	from gx.Color
+	to   gx.Color
+mut:
+	batch bool
+}
+
+fn (this Change) compare(b Change) u8 {
+	same_pos := this.x == b.x && this.y == b.y
+	same_from := this.from == b.from
+	same_to := this.to == b.to
+
+	if same_pos && same_to && same_from {
+		return 2
+	}
+	if same_pos && same_to {
+		return 1
+	}
+	return 0
+}
+
+fn (mut this Image) note_multichange() {
+	change := Change{
+		x: -1
+		y: -1
+		from: gx.white
+		to: gx.white
+		batch: false
+	}
+	this.history.insert(0, change)
+}
+
+fn (mut this Image) undo() {
+	if this.history.len == 0 {
+		return
+	}
+	last_change := this.history[0]
+	old_color := last_change.from
+	x := last_change.x
+	y := last_change.y
+	batch := last_change.batch
+
+	set_pixel(this.data.file, x, y, old_color)
+	this.history.delete(0)
+
+	if batch {
+		mut b := true
+		for b {
+			change := this.history[0]
+			set_pixel(this.data.file, change.x, change.y, change.from)
+			b = change.batch
+			this.history.delete(0)
+			if change.x == -1 {
+				break
+			}
+		}
+	}
+
+	this.refresh()
+}
+
+fn (mut this Image) mark_batch_change() {
+	this.history[0].batch = true
+}
+
 fn (mut this Image) set(x int, y int, color gx.Color) bool {
+	return this.set2(x, y, color, false)
+}
+
+fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
+	change := Change{
+		x: x
+		y: y
+		from: this.get(x, y)
+		to: color
+		batch: batch
+	}
+	if this.history.len > 0 {
+		if this.history[0].compare(change) == 0 {
+			this.history.insert(0, change)
+		}
+	} else {
+		this.history.insert(0, change)
+	}
+
 	return set_pixel(this.data.file, x, y, color)
 }
 
@@ -161,7 +247,6 @@ fn (mut this Image) refresh() {
 // Get RGB value from image loaded with STBI
 fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 	if x < 0 || x >= image.width {
-		dump(x)
 		return false
 	}
 
@@ -186,17 +271,19 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 pub struct Image {
 	ui.Component_A
 pub mut:
-	app    &App
-	data   &ImageViewData
-	w      int
-	h      int
-	sx     f32
-	sy     f32
-	mx     int
-	my     int
-	img    int
-	zoom   f32
-	loaded bool
+	app           &App
+	data          &ImageViewData
+	w             int
+	h             int
+	sx            f32
+	sy            f32
+	mx            int
+	my            int
+	img           int
+	zoom          f32
+	loaded        bool
+	history       []Change
+	history_index int
 }
 
 pub fn image_from_data(data &ImageViewData) &Image {
@@ -252,11 +339,15 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	tool.draw_hover_fn(this, ctx)
 
 	if this.is_mouse_down {
-		tool.draw_down_fn(this, ctx)
+		if ctx.win.bar.tik > 90 {
+			tool.draw_down_fn(this, ctx)
+		}
 	}
 
 	if this.is_mouse_rele {
-		tool.draw_click_fn(this, ctx)
+		if ctx.win.bar.tik > 90 {
+			tool.draw_click_fn(this, ctx)
+		}
 		this.is_mouse_rele = false
 	}
 }

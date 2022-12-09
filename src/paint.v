@@ -22,7 +22,7 @@ mut:
 	status_bar  &ui.HBox
 	stat_lbl    &ui.Label
 	brush_size  int = 1
-	color_data  &HSLData
+	// color_data  &HSLData
 }
 
 fn (app &App) get_color() gx.Color {
@@ -52,9 +52,9 @@ fn main() {
 		ribbon: unsafe { nil }
 		status_bar: unsafe { nil }
 		stat_lbl: unsafe { nil }
-		color_data: &HSLData{
-			slid: unsafe { nil }
-		}
+		// color_data: &HSLData{
+		//	slid: unsafe { nil }
+		//}
 		tool: &PencilTool{}
 	}
 	mut window := ui.make_window(
@@ -62,7 +62,7 @@ fn main() {
 		width: 700
 		height: 500
 		font_size: 16
-		ui_mode: true
+		// ui_mode: true
 	)
 	app.win = window
 	window.id_map['app'] = app
@@ -122,11 +122,11 @@ fn fit_lbl(mut lbl ui.Label) {
 }
 
 // Image canvas ScrollView draw event
-fn image_scrollview_draw_event_fn(win &ui.Window, com &ui.Component) {
+fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
 	mut app := &App(win.id_map['app'])
 	ws := win.gg.window_size()
-	x_pos := 72
-	bar_y := app.sidebar.y
+	x_pos := 64
+	bar_y := app.sidebar.y + 1
 	app.sv.set_bounds(x_pos, bar_y, ws.width - x_pos, ws.height - 31 - bar_y)
 
 	reff := &gx.Color(win.id_map['background'])

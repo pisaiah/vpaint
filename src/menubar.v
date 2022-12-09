@@ -20,6 +20,21 @@ fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 	app.canvas.upscale()
 }
 
+fn grayscale_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.canvas.grayscale_filter()
+}
+
+fn invert_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.canvas.invert_filter()
+}
+
+fn undo_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.canvas.undo()
+}
+
 fn save_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := &App(win.id_map['app'])
 	app.data.save()
@@ -67,6 +82,18 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 				text: 'Upscale 2x'
 				click_event_fn: upscale_click
 			),
+			ui.menu_item(
+				text: 'Apply Grayscale'
+				click_event_fn: grayscale_click
+			),
+			ui.menu_item(
+				text: 'Invert Image'
+				click_event_fn: invert_click
+			),
+			ui.menu_item(
+				text: 'Undo'
+				click_event_fn: undo_click
+			),
 		]
 	))
 
@@ -110,11 +137,22 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	}
 
 	window.bar.add_child(theme_menu)
+
+	undo_img := $embed_file('assets/undo.png')
+
+	undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
+	mut undo_item := ui.menu_item(
+		text: 'Undo'
+		click_event_fn: undo_click
+		icon: undo_icon
+	)
+	undo_item.width = 30
+	window.bar.add_child(undo_item)
 }
 
 fn size_menu_item(size int) &ui.MenuItem {
 	item := ui.menu_item(
-		text: '$size px'
+		text: '${size} px'
 		click_event_fn: menu_size_click
 	)
 	return item
@@ -182,7 +220,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut label := ui.label(win, 'Simple Image Editor written in the V Programming Language.' +
 		'\n\n\u00A9 2022 Isaiah. All Rights Reserved.')
 
-	mut versions := ui.label(win, 'Version: 1.0 (Development Build) \u2014 UI Version: $ui.version')
+	mut versions := ui.label(win, 'Version: 1.0 (Development Build) \u2014 UI Version: ${ui.version}')
 
 	mut icons8 := ui.link(
 		text: 'Icons by Icons8'

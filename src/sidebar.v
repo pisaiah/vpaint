@@ -2,13 +2,13 @@ module main
 
 import iui as ui
 
-fn sidebar_draw_event(win &ui.Window, com &ui.Component) { //(mut app App)
+fn sidebar_draw_event(mut win ui.Window, com &ui.Component) { //(mut app App)
 	// webasm build works better without closures
 	mut app := &App(win.id_map['app'])
 
 	ws := win.gg.window_size()
 	y := 90
-	app.sidebar.set_bounds(0, y, 70, ws.height - y - 29)
+	app.sidebar.set_bounds(0, y, 62, ws.height - y - 29)
 	color := win.theme.menubar_background
 	win.gg.draw_rect_filled(0, y, app.sidebar.width, app.sidebar.height, color)
 }
@@ -53,9 +53,13 @@ fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
 	img_dropper_file := $embed_file('assets/color-dropper.png')
 	mut test8 := app.icon_btn(img_dropper_file.to_bytes(), &DropperTool{})
 
+	// Pencil
+	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
+	mut test9 := app.icon_btn(img_wide_file.to_bytes(), &WidePencilTool{})
+
 	mut hbox := ui.hbox(app.win)
-	off := 16
-	hbox.set_bounds(off, 16, 70 - off, 40 * 3)
+	off := 5
+	hbox.set_bounds(off, 0, 70 - off, 40 * 3)
 
 	hbox.add_child(test)
 	hbox.add_child(test2)
@@ -65,6 +69,7 @@ fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
 	hbox.add_child(test6)
 	hbox.add_child(test7)
 	hbox.add_child(test8)
+	hbox.add_child(test9)
 	sidebar.add_child(hbox)
 }
 
@@ -74,7 +79,8 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 	cim := gg.cache_image(gg_im)
 	mut btn := ui.button_with_icon(cim)
 
-	btn.set_bounds(2, 4, 32, 32)
+	btn.set_bounds(2, 1, 50, 32)
+	btn.icon_width = 32
 
 	btn.set_click_fn(tool_btn_click, tool)
 	return btn
