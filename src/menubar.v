@@ -3,18 +3,6 @@ module main
 import iui as ui
 import gx
 
-fn (mut app App) set_tool_pencil(mut win ui.Window, com ui.MenuItem) {
-	app.tool = &PencilTool{}
-}
-
-fn (mut app App) set_tool_select(mut win ui.Window, com ui.MenuItem) {
-	app.tool = &SelectTool{}
-}
-
-fn (mut app App) set_tool_fill(mut win ui.Window, com ui.MenuItem) {
-	app.tool = &FillTool{}
-}
-
 fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := &App(win.id_map['app'])
 	app.canvas.upscale()
@@ -67,18 +55,6 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		text: 'Tools'
 		children: [
 			ui.menu_item(
-				text: 'Pencil'
-				// click_event_fn: app.set_tool_pencil
-			),
-			ui.menu_item(
-				text: 'Select'
-				// click_event_fn: app.set_tool_select
-			),
-			ui.menu_item(
-				text: 'Fillcan'
-				// click_event_fn: app.set_tool_fill
-			),
-			ui.menu_item(
 				text: 'Upscale 2x'
 				click_event_fn: upscale_click
 			),
@@ -102,7 +78,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		children: [
 			ui.menu_item(
 				text: 'Fit Canvas'
-				// click_event_fn: app.menubar_fit_zoom_click
+				click_event_fn: menubar_fit_zoom_click
 			),
 			ui.menu_item(
 				text: 'Zoom-out'
@@ -160,26 +136,12 @@ fn size_menu_item(size int) &ui.MenuItem {
 
 fn menu_size_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := &App(win.id_map['app'])
-
 	size := com.text.replace(' px', '').int()
-
 	app.brush_size = size
 }
 
-fn (mut app App) menubar_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
-	zoom := app.canvas.get_zoom()
-	new_zoom := if zoom >= 1 { zoom + 2 } else { 1 }
-	app.canvas.set_zoom(new_zoom)
-}
-
-fn (mut app App) menubar_zoom_out_click(mut win ui.Window, com ui.MenuItem) {
-	app.tool = &PencilTool{}
-	zoom := app.canvas.get_zoom()
-	new_zoom := if zoom > 1 { zoom - 2 } else { 1 }
-	app.canvas.set_zoom(new_zoom)
-}
-
-fn (mut app App) menubar_fit_zoom_click(mut win ui.Window, com ui.MenuItem) {
+fn menubar_fit_zoom_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
 	canvas_height := app.sv.height - 50
 	level := canvas_height / app.data.file.height
 	app.canvas.set_zoom(level)
@@ -222,11 +184,11 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	mut versions := ui.label(win, 'Version: 1.0 (Development Build) \u2014 UI Version: ${ui.version}')
 
-	mut icons8 := ui.link(
+	icons8 := ui.link(
 		text: 'Icons by Icons8'
 		url: 'https://icons8.com/'
 		bounds: ui.Bounds{
-			x: 8
+			x: 0
 			y: 16
 		}
 		pack: true
@@ -234,8 +196,6 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	label.set_config(18, true, false)
 	versions.set_config(18, true, false)
-	icons8.set_config(18, true, true)
-
 	versions.pack()
 	label.pack()
 

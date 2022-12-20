@@ -13,9 +13,9 @@ fn sidebar_draw_event(mut win ui.Window, com &ui.Component) { //(mut app App)
 	win.gg.draw_rect_filled(0, y, app.sidebar.width, app.sidebar.height, color)
 }
 
-fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
+fn (mut app App) make_sidebar() {
 	// Sidebar
-	sidebar.draw_event_fn = sidebar_draw_event
+	app.sidebar.draw_event_fn = sidebar_draw_event
 
 	// Select
 	img_sele_file := $embed_file('assets/icons8-select-none-32.png')
@@ -70,7 +70,7 @@ fn (mut app App) make_sidebar(mut sidebar ui.HBox) {
 	hbox.add_child(test7)
 	hbox.add_child(test8)
 	hbox.add_child(test9)
-	sidebar.add_child(hbox)
+	app.sidebar.add_child(hbox)
 }
 
 fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {

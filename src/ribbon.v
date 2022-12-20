@@ -4,7 +4,7 @@ module main
 import gx
 import iui as ui
 
-fn (mut app App) make_ribbon(mut ribbon ui.HBox) {
+fn (mut app App) make_ribbon() {
 	mut color_box := ui.hbox(app.win)
 	colors := [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
 		gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
@@ -47,8 +47,8 @@ fn (mut app App) make_ribbon(mut ribbon ui.HBox) {
 	img_picker_file := $embed_file('assets/rgb-picker.png')
 	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
 
-	ribbon.add_child(color_box)
-	ribbon.add_child(btn)
+	app.ribbon.add_child(color_box)
+	app.ribbon.add_child(btn)
 
 	// Load hsv.png
 	// img_file := $embed_file('assets/hsv.png')

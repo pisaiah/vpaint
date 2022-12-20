@@ -16,13 +16,13 @@ mut:
 }
 
 fn (this &ImageViewData) save() {
-	dump(this.file.ext)
+	// dump(this.file.ext)
 	if this.file_name.ends_with('jpg') {
 		write_jpg(this.file, this.file_name)
 	} else {
 		write_img(this.file, this.file_name)
 	}
-	dump('Saved')
+	// dump('Saved')
 }
 
 pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.VBox {

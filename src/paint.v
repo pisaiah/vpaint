@@ -22,7 +22,6 @@ mut:
 	status_bar  &ui.HBox
 	stat_lbl    &ui.Label
 	brush_size  int = 1
-	// color_data  &HSLData
 }
 
 fn (app &App) get_color() gx.Color {
@@ -40,23 +39,8 @@ fn (mut app App) set_color(c gx.Color) {
 	app.color = c
 }
 
-[console]
 fn main() {
 	// Create Window
-	mut app := &App{
-		sv: unsafe { nil }
-		sidebar: unsafe { nil }
-		data: unsafe { nil }
-		canvas: unsafe { nil }
-		win: unsafe { nil }
-		ribbon: unsafe { nil }
-		status_bar: unsafe { nil }
-		stat_lbl: unsafe { nil }
-		// color_data: &HSLData{
-		//	slid: unsafe { nil }
-		//}
-		tool: &PencilTool{}
-	}
 	mut window := ui.make_window(
 		title: 'vPaint'
 		width: 700
@@ -64,7 +48,19 @@ fn main() {
 		font_size: 16
 		// ui_mode: true
 	)
-	app.win = window
+
+	mut app := &App{
+		sv: unsafe { nil }
+		sidebar: ui.hbox(window)
+		data: unsafe { nil }
+		canvas: unsafe { nil }
+		win: window
+		ribbon: ui.hbox(window)
+		status_bar: unsafe { nil }
+		stat_lbl: unsafe { nil }
+		tool: &PencilTool{}
+	}
+	// app.win = window
 	window.id_map['app'] = app
 
 	app.make_menubar(mut window)
@@ -80,31 +76,27 @@ fn main() {
 		os.write_file_array(path, blank_png.to_bytes()) or { panic(error) }
 	}
 
-	dump(path)
-	dump(os.exists(path))
 	mut tree := make_image_view(path, mut window, mut app)
 
-	mut sidebar := ui.hbox(window)
-	app.sidebar = sidebar
-	sidebar.z_index = 21
+	app.sidebar.z_index = 21
 
 	mut sv := &ui.ScrollView{
 		children: [tree]
+		increment: 2
 	}
 	app.sv = sv
 	sv.set_bounds(0, 0, 500, 210)
 	sv.draw_event_fn = image_scrollview_draw_event_fn
 
-	app.make_sidebar(mut sidebar)
+	app.make_sidebar()
 
 	// Ribbon bar
-	app.ribbon = ui.hbox(window)
 	app.ribbon.z_index = 21
 	app.ribbon.draw_event_fn = ribbon_draw_fn
 
-	app.make_ribbon(mut app.ribbon)
+	app.make_ribbon()
 
-	window.add_child(sidebar)
+	window.add_child(app.sidebar)
 	window.add_child(app.ribbon)
 	window.add_child(sv)
 

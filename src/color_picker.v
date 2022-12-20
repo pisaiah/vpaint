@@ -26,23 +26,15 @@ mut:
 }
 
 fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
-	// img_file := $embed_file('assets/hsv.png')
-	// data := img_file.to_bytes()
-
-	mut gg := win.gg
-	gg_im := 0 // gg.create_image_from_byte_array(data)
-
 	mut cim := 0
 	if 'HSL' in win.id_map {
 		hsl := &int(win.id_map['HSL'])
 		cim = *hsl
-	} else {
-		// cim = gg.cache_image(gg_im)
-		// win.id_map['HSL'] = &cim
 	}
 
-	mut btn := ui.button_with_icon(cim) // ui.button_with_icon(cim)
-	btn.set_bounds(16, 8, 256, 256)
+	mut btn := ui.button_with_icon(cim)
+	btn.set_area_filled(false)
+	btn.set_bounds(14, 8, 256, 256)
 	btn.after_draw_event_fn = hsl_btn_draw_evnt
 
 	mut slide := ui.new_slider(
@@ -52,9 +44,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	)
 	slide.after_draw_event_fn = slid_draw_evnt
 
-	slide.set_bounds(284, 8, 32, 256)
-
-	// h, s, v := rgb_to_hsv(val)
+	slide.set_bounds(280, 8, 41, 256)
 
 	mut modal := ui.modal(win, 'HSV Color Picker')
 	modal.needs_init = false
@@ -69,7 +59,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		max: 255
 		dir: .vert
 	)
-	aslid.set_bounds(325, 8, 32, 256)
+	aslid.set_bounds(333, 8, 28, 256)
 	aslid.after_draw_event_fn = aslid_draw_evnt
 	modal.add_child(aslid)
 
@@ -84,7 +74,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	can.set_bounds(252, y, 222, 30)
 
 	mut vbox := ui.vbox(win)
-	vbox.set_pos(370, 8)
+	vbox.set_pos(376, 8)
 	mut lbl := ui.label(win, ' ')
 	lbl.set_bounds(0, 1, 4, 40)
 
@@ -112,9 +102,6 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		btn: btn
 		slid: slide
 		aslid: aslid
-		// h: h
-		// s: s
-		// v: v * 100
 		modal: modal
 		h_field: ah
 		s_field: ass
@@ -124,7 +111,6 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		b_field: bf
 		a_field: af
 	}
-	// cp.load_hsv(h, s, v)
 	cp.load_rgb(val)
 	win.id_map['color_picker'] = cp
 	return cp
@@ -200,13 +186,28 @@ fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 	mut cp := &ColorPicker(win.id_map['color_picker'])
 
 	cpc := cp.color
-	len := 32
+	len := 16
+	spa := 16
+
+	aa := gx.rgb(150, 150, 150)
+	bb := gx.rgb(255, 255, 255)
+
+	mut cc := false
 	for i in 0 .. len {
-		val := 255 - (i * 8)
-		space := 8
+		val := 255 - (i * spa)
+		space := spa
 		color := gx.rgba(cpc.r, cpc.g, cpc.b, u8(val))
 		y := com.ry + int(space * i)
+
+		ca := if cc { aa } else { bb }
+		cb := if cc { bb } else { aa }
+		fw := com.width / 2
+
+		win.gg.draw_rect_filled(com.rx, y, fw, space, ca)
+		win.gg.draw_rect_filled(com.rx + fw, y, fw - 1, space, cb)
+
 		win.gg.draw_rect_filled(com.rx, y, com.width - 1, space, color)
+		cc = !cc
 	}
 
 	if mut com is ui.Slider {
@@ -234,7 +235,6 @@ fn (mut cp ColorPicker) update_text() {
 	cp.g_field.text = '${color.g}'
 	cp.b_field.text = '${color.b}'
 
-	// cp.a_field.text = '${color.a}'
 	cp.h_field.carrot_left = cp.h_field.text.len
 	cp.s_field.carrot_left = cp.s_field.text.len
 	cp.v_field.carrot_left = cp.v_field.text.len
@@ -272,9 +272,7 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 	x := cp.mx - 7 + com.rx
 	win.gg.draw_rounded_rect_empty(x, cp.my - 7 + com.ry, 16, 16, 32, gx.white)
 	win.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + com.ry, 16, 16, 32, gx.blue)
-	win.gg.draw_rect_empty(cp.btn.rx, cp.btn.ry, cp.btn.width, cp.btn.height, gx.black)
 
-	// color := hsv_to_rgb(cp.h, cp.s, f32(cp.v) / 100)
 	y := cp.btn.ry + cp.btn.height + 12
 	win.gg.draw_rect_filled(cp.btn.rx, y, 454, 24, cp.color)
 	win.gg.draw_text(cp.btn.rx, y + 30, 'Result: ${cp.color.to_css_string()}', gx.TextCfg{
@@ -307,7 +305,7 @@ fn number_sect(win &ui.Window, txt string) (&ui.HBox, &ui.TextField) {
 	mut hbox := ui.hbox(win)
 
 	mut numfield := ui.numeric_field(255)
-	numfield.set_bounds(0, 0, 100, 26)
+	numfield.set_bounds(0, 0, 95, 26)
 	if txt == 'H' || txt == 'S' || txt == 'V' {
 		numfield.text_change_event_fn = hsv_num_box_change_evnt
 	} else {

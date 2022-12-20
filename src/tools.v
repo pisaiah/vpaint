@@ -148,18 +148,14 @@ fn (mut this DragTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 	// TODO:
 	// if app.selection_area {}
 
-	// sapp.set_mouse_cursor(.resize_all)
-
 	sx, sy := img.get_point_screen_pos(img.mx, img.my)
 
 	diff_x := sx - this.sx
 	diff_y := sy - this.sy
 
-	sdx := if diff_x < 0 { -2 } else { 2 }
-	sdy := if diff_y < 0 { -2 } else { 2 }
+	sdx := if diff_x < 0 { -4 } else { 4 }
+	sdy := if diff_y < 0 { -4 } else { 4 }
 
-	dump(diff_x)
-	dump(img.zoom)
 	if math.abs(diff_x) > img.zoom {
 		img.app.sv.scroll_x += sdx
 	}
@@ -274,12 +270,16 @@ fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 
 	color := img.get(img.mx, img.my)
 
-	width := img.zoom * 4
+	width := if img.zoom > 4 { img.zoom * 4 } else { 16 }
 	xpos := img.sx + width
 	ypos := img.sy + width
 
-	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, gx.blue)
 	ctx.gg.draw_rounded_rect_filled(xpos, ypos, width, width, 1, color)
+	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, gx.blue)
+	str := 'RGBA: ${color.r}, ${color.g}, ${color.b}, ${color.a}'
+	ctx.gg.draw_text(int(xpos), int(ypos), str, gx.TextCfg{
+		size: 12
+	})
 }
 
 fn (mut this DropperTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
@@ -301,7 +301,7 @@ fn (mut this WidePencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	mut img := &Image(a)
 
 	size := img.app.brush_size
-	half_size := size / 2
+	// half_size := size / 2
 	q_size := 1 // half_size / 2
 	pix := img.zoom
 
@@ -312,16 +312,6 @@ fn (mut this WidePencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	hei := img.zoom + ((2 - 1) * pix)
 
 	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, hei, 1, gx.blue)
-
-	// Draw lines instead of individual rects;
-	// to reduce our drawing instructions.
-	for i in 0 .. size / 2 {
-		yy := ypos + (i * pix)
-		xx := xpos + ((i * 2) * pix)
-
-		// ctx.gg.draw_line(xpos, yy, xpos + width, yy, gx.blue)
-		// ctx.gg.draw_line(xx, ypos, xx, ypos + hei, gx.blue)
-	}
 }
 
 fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
@@ -329,7 +319,7 @@ fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 
 	size := img.app.brush_size
 	half_size := size / 2
-	q_size := half_size / 2
+	// q_size := half_size / 2
 
 	for x in -half_size .. size + half_size {
 		for y in 0 .. 2 {

@@ -77,7 +77,6 @@ pub fn (mut this Image) screenshot_window(w int, h int) &Screenshot {
 	img_size := w * h * 4
 	img_pixels := unsafe { &u8(malloc(img_size)) }
 
-	dump(this.y)
 	C.v_sapp_gl_read_rgba_pixels(0, 0, w, h, img_pixels)
 
 	return &Screenshot{
@@ -105,10 +104,10 @@ pub fn (mut ss Screenshot) destroy() {
 	unsafe { free(ss) }
 }
 
-pub fn (mut this Image) screenshot_png(path string, w int, h int) ? {
+pub fn (mut this Image) screenshot_png(path string, w int, h int) ! {
 	ss := this.screenshot_window(w, h)
 	// stbi.set_flip_vertically_on_write(true)
-	stbi.stbi_write_png(path, ss.width, ss.height, 4, ss.pixels, ss.width * 4)?
+	stbi.stbi_write_png(path, ss.width, ss.height, 4, ss.pixels, ss.width * 4)!
 	unsafe { ss.destroy() }
 }
 

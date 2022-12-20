@@ -8,8 +8,8 @@ fn (mut app App) show_resize_modal(cw int, ch int) {
 	modal.in_width = 300
 	modal.in_height = 200
 
-	mut width_box := ui.textfield(app.win, '${cw}')
-	mut heigh_box := ui.textfield(app.win, '${ch}')
+	mut width_box := ui.text_field(text: '${cw}')
+	mut heigh_box := ui.text_field(text: '${ch}')
 
 	mut width_lbl := ui.label(app.win, 'Width')
 	mut heigh_lbl := ui.label(app.win, 'Height')
@@ -47,7 +47,6 @@ pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
 		mut heigh_lbl := &ui.TextField(win.get_from_id('resize_heigh'))
 		mut app := &App(win.id_map['app'])
 
-		dump(width_lbl.text.int())
 		app.canvas.resize(width_lbl.text.int(), heigh_lbl.text.int())
 	})
 
