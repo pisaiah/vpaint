@@ -101,6 +101,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			size_menu_item(16),
 			size_menu_item(32),
 			size_menu_item(64),
+			ui.menu_item(
+				text: 'Custom'
+				click_event_fn: menu_size_custom_click
+			),
 		]
 	))
 
@@ -132,6 +136,11 @@ fn size_menu_item(size int) &ui.MenuItem {
 		click_event_fn: menu_size_click
 	)
 	return item
+}
+
+fn menu_size_custom_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.show_size_modal()
 }
 
 fn menu_size_click(mut win ui.Window, com ui.MenuItem) {

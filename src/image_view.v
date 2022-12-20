@@ -224,6 +224,11 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 		to: color
 		batch: batch
 	}
+
+	if this.history.len > 1000 {
+		this.history.delete_last()
+	}
+
 	if this.history.len > 0 {
 		if this.history[0].compare(change) == 0 {
 			this.history.insert(0, change)
@@ -366,8 +371,11 @@ pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
 			sy := this.y + (y * this.zoom)
 			ey := sy + this.zoom
 
-			if mx >= sx && mx < ex {
-				if my >= sy && my < ey {
+			gx := mx < ex || mx > this.x + (x * this.zoom) || mx < this.x
+			gy := my < ey //|| my < this.y
+
+			if mx >= sx && gx {
+				if my >= sy && gy {
 					this.sx = sx
 					this.sy = sy
 					this.mx = x
@@ -376,7 +384,39 @@ pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
 					break
 				}
 			}
+
+			if y == this.h - 1 {
+				if mx >= sx && gx && my > this.y + (y * this.zoom) {
+					this.sx = sx
+					this.sy = sy
+					this.mx = x
+					this.my = y
+					break
+				}
+			}
+
+			if y == 0 {
+				if mx >= sx && gx && my < this.y {
+					this.sx = sx
+					this.sy = sy
+					this.mx = x
+					this.my = y
+					break
+				}
+			}
 		}
+	}
+
+	if mx > this.x + ((this.w - 1) * this.zoom) {
+		sx := this.x + ((this.w - 1) * this.zoom)
+
+		this.sx = sx
+		this.mx = this.w - 1
+	}
+
+	if mx < this.x {
+		this.sx = this.x
+		this.mx = 0
 	}
 }
 
