@@ -36,7 +36,7 @@ fn (mut app App) show_resize_modal(cw int, ch int) {
 }
 
 pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
-	mut close := ui.button(app, 'OK')
+	mut close := ui.button(text: 'OK')
 
 	y := this.in_height - 50
 	close.set_bounds(24, y, 130, 25)
@@ -50,7 +50,7 @@ pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
 		app.canvas.resize(width_lbl.text.int(), heigh_lbl.text.int())
 	})
 
-	mut cancel := ui.button(app, 'Cancel')
+	mut cancel := ui.button(text: 'Cancel')
 	cancel.set_bounds(165, y, 105, 25)
 
 	cancel.set_click(fn (mut win ui.Window, btn ui.Button) {
@@ -58,8 +58,7 @@ pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
 	})
 	this.add_child(cancel)
 
-	ref := &close
-	this.children << ref
-	this.close = ref
-	return ref
+	this.children << close
+	this.close = close
+	return close
 }

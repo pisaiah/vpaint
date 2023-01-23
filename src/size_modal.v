@@ -21,14 +21,16 @@ fn (mut app App) show_size_modal() {
 	width_box.set_id(mut app.win, 'bs_size')
 
 	modal.needs_init = false
-	bs_create_close_btn(mut modal, app.win)
+	bs_create_close_btn(mut modal)
 
 	app.win.add_child(modal)
 	app.canvas.is_mouse_down = false
 }
 
-pub fn bs_create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
-	mut close := ui.button(app, 'OK')
+pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
+	mut close := ui.button(
+		text: 'OK'
+	)
 
 	y := this.in_height - 50
 	close.set_bounds(12, y, 120, 35)
@@ -41,16 +43,17 @@ pub fn bs_create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
 		app.brush_size = width_lbl.text.int()
 	})
 
-	mut cancel := ui.button(app, 'Cancel')
-	cancel.set_bounds(138, y, 90, 35)
+	mut cancel := ui.button(
+		text: 'Cancel'
+		bounds: ui.Bounds{138, y, 90, 35}
+	)
 
 	cancel.set_click(fn (mut win ui.Window, btn ui.Button) {
 		win.components = win.components.filter(mut it !is ui.Modal)
 	})
 	this.add_child(cancel)
 
-	ref := &close
-	this.children << ref
-	this.close = ref
-	return ref
+	this.children << close
+	this.close = close
+	return close
 }

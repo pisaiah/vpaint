@@ -18,7 +18,7 @@ fn (mut app App) make_sidebar() {
 	app.sidebar.draw_event_fn = sidebar_draw_event
 
 	// Select
-	img_sele_file := $embed_file('assets/icons8-select-none-32.png')
+	img_sele_file := $embed_file('assets/select.png')
 	mut test := app.icon_btn(img_sele_file.to_bytes(), &SelectTool{})
 
 	// Pencil
@@ -26,7 +26,7 @@ fn (mut app App) make_sidebar() {
 	mut test2 := app.icon_btn(img_pencil_file.to_bytes(), &PencilTool{})
 
 	// Fill
-	img_fill_file := $embed_file('assets/icons8-fill-color-32-2.png')
+	img_fill_file := $embed_file('assets/fill-can.png')
 	mut test3 := app.icon_btn(img_fill_file.to_bytes(), &FillTool{})
 
 	// Drag

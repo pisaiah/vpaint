@@ -46,6 +46,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 				click_event_fn: save_click
 			),
 			ui.menu_item(
+				text: 'Settings'
+				click_event_fn: settings_click
+			),
+			ui.menu_item(
 				text: 'About Paint'
 				click_event_fn: about_click
 			),
@@ -175,14 +179,19 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 		background := gx.rgb(0, 16, 0)
 		win.id_map['background'] = &background
 	} else {
-		win.gg.set_bg_color(gx.rgb(210, 220, 240))
-		background := gx.rgb(210, 220, 240)
+		background := gx.rgb(230, 235, 245)
+		win.gg.set_bg_color(background)
 		win.id_map['background'] = &background
 	}
 }
 
+fn settings_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := &App(win.id_map['app'])
+	app.show_settings()
+}
+
 fn about_click(mut win ui.Window, com ui.MenuItem) {
-	mut modal := ui.page(win, 'About vPaint')
+	mut modal := ui.modal(win, 'About vPaint')
 
 	mut title := ui.label(win, 'VPaint')
 	title.set_config(32, true, true)

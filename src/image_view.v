@@ -111,7 +111,7 @@ pub fn get_pixel(x int, y int, this stbi.Image) gx.Color {
 	x_oob := x < 0 || x >= this.width
 	y_oob := y < 0 || y >= this.height
 	if x_oob || y_oob {
-		return gx.rgba(0, 0, 0, -1)
+		return gx.rgba(0, 0, 0, 0)
 	}
 
 	image := this
@@ -322,6 +322,16 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	if !this.loaded {
 		this.load_if_not_loaded(ctx)
 	}
+
+	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
+		img_id: this.app.bg_id
+		img_rect: gg.Rect{
+			x: this.x
+			y: this.y
+			width: this.width
+			height: this.height
+		}
+	})
 
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
 		img_id: this.img

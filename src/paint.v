@@ -22,6 +22,7 @@ mut:
 	status_bar  &ui.HBox
 	stat_lbl    &ui.Label
 	brush_size  int = 1
+	bg_id       int
 }
 
 fn (app &App) get_color() gx.Color {
@@ -60,7 +61,6 @@ fn main() {
 		stat_lbl: unsafe { nil }
 		tool: &PencilTool{}
 	}
-	// app.win = window
 	window.id_map['app'] = app
 
 	app.make_menubar(mut window)
@@ -104,6 +104,13 @@ fn main() {
 	app.status_bar = sb
 	window.add_child(sb)
 
+	mut win := app.win
+	tb_file := $embed_file('assets/checker.png')
+	data := tb_file.to_bytes()
+	gg_im := win.gg.create_image_from_byte_array(data)
+	cim := win.gg.cache_image(gg_im)
+	app.bg_id = cim
+
 	window.gg.run()
 }
 
@@ -125,7 +132,8 @@ fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
 	color := if 'background' in win.id_map {
 		gx.rgb(reff.r, reff.g, reff.b)
 	} else {
-		gx.rgb(210, 220, 240)
+		// gx.rgb(210, 220, 240)
+		gx.rgb(230, 235, 245)
 	}
 
 	win.gg.draw_rect_filled(app.sv.x, 0, ws.width, ws.height, color)

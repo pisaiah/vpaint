@@ -18,14 +18,14 @@ fn (mut app App) make_ribbon() {
 
 	mut count := 0
 	for color in colors {
-		mut btn := ui.button(app.win, ' ')
+		mut btn := ui.button(text: ' ')
 		btn.set_background(color)
 		btn.set_bounds(4, 4, size, size)
 		btn.border_radius = 64
 
 		if count == 0 || count == 10 {
 			txt := if count == 0 { '' } else { ' ' }
-			mut current_btn := ui.button(app.win, txt)
+			mut current_btn := ui.button(text: txt)
 			current_btn.set_bounds(2, 8, 30, 20)
 			current_btn.draw_event_fn = current_color_btn_draw
 			btn.set_bounds(20, 4, size, size)

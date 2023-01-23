@@ -72,9 +72,9 @@ fn stat_lbl_draw_event(mut win ui.Window, mut com ui.Component) { //(mut app App
 
 fn (mut app App) zoom_btn(val int) &ui.Button {
 	txt := if val == 0 { '-' } else { '+' }
-	mut btn := ui.button(app.win, txt)
+	mut btn := ui.button(text: txt)
 	btn.border_radius = 0
-	return &btn
+	return btn
 }
 
 fn on_zoom_inc_click(win voidptr, btn voidptr, mut app App) {
