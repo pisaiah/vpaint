@@ -37,8 +37,8 @@ pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
 
 	close.set_click(fn (mut win ui.Window, btn ui.Button) {
 		win.components = win.components.filter(mut it !is ui.Modal)
-		mut width_lbl := &ui.TextField(win.get_from_id('bs_size'))
-		mut app := &App(win.id_map['app'])
+		mut width_lbl := win.get[&ui.TextField]('bs_size')
+		mut app := win.get[&App]('app')
 
 		app.brush_size = width_lbl.text.int()
 	})

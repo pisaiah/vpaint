@@ -117,8 +117,8 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 }
 
 pub fn default_modal_close_fn(mut win ui.Window, btn ui.Button) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
-	mut app := &App(win.id_map['app'])
+	mut cp := win.get[&ColorPicker]('color_picker')
+	mut app := win.get[&App]('app')
 	app.set_color(cp.color)
 	win.components = win.components.filter(mut it !is ui.Modal)
 }
@@ -160,14 +160,14 @@ fn roun(a f64, place int) string {
 }
 
 fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
+	mut cp := win.get[&ColorPicker]('color_picker')
 
 	for i in 0 .. 33 {
 		v := 100 - (i * 3)
 		vp := f32(v) / 100
 		color := hsv_to_rgb(cp.h, cp.s, vp)
 		y := com.ry + int(7.75 * i)
-		win.gg.draw_rect_filled(com.rx, y + 1, com.width - 1, 7.8, color)
+		win.gg.draw_rect_filled(com.rx, y + 1, com.width - 1, 8, color)
 	}
 
 	if mut com is ui.Slider {
@@ -183,7 +183,7 @@ fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 }
 
 fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
+	mut cp := win.get[&ColorPicker]('color_picker')
 
 	cpc := cp.color
 	len := 16
@@ -246,7 +246,7 @@ fn (mut cp ColorPicker) update_text() {
 }
 
 fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
+	mut cp := win.get[&ColorPicker]('color_picker')
 	if com.is_mouse_down {
 		cp.mx = math.min(win.mouse_x, cp.btn.rx + cp.btn.width)
 		cp.my = math.min(win.mouse_y, cp.btn.ry + cp.btn.height)
@@ -281,7 +281,7 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 }
 
 fn hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
+	mut cp := win.get[&ColorPicker]('color_picker')
 
 	h := cp.h_field.text.f64()
 	s := cp.s_field.text.f64()
@@ -291,7 +291,7 @@ fn hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 }
 
 fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
-	mut cp := &ColorPicker(win.id_map['color_picker'])
+	mut cp := win.get[&ColorPicker]('color_picker')
 
 	r := cp.r_field.text.u8()
 	g := cp.g_field.text.u8()

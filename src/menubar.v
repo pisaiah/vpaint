@@ -4,27 +4,27 @@ import iui as ui
 import gx
 
 fn upscale_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.canvas.upscale()
 }
 
 fn grayscale_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.canvas.grayscale_filter()
 }
 
 fn invert_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.canvas.invert_filter()
 }
 
 fn undo_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.canvas.undo()
 }
 
 fn save_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.data.save()
 }
 
@@ -143,18 +143,18 @@ fn size_menu_item(size int) &ui.MenuItem {
 }
 
 fn menu_size_custom_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.show_size_modal()
 }
 
 fn menu_size_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	size := com.text.replace(' px', '').int()
 	app.brush_size = size
 }
 
 fn menubar_fit_zoom_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	canvas_height := app.sv.height - 50
 	level := canvas_height / app.data.file.height
 	app.canvas.set_zoom(level)
@@ -186,7 +186,7 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 }
 
 fn settings_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := &App(win.id_map['app'])
+	mut app := win.get[&App]('app')
 	app.show_settings()
 }
 

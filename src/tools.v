@@ -21,7 +21,7 @@ struct PencilTool {
 }
 
 fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
@@ -46,7 +46,7 @@ fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this PencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
@@ -85,7 +85,7 @@ fn (mut this SelectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 		return
 	}
 
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	xoff := img.mx - this.dx
 	yoff := img.my - this.dy
@@ -102,7 +102,7 @@ fn (mut this SelectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this SelectTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 	if this.dx == -1 {
 		this.dx = img.mx
 		this.dy = img.my
@@ -110,7 +110,7 @@ fn (mut this SelectTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
 fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	this.selection = Selection{
 		x1: math.min(img.mx, this.dx)
@@ -137,7 +137,7 @@ fn (mut this DragTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this DragTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	if this.dx == -1 {
 		this.dx = img.mx
@@ -176,7 +176,7 @@ struct AirbrushTool {
 }
 
 fn (mut this AirbrushTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
@@ -196,7 +196,7 @@ fn (mut this AirbrushTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this AirbrushTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
@@ -230,12 +230,12 @@ mut:
 }
 
 fn (mut this PencilTool2) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, img.zoom, img.zoom, 1, gx.blue)
 }
 
 fn (mut this PencilTool2) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	if this.last_x != -1 {
 		min_x := math.min(this.last_x, img.mx)
@@ -266,7 +266,7 @@ struct DropperTool {
 }
 
 fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	color := img.get(img.mx, img.my)
 
@@ -283,7 +283,7 @@ fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this DropperTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	color := img.get(img.mx, img.my)
 	img.app.set_color(color)
@@ -298,7 +298,7 @@ struct WidePencilTool {
 }
 
 fn (mut this WidePencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	// half_size := size / 2
@@ -315,7 +315,7 @@ fn (mut this WidePencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 }
 
 fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2

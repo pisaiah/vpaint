@@ -13,12 +13,12 @@ mut:
 }
 
 fn (mut this FillTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, img.zoom, img.zoom, 1, gx.blue)
 }
 
 fn (mut this FillTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
-	mut img := &Image(a)
+	mut img := unsafe { &Image(a) }
 	this.img = img
 
 	x := img.mx

@@ -18,8 +18,8 @@ mut:
 	color_2     gx.Color = gx.white
 	sele_color  bool
 	tool        &Tool
-	ribbon      &ui.HBox
-	status_bar  &ui.HBox
+	ribbon      &ui.Panel
+	status_bar  &ui.Panel
 	stat_lbl    &ui.Label
 	brush_size  int = 1
 	bg_id       int
@@ -56,7 +56,7 @@ fn main() {
 		data: unsafe { nil }
 		canvas: unsafe { nil }
 		win: window
-		ribbon: ui.hbox(window)
+		ribbon: ui.Panel.new()
 		status_bar: unsafe { nil }
 		stat_lbl: unsafe { nil }
 		tool: &PencilTool{}
@@ -78,36 +78,52 @@ fn main() {
 
 	mut tree := make_image_view(path, mut window, mut app)
 
-	app.sidebar.z_index = 21
+	// app.sidebar.z_index = 21
 
 	mut sv := &ui.ScrollView{
 		children: [tree]
 		increment: 2
+		padding: 50
 	}
 	app.sv = sv
 	sv.set_bounds(0, 0, 500, 210)
-	sv.draw_event_fn = image_scrollview_draw_event_fn
+
+	sv.subscribe_event('draw', image_scrollview_draw_event_fn)
 
 	app.make_sidebar()
 
 	// Ribbon bar
-	app.ribbon.z_index = 21
-	app.ribbon.draw_event_fn = ribbon_draw_fn
+	// app.ribbon.z_index = 21
+	app.ribbon.subscribe_event('draw', ribbon_draw_fn)
 
 	app.make_ribbon()
 
-	window.add_child(app.sidebar)
-	window.add_child(app.ribbon)
-	window.add_child(sv)
+	// window.add_child(app.sidebar)
+	// window.add_child(app.ribbon)
+	// window.add_child(sv)
 
 	mut sb := app.make_status_bar(window)
 	app.status_bar = sb
-	window.add_child(sb)
+	// window.add_child(sb)
+
+	mut pan := ui.Panel.new(
+		layout: ui.BorderLayout{
+			hgap: 0
+			vgap: 0
+		}
+	)
+
+	pan.add_child_with_flag(app.ribbon, ui.borderlayout_north)
+	pan.add_child_with_flag(app.sidebar, ui.borderlayout_west)
+	pan.add_child_with_flag(app.sv, ui.borderlayout_center)
+	pan.add_child_with_flag(sb, ui.borderlayout_south)
+
+	window.add_child(pan)
 
 	mut win := app.win
 	tb_file := $embed_file('assets/checker.png')
 	data := tb_file.to_bytes()
-	gg_im := win.gg.create_image_from_byte_array(data)
+	gg_im := win.gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := win.gg.cache_image(gg_im)
 	app.bg_id = cim
 
@@ -121,20 +137,23 @@ fn fit_lbl(mut lbl ui.Label) {
 }
 
 // Image canvas ScrollView draw event
-fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
-	mut app := &App(win.id_map['app'])
-	ws := win.gg.window_size()
+// fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
+fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
+	mut app := e.ctx.win.get[&App]('app')
+	ws := e.ctx.gg.window_size()
 	x_pos := 64
 	bar_y := app.sidebar.y + 1
-	app.sv.set_bounds(x_pos, bar_y, ws.width - x_pos, ws.height - 31 - bar_y)
+	// app.sv.set_bounds(x_pos, bar_y, ws.width - x_pos, ws.height - 31 - bar_y)
 
-	reff := &gx.Color(win.id_map['background'])
-	color := if 'background' in win.id_map {
+	// dump('draw')
+
+	color := if 'background' in e.ctx.win.id_map {
+		reff := e.ctx.win.get[&gx.Color]('background')
 		gx.rgb(reff.r, reff.g, reff.b)
 	} else {
 		// gx.rgb(210, 220, 240)
 		gx.rgb(230, 235, 245)
 	}
 
-	win.gg.draw_rect_filled(app.sv.x, 0, ws.width, ws.height, color)
+	// e.ctx.gg.draw_rect_filled(app.sv.x, 0, ws.width, ws.height, color)
 }

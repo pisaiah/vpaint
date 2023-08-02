@@ -2,20 +2,20 @@ module main
 
 import iui as ui
 
-fn sidebar_draw_event(mut win ui.Window, com &ui.Component) { //(mut app App)
+fn sidebar_draw_event(mut e ui.DrawEvent) {
 	// webasm build works better without closures
-	mut app := &App(win.id_map['app'])
+	mut app := e.ctx.win.get[&App]('app')
 
-	ws := win.gg.window_size()
-	y := 90
-	app.sidebar.set_bounds(0, y, 62, ws.height - y - 29)
-	color := win.theme.menubar_background
-	win.gg.draw_rect_filled(0, y, app.sidebar.width, app.sidebar.height, color)
+	app.sidebar.width = 64
+
+	color := e.ctx.theme.menubar_background
+	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, app.sidebar.width, app.sidebar.height,
+		color)
 }
 
 fn (mut app App) make_sidebar() {
 	// Sidebar
-	app.sidebar.draw_event_fn = sidebar_draw_event
+	app.sidebar.subscribe_event('draw', sidebar_draw_event)
 
 	// Select
 	img_sele_file := $embed_file('assets/select.png')
@@ -37,7 +37,7 @@ fn (mut app App) make_sidebar() {
 	img_resize_file := $embed_file('assets/resize.png')
 	mut test5 := app.icon_btn(img_resize_file.to_bytes(), &SelectTool{})
 	test5.set_click_fn(fn (win &ui.Window, b voidptr, c voidptr) {
-		mut app := &App(win.id_map['app'])
+		mut app := win.get[&App]('app')
 		app.show_resize_modal(app.canvas.w, app.canvas.h)
 	}, 0)
 
@@ -57,9 +57,7 @@ fn (mut app App) make_sidebar() {
 	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
 	mut test9 := app.icon_btn(img_wide_file.to_bytes(), &WidePencilTool{})
 
-	mut hbox := ui.hbox(app.win)
-	off := 5
-	hbox.set_bounds(off, 0, 70 - off, 40 * 3)
+	mut hbox := ui.Panel.new()
 
 	hbox.add_child(test)
 	hbox.add_child(test2)
@@ -70,16 +68,49 @@ fn (mut app App) make_sidebar() {
 	hbox.add_child(test7)
 	hbox.add_child(test8)
 	hbox.add_child(test9)
+
+	mut group := ui.buttongroup[ui.Button]()
+
+	group.add(test)
+	group.add(test2)
+	group.add(test3)
+	group.add(test4)
+	group.add(test5)
+	group.add(test6)
+	group.add(test7)
+	group.add(test8)
+	group.add(test9)
+
+	mut btns := [test, test2, test3, test4, test5, test6, test7, test8, test9]
+	for mut b in btns {
+		b.subscribe_event('after_draw', fn (mut e ui.DrawEvent) {
+			if e.target.is_selected {
+				mut btn := e.target
+				x := btn.x + 1
+				y := btn.y + 1
+				w := btn.width - 2
+				h := btn.height - 2
+				e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.text_color)
+			}
+		})
+	}
+
+	group.subscribe_event('mouse_up', app.group_clicked)
+	group.setup()
+
 	app.sidebar.add_child(hbox)
+}
+
+fn (mut app App) group_clicked(mut e ui.MouseEvent) {
 }
 
 fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 	mut gg := app.win.gg
-	gg_im := gg.create_image_from_byte_array(data)
+	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := gg.cache_image(gg_im)
 	mut btn := ui.button_with_icon(cim)
 
-	btn.set_bounds(2, 1, 50, 32)
+	btn.set_bounds(2, 0, 50, 32)
 	btn.icon_width = 32
 
 	btn.set_click_fn(tool_btn_click, tool)
@@ -87,7 +118,7 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 }
 
 fn tool_btn_click(winn voidptr, btn voidptr, tool &Tool) { //(mut app App)
-	mut win := &ui.Window(winn)
-	mut app := &App(win.id_map['app'])
+	mut win := unsafe { &ui.Window(winn) }
+	mut app := win.get[&App]('app')
 	app.tool = unsafe { tool }
 }

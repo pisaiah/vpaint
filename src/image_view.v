@@ -381,10 +381,10 @@ pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
 			sy := this.y + (y * this.zoom)
 			ey := sy + this.zoom
 
-			gx := mx < ex || mx > this.x + (x * this.zoom) || mx < this.x
+			gxa := mx < ex || mx > this.x + (x * this.zoom) || mx < this.x
 			gy := my < ey //|| my < this.y
 
-			if mx >= sx && gx {
+			if mx >= sx && gxa {
 				if my >= sy && gy {
 					this.sx = sx
 					this.sy = sy
@@ -396,7 +396,7 @@ pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
 			}
 
 			if y == this.h - 1 {
-				if mx >= sx && gx && my > this.y + (y * this.zoom) {
+				if mx >= sx && gxa && my > this.y + (y * this.zoom) {
 					this.sx = sx
 					this.sy = sy
 					this.mx = x
@@ -406,7 +406,7 @@ pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
 			}
 
 			if y == 0 {
-				if mx >= sx && gx && my < this.y {
+				if mx >= sx && gxa && my < this.y {
 					this.sx = sx
 					this.sy = sy
 					this.mx = x
