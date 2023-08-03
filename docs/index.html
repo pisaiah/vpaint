@@ -1,23 +1,37 @@
 <html>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<style>
-		body{background:rgb(230,230,230);}
+		body{background:rgb(220,220,220);}
 		.w3-button {
-			padding-left: 1rem;
-			padding-right: 1rem;
+			padding-left: 1rem; padding-right: 1rem;
 			min-width: 45%;
 			margin-bottom: 1rem;
 			border-radius: 8px;
 		}
 		.bf {min-width: 91%;}
-		.dl { min-width: 91%; margin-bottom: .5rem;}
+		.dl { min-width: 71%; margin-bottom: .5rem;}
+		.dl {
+			background-image: url('https://bit.ly/dwn-icon');
+			background-size: 32px;
+			background-repeat: no-repeat;
+			background-position: top 50% right 10px;
+		}
 		.copy {
 			font-size: 11px;
 			color: rgba(0, 0, 0, .4);
 			margin-top: 2rem;
 		}
 		.lgc {background:rgb(210,210,210)}
+		#can2 {position:relative}
+		#ldd {
+			background: rgba(90, 90, 90,.7);
+			color: white;
+			display: inline-block;
+			padding: .2rem;
+			position: absolute;
+			left: 1%; bottom: 1%; border-radius: 4px;
+		}
 	</style>
 	
 	<div class="w3-container w3-auto w3-margin-top">
@@ -30,22 +44,22 @@
 			<a href="./demo/index.html"><button class="w3-button w3-blue w3-border bf">Demo</button></a><br>
 			<a href="https://github.com/isaiahpatton/vpaint" target="_blank"><button class="w3-button lgc w3-border">Github</button></a>
 			<a href="https://discord.gg/NruVtYBf5g" target="_blank"><button class="w3-button lgc w3-border">Discord</button></a><hr>
-			<h3>Download</h3>
+			<h3>Downloads:</h3>
 			<a href="https://github.com/isaiahpatton/vpaint/releases/download/0.5/vpaint_windows.zip"><button class="w3-button w3-green w3-border dl">Windows</button></a>
 			<a href="https://github.com/isaiahpatton/vpaint/releases/download/0.5/vpaint_linux.zip"><button class="w3-button w3-green w3-border dl">Linux</button></a>
-			<a href="https://github.com/isaiahpatton/vpaint/releases/download/0.5/vpaint_macos.zip"><button class="w3-button w3-green w3-border dl">macos</button></a>
+			<a href="https://bit.ly/vpaint-0-5-macos"><button class="w3-button w3-green w3-border dl">macos</button></a>
 		</div>
-	
-	
+
 		<div class="w3-twothird w3-mobile">
-			<img id="preview" style="display:none" src="./previeww.png">
 			<div style="background-imaage: url('./demo/window.png');float:right">
 				<img src="./demo/titlebar.png" style="float:right">
-				<canvas id="canvas" tabindex=-1></canvas>
+				<div id="can2">
+					<div id="ldd">Hover to load demo</div>
+				</div>
+				<canvas id="canvas" tabindex=-1 style="display:none"></canvas>
 			</div>
 		</div>
-		
-		
+
 		</div>
 	</div>
 	<div class="copy w3-auto">
@@ -53,35 +67,26 @@
 	</div>
 	
 	<script>
-	function draw() {
-	  var cc = document.getElementById("canvas");
-	  var ctxx = cc.getContext("2d");
-	  var imgg = document.getElementById("preview");
-	  ctxx.drawImage(imgg, 0, 0);
-	}
-	// draw();
-	
 	var has_loaded = false;
-	
+
 	var ca = document.getElementById("canvas");
-	ca.addEventListener("mouseover", (event) => {
-		console.log('mouse')
-		if (has_loaded) {
-			return;
-		}
+	var c2 = document.getElementById("can2");
+	c2.addEventListener("mouseover", (event) => {
+		if (has_loaded) { return; }
+		
+		c2.style.display = "none";
 
 		var script = document.createElement('script');
 		script.type = "module";
-		script.src = "./demo/mui_helper.js"//scriptNames[i];
-		script.async = false; // This is required for synchronous execution
+		script.src = "./demo/mui_helper.js";
+		script.async = false;
 		document.head.appendChild(script);
 		has_loaded = true;
+		ca.style.display = "block";
 	});
 	</script>
-
-	<!--<script src="./demo/app.js"></script>-->
 	<style>
-	#canvas {
+	#canvas, #can2 {
 		float:right;
 		width:640px;
 		height:480px;
@@ -92,8 +97,7 @@
 		border-radius: 1rem;
 		border-top-left-radius: 0;
 		border-top-right-radius: 0;
-		background: url('./previeww.png');
+		background-image: url('./previeww.png');
 	}
 	</style>
-	<!--<script type="module" src="./demo/mui_helper.js"></script>-->
 </html>
