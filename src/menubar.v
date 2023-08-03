@@ -53,6 +53,9 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 				text: 'About Paint'
 				click_event_fn: about_click
 			),
+			ui.menu_item(
+				text: 'About iUI'
+			),
 		]
 	))
 	window.bar.add_child(ui.menu_item(
@@ -193,14 +196,18 @@ fn settings_click(mut win ui.Window, com ui.MenuItem) {
 fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut modal := ui.modal(win, 'About vPaint')
 
-	mut title := ui.label(win, 'VPaint')
+	mut title := ui.Label.new(text: 'VPaint')
 	title.set_config(32, true, true)
 	title.pack()
 
-	mut label := ui.label(win, 'Simple Image Editor written in the V Programming Language.' +
-		'\n\n\u00A9 2022 Isaiah. All Rights Reserved.')
+	mut label := ui.Label.new(
+		text: 'Simple Image Editor written in the V Programming Language.' +
+			'\n\n\u00A9 2022-2023 Isaiah. All Rights Reserved.'
+	)
 
-	mut versions := ui.label(win, 'Version: 1.0 (Development Build) \u2014 UI Version: ${ui.version}')
+	mut versions := ui.Label.new(
+		text: 'Version: 1.0 (Development Build) \u2014 UI Version: ${ui.version}'
+	)
 
 	icons8 := ui.link(
 		text: 'Icons by Icons8'
@@ -212,17 +219,28 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 		pack: true
 	)
 
-	label.set_config(18, true, false)
-	versions.set_config(18, true, false)
+	git := ui.link(
+		text: 'vpaint @ Github'
+		url: 'https://github.com/isaiahpatton/vpaint'
+		bounds: ui.Bounds{
+			x: 0
+			y: 16
+		}
+		pack: true
+	)
+
+	// label.set_config(18, true, false)
+	// versions.set_config(18, true, false)
 	versions.pack()
 	label.pack()
 
-	mut vbox := ui.vbox(win)
+	mut vbox := ui.Panel.new()
 	vbox.set_pos(32, 18)
 	vbox.add_child(title)
 	vbox.add_child(label)
 	vbox.add_child(versions)
 	vbox.add_child(icons8)
+	vbox.add_child(git)
 
 	modal.add_child(vbox)
 

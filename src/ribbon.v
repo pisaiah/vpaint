@@ -8,12 +8,7 @@ fn (mut app App) make_ribbon() {
 	mut box1 := ui.Panel.new()
 
 	mut color_box := ui.Panel.new(
-		layout: ui.GridLayout{
-			rows: 2
-			// cols: 10,
-			vgap: 4
-			hgap: 4
-		}
+		layout: ui.GridLayout.new(rows: 2, vgap: 4, hgap: 4)
 	)
 	colors := [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
 		gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
@@ -29,6 +24,7 @@ fn (mut app App) make_ribbon() {
 	for color in colors {
 		mut btn := ui.button(text: ' ')
 		btn.set_background(color)
+		// btn.extra = 'RGB Value: \n${color.r},${color.g},${color.b}\nAlpha: ${color.a}'
 		btn.border_radius = 64
 
 		btn.set_click_fn(cbc, color)

@@ -277,9 +277,15 @@ fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	ctx.gg.draw_rounded_rect_filled(xpos, ypos, width, width, 1, color)
 	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, gx.blue)
 	str := 'RGBA: ${color.r}, ${color.g}, ${color.b}, ${color.a}'
+
 	ctx.gg.draw_text(int(xpos), int(ypos), str, gx.TextCfg{
 		size: 12
 	})
+
+	ctx.gg.set_text_cfg()
+
+	mut win := ctx.win
+	win.tooltip = str
 }
 
 fn (mut this DropperTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {

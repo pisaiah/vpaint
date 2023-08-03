@@ -113,6 +113,8 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 	btn.set_bounds(2, 0, 50, 32)
 	btn.icon_width = 32
 
+	btn.extra = tool.tool_name
+
 	btn.set_click_fn(tool_btn_click, tool)
 	return btn
 }

@@ -78,8 +78,6 @@ fn main() {
 
 	mut tree := make_image_view(path, mut window, mut app)
 
-	// app.sidebar.z_index = 21
-
 	mut sv := &ui.ScrollView{
 		children: [tree]
 		increment: 2
@@ -98,19 +96,14 @@ fn main() {
 
 	app.make_ribbon()
 
-	// window.add_child(app.sidebar)
-	// window.add_child(app.ribbon)
-	// window.add_child(sv)
-
 	mut sb := app.make_status_bar(window)
 	app.status_bar = sb
-	// window.add_child(sb)
 
 	mut pan := ui.Panel.new(
-		layout: ui.BorderLayout{
+		layout: ui.BorderLayout.new(
 			hgap: 0
 			vgap: 0
-		}
+		)
 	)
 
 	pan.add_child_with_flag(app.ribbon, ui.borderlayout_north)

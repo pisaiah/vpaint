@@ -25,8 +25,13 @@ fn (this &ImageViewData) save() {
 	// dump('Saved')
 }
 
-pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.VBox {
-	mut vbox := ui.vbox(win)
+pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
+	mut vbox := ui.Panel.new(
+		layout: ui.FlowLayout.new(
+			hgap: 0
+			vgap: 0
+		)
+	)
 
 	mut png_file := stbi.load(file) or { return vbox }
 	mut data := &ImageViewData{
@@ -40,18 +45,16 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.VBox {
 	app.canvas = img
 	vbox.add_child(img)
 
+	vbox.subscribe_event('draw', fn (mut e ui.DrawEvent) {
+		app := e.ctx.win.get[&App]('app')
+		e.target.width = app.canvas.width + 2
+		e.target.height = app.canvas.height + 2
+	})
+
 	file_size := format_size(os.file_size(file))
 	data.file_size = file_size
 
 	vbox.set_pos(24, 24)
-	/*
-	vbox.draw_event_fn = fn mut vbox, img (win voidptr, com &ui.Component) {
-		// I prefer extra padding
-		padding := int(img.zoom) + 10
-		vbox.width = img.width + padding
-		vbox.height = img.height + padding
-		vbox.overflow = false
-	}*/
 
 	return vbox
 }

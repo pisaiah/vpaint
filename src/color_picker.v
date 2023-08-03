@@ -73,10 +73,16 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	can.text = 'Cancel'
 	can.set_bounds(252, y, 222, 30)
 
-	mut vbox := ui.vbox(win)
+	mut vbox := ui.Panel.new(
+		layout: ui.BoxLayout.new(
+			ori: 1
+			vgap: 0
+			hgap: 0
+		)
+	)
 	vbox.set_pos(376, 8)
 	mut lbl := ui.label(win, ' ')
-	lbl.set_bounds(0, 1, 4, 40)
+	lbl.set_bounds(0, 1, 4, 35)
 
 	aha, mut ah := number_sect(win, 'H')
 	asa, mut ass := number_sect(win, 'S')
@@ -175,7 +181,9 @@ fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 		ts := 12
 		wid := (com.height * per) - per * ts
 		if com.is_mouse_down {
-			cp.v_field.text = '${100 - com.cur}'
+			val := 100 - com.cur
+			strv := if cp.v == 100 { '100' } else { roun(val, 2) }
+			cp.v_field.text = strv //'${100 - com.cur}'
 		}
 		win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, ts, 32, win.theme.scroll_bar_color)
 		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, ts, 32, gx.blue)
@@ -228,7 +236,7 @@ fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 fn (mut cp ColorPicker) update_text() {
 	cp.h_field.text = roun(cp.h, 5)
 	cp.s_field.text = roun(cp.s, 5)
-	cp.v_field.text = roun(cp.v, 2)
+	cp.v_field.text = if cp.v == 100 { '100' } else { roun(cp.v, 2) }
 
 	color := hsv_to_rgb(cp.h, cp.s, f32(cp.v) / 100)
 	cp.r_field.text = '${color.r}'
@@ -301,8 +309,10 @@ fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	cp.load_rgb(gx.rgba(r, g, b, a))
 }
 
-fn number_sect(win &ui.Window, txt string) (&ui.HBox, &ui.TextField) {
-	mut hbox := ui.hbox(win)
+fn number_sect(win &ui.Window, txt string) (&ui.Panel, &ui.TextField) {
+	mut p := ui.Panel.new(
+		layout: ui.FlowLayout.new(vgap: 0)
+	)
 
 	mut numfield := ui.numeric_field(255)
 	numfield.set_bounds(0, 0, 95, 26)
@@ -312,16 +322,12 @@ fn number_sect(win &ui.Window, txt string) (&ui.HBox, &ui.TextField) {
 		numfield.text_change_event_fn = rgb_num_box_change_evnt
 	}
 
-	mut lbl := ui.label(win, txt)
+	mut lbl := ui.Label.new(text: txt)
 	lbl.pack()
-	lbl.draw_event_fn = fn (mut win ui.Window, mut com ui.Component) {
-		com.x = 4
-		com.y = 5
-		com.width = 14
-	}
+	lbl.set_y(4)
 
-	hbox.add_child(numfield)
-	hbox.add_child(lbl)
-	hbox.set_bounds(0, 4, 300, 35)
-	return hbox, numfield
+	p.add_child(numfield)
+	p.add_child(lbl)
+	p.set_bounds(0, 0, 200, 30)
+	return p, numfield
 }

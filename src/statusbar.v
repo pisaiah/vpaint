@@ -18,7 +18,7 @@ fn statusbar_draw_event(mut e ui.DrawEvent) {
 
 fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	mut sb := ui.Panel.new(
-		layout: ui.BorderLayout{}
+		layout: ui.BorderLayout.new()
 	)
 
 	sb.subscribe_event('draw', statusbar_draw_event)
@@ -44,17 +44,14 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 		com.text = '${zoom}%'
 		if mut com is ui.Label {
 			com.pack()
-			com.set_y(18 - (com.height / 2)) // Y-Center
+			com.set_y(16 - (com.height / 2)) // Y-Center
 		}
 	})
 
 	status.subscribe_event('draw', stat_lbl_draw_event)
 
 	mut zp := ui.Panel.new(
-		layout: ui.FlowLayout{
-			vgap: 4
-			hgap: 4
-		}
+		layout: ui.FlowLayout.new(vgap: 0, hgap: 4)
 	)
 	zp.set_bounds(0, 0, 160, 25)
 

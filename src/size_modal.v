@@ -3,14 +3,14 @@ module main
 import iui as ui
 
 fn (mut app App) show_size_modal() {
-	mut modal := ui.modal(app.win, 'Set Brush Size')
+	mut modal := ui.Modal.new(title: 'Set Brush Size')
 
 	modal.in_width = 245
 	modal.in_height = 210
 
 	mut width_box := ui.numeric_field(app.brush_size)
 
-	mut width_lbl := ui.label(app.win, 'Tool/Brush Size (px)')
+	mut width_lbl := ui.Label.new(text: 'Tool/Brush Size (px)')
 
 	width_lbl.set_bounds(50, 34, 150, 22)
 	width_box.set_bounds(20, 64, 200, 40)
