@@ -24,7 +24,6 @@ fn (mut app App) make_ribbon() {
 	for color in colors {
 		mut btn := ui.button(text: ' ')
 		btn.set_background(color)
-		// btn.extra = 'RGB Value: \n${color.r},${color.g},${color.b}\nAlpha: ${color.a}'
 		btn.border_radius = 64
 
 		btn.set_click_fn(cbc, color)

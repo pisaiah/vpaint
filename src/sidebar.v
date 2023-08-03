@@ -83,22 +83,26 @@ fn (mut app App) make_sidebar() {
 
 	mut btns := [test, test2, test3, test4, test5, test6, test7, test8, test9]
 	for mut b in btns {
-		b.subscribe_event('after_draw', fn (mut e ui.DrawEvent) {
-			if e.target.is_selected {
-				mut btn := e.target
-				x := btn.x + 1
-				y := btn.y + 1
-				w := btn.width - 2
-				h := btn.height - 2
-				e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.text_color)
-			}
-		})
+		b.subscribe_event('after_draw', after_draw_btn)
 	}
 
 	group.subscribe_event('mouse_up', app.group_clicked)
 	group.setup()
 
 	app.sidebar.add_child(hbox)
+}
+
+fn after_draw_btn(mut e ui.DrawEvent) {
+	if e.target.is_selected {
+		mut btn := e.target
+		for i in 1 .. 4 {
+			x := btn.x + i
+			y := btn.y + i
+			w := btn.width - (2 * i)
+			h := btn.height - (2 * i)
+			e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.button_border_hover)
+		}
+	}
 }
 
 fn (mut app App) group_clicked(mut e ui.MouseEvent) {

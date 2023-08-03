@@ -120,6 +120,8 @@ fn main() {
 	cim := win.gg.cache_image(gg_im)
 	app.bg_id = cim
 
+	background := gx.rgb(210, 220, 240)
+	window.gg.set_bg_color(background)
 	window.gg.run()
 }
 
@@ -140,13 +142,13 @@ fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
 
 	// dump('draw')
 
-	color := if 'background' in e.ctx.win.id_map {
+	/*color := if 'background' in e.ctx.win.id_map {
 		reff := e.ctx.win.get[&gx.Color]('background')
 		gx.rgb(reff.r, reff.g, reff.b)
 	} else {
 		// gx.rgb(210, 220, 240)
-		gx.rgb(230, 235, 245)
-	}
+		gx.rgb(220, 225, 245)
+	}*/
 
-	// e.ctx.gg.draw_rect_filled(app.sv.x, 0, ws.width, ws.height, color)
+	//e.ctx.gg.draw_rect_filled(app.sv.x, app.sv.y, ws.width, ws.height, color)
 }

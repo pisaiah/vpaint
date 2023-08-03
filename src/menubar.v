@@ -182,7 +182,7 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 		background := gx.rgb(0, 16, 0)
 		win.id_map['background'] = &background
 	} else {
-		background := gx.rgb(230, 235, 245)
+		background := gx.rgb(210, 220, 240)
 		win.gg.set_bg_color(background)
 		win.id_map['background'] = &background
 	}
