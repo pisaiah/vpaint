@@ -84,6 +84,7 @@ fn (mut app App) make_sidebar() {
 	mut btns := [test, test2, test3, test4, test5, test6, test7, test8, test9]
 	for mut b in btns {
 		b.subscribe_event('after_draw', after_draw_btn)
+		b.subscribe_event('draw', draw_btn)
 	}
 
 	group.subscribe_event('mouse_up', app.group_clicked)
@@ -92,10 +93,17 @@ fn (mut app App) make_sidebar() {
 	app.sidebar.add_child(hbox)
 }
 
+fn draw_btn(mut e ui.DrawEvent) {
+	mut btn := e.target
+	if mut btn is ui.Button {
+		btn.set_area_filled(e.target.is_selected)
+	}
+}
+
 fn after_draw_btn(mut e ui.DrawEvent) {
 	if e.target.is_selected {
 		mut btn := e.target
-		for i in 1 .. 4 {
+		for i in 1 .. 3 {
 			x := btn.x + i
 			y := btn.y + i
 			w := btn.width - (2 * i)
@@ -116,6 +124,9 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 
 	btn.set_bounds(2, 0, 50, 32)
 	btn.icon_width = 32
+
+	btn.set_area_filled(false)
+	btn.border_radius = -1
 
 	btn.extra = tool.tool_name
 

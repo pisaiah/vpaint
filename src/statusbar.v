@@ -40,7 +40,7 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	zoom_lbl.subscribe_event('draw', fn (mut e ui.DrawEvent) {
 		mut com := e.target
 		mut app := e.ctx.win.get[&App]('app')
-		zoom := app.canvas.get_zoom() * 100
+		zoom := int(app.canvas.get_zoom() * 100)
 		com.text = '${zoom}%'
 		if mut com is ui.Label {
 			com.pack()
@@ -86,12 +86,22 @@ fn on_zoom_inc_click(win voidptr, btn voidptr, mut app App) {
 	zoom := app.canvas.get_zoom()
 	new_zoom := if zoom >= 1 { zoom + 1 } else { zoom + .25 }
 
+	if zoom < .25 {
+		app.canvas.set_zoom(.25)
+		return
+	}
+
 	app.canvas.set_zoom(new_zoom)
 }
 
 fn on_zoom_dec_click(win voidptr, mut btn ui.Button, mut app App) {
 	zoom := app.canvas.get_zoom()
 	new_zoom := if zoom > 1 { zoom - 1 } else { zoom - .25 }
+
+	if new_zoom < .25 {
+		app.canvas.set_zoom(.15)
+		return
+	}
 
 	app.canvas.set_zoom(new_zoom)
 }

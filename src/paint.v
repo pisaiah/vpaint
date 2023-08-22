@@ -142,7 +142,8 @@ fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
 
 	// dump('draw')
 
-	/*color := if 'background' in e.ctx.win.id_map {
+	/*
+	color := if 'background' in e.ctx.win.id_map {
 		reff := e.ctx.win.get[&gx.Color]('background')
 		gx.rgb(reff.r, reff.g, reff.b)
 	} else {
@@ -150,5 +151,5 @@ fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
 		gx.rgb(220, 225, 245)
 	}*/
 
-	//e.ctx.gg.draw_rect_filled(app.sv.x, app.sv.y, ws.width, ws.height, color)
+	// e.ctx.gg.draw_rect_filled(app.sv.x, app.sv.y, ws.width, ws.height, color)
 }

@@ -5,9 +5,9 @@ import gx
 import math
 
 struct ColorPicker {
-	btn   &ui.Button
-	modal &ui.Modal
+	btn &ui.Button
 mut:
+	modal   &ui.Modal
 	slid    &ui.Slider
 	aslid   &ui.Slider
 	mx      int
@@ -25,6 +25,22 @@ mut:
 	color   gx.Color
 }
 
+fn modal_draw(mut e ui.DrawEvent) {
+	h := e.target.height
+	if h > 1 && h < 700 {
+		mut tar := e.target
+		if mut tar is ui.Modal {
+			tar.top_off = 2
+		}
+	}
+	if h > 700 {
+		mut tar := e.target
+		if mut tar is ui.Modal {
+			tar.top_off = (tar.height / 2) - (tar.in_height)
+		}
+	}
+}
+
 fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	mut cim := 0
 	if 'HSL' in win.id_map {
@@ -34,7 +50,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 
 	mut btn := ui.button_with_icon(cim)
 	btn.set_area_filled(false)
-	btn.set_bounds(14, 8, 256, 256)
+	btn.set_bounds(10, 4, 256, 256)
 	btn.after_draw_event_fn = hsl_btn_draw_evnt
 
 	mut slide := ui.new_slider(
@@ -44,27 +60,28 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	)
 	slide.after_draw_event_fn = slid_draw_evnt
 
-	slide.set_bounds(280, 8, 41, 256)
+	slide.set_bounds(272, 4, 42, 256)
 
 	mut modal := ui.modal(win, 'HSV Color Picker')
 	modal.needs_init = false
-	modal.in_width = 510
-	modal.in_height = 390
-	modal.top_off = 25
+	modal.in_width = 500
+	modal.in_height = 360
+	modal.top_off = 20
 	modal.add_child(btn)
 	modal.add_child(slide)
+	modal.subscribe_event('draw', modal_draw)
 
 	mut aslid := ui.new_slider(
 		min: 0
 		max: 255
 		dir: .vert
 	)
-	aslid.set_bounds(333, 8, 28, 256)
+	aslid.set_bounds(325, 4, 32, 256)
 	aslid.after_draw_event_fn = aslid_draw_evnt
 	modal.add_child(aslid)
 
 	mut close := modal.create_close_btn(mut win, false)
-	y := 345
+	y := 315
 
 	close.set_click(default_modal_close_fn)
 	close.set_bounds(16, y, 222, 30)
@@ -80,18 +97,18 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 			hgap: 0
 		)
 	)
-	vbox.set_pos(376, 8)
-	mut lbl := ui.label(win, ' ')
-	lbl.set_bounds(0, 1, 4, 35)
+	vbox.set_pos(374, 2)
+	mut lbl := ui.Label.new(text: ' ')
+	lbl.set_bounds(0, 1, 4, 28)
 
-	aha, mut ah := number_sect(win, 'H')
-	asa, mut ass := number_sect(win, 'S')
-	ava, mut av := number_sect(win, 'V')
+	aha, mut ah := number_sect('H')
+	asa, mut ass := number_sect('S')
+	ava, mut av := number_sect('V')
 
-	rb, mut rf := number_sect(win, 'R')
-	gb, mut gf := number_sect(win, 'G')
-	bb, mut bf := number_sect(win, 'B')
-	ab, mut af := number_sect(win, 'A')
+	rb, mut rf := number_sect('R')
+	gb, mut gf := number_sect('G')
+	bb, mut bf := number_sect('B')
+	ab, mut af := number_sect('A')
 
 	vbox.add_child(aha)
 	vbox.add_child(asa)
@@ -281,10 +298,25 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 	win.gg.draw_rounded_rect_empty(x, cp.my - 7 + com.ry, 16, 16, 32, gx.white)
 	win.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + com.ry, 16, 16, 32, gx.blue)
 
-	y := cp.btn.ry + cp.btn.height + 12
-	win.gg.draw_rect_filled(cp.btn.rx, y, 454, 24, cp.color)
-	win.gg.draw_text(cp.btn.rx, y + 30, 'Result: ${cp.color.to_css_string()}', gx.TextCfg{
+	y := cp.btn.ry - 32
+
+	ty := cp.btn.ry + cp.btn.height + 5
+
+	cp.modal.text = '${cp.color.to_css_string()}'
+
+	win.gg.draw_rect_filled(cp.btn.rx, ty, 256, 24, cp.color)
+
+	tcolor := gx.rgb(255 - cp.color.r, 255 - cp.color.g, 255 - cp.color.b)
+
+	br := f32(cp.color.r) * 299
+	bg := f32(cp.color.g) * 587
+	bb := f32(cp.color.b) * 114
+	o := (br + bg + bb) / 1000
+	tco := if o > 125 { gx.black } else { gx.white }
+
+	win.gg.draw_text(cp.btn.rx + 5, ty + 4, '${cp.color.to_css_string()}', gx.TextCfg{
 		size: win.font_size
+		color: tco
 	})
 }
 
@@ -309,13 +341,13 @@ fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	cp.load_rgb(gx.rgba(r, g, b, a))
 }
 
-fn number_sect(win &ui.Window, txt string) (&ui.Panel, &ui.TextField) {
+fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
 	mut p := ui.Panel.new(
-		layout: ui.FlowLayout.new(vgap: 0)
+		layout: ui.FlowLayout.new()
 	)
 
 	mut numfield := ui.numeric_field(255)
-	numfield.set_bounds(0, 0, 95, 26)
+	numfield.set_bounds(0, 0, 80, 29)
 	if txt == 'H' || txt == 'S' || txt == 'V' {
 		numfield.text_change_event_fn = hsv_num_box_change_evnt
 	} else {
@@ -328,6 +360,6 @@ fn number_sect(win &ui.Window, txt string) (&ui.Panel, &ui.TextField) {
 
 	p.add_child(numfield)
 	p.add_child(lbl)
-	p.set_bounds(0, 0, 200, 30)
+	p.set_bounds(0, 0, 150, 33)
 	return p, numfield
 }

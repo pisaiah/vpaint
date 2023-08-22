@@ -33,7 +33,7 @@
 			left: 1%; bottom: 1%; border-radius: 4px;
 		}
 	</style>
-	
+	<title>vpaint</title>
 	<div class="w3-container w3-auto w3-margin-top">
 		<div class="w3-row" style="margin-top:10vh">
 	
@@ -51,8 +51,8 @@
 		</div>
 
 		<div class="w3-twothird w3-mobile">
-			<div style="background-imaage: url('./demo/window.png');float:right">
-				<img src="./demo/titlebar.png" style="float:right">
+			<div style="background-imaage: url('./demo/window.png');">
+				<img id="tb" src="./demo/titlebar.png" style="float:right">
 				<div id="can2">
 					<div id="ldd">Hover to load demo</div>
 				</div>
@@ -86,9 +86,11 @@
 	});
 	</script>
 	<style>
+	#tb {max-width: 100%;}
 	#canvas, #can2 {
 		float:right;
 		width:640px;
+		max-width: 100%;
 		height:480px;
 		border-left:1px solid rgb(22,50,95);
 		border-right:1px solid rgb(22,50,95);
