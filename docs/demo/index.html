@@ -1,46 +1,45 @@
 <html>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<style>
-		body{background:rgb(230,230,230);}
-		@media (prefers-color-scheme: dark) { body { background: rgb(150,150,150);}}
-		.copy { font-size: 10px; color:rgba(0,0,0,.7); position:fixed; bottom:8px; left:2px; }
+	body{background:rgb(230,230,230);}
+	@media (prefers-color-scheme: dark) { body { background: rgb(150,150,150);}}
+		
+	.titlebar{width:100%; height:20px; background:rgb(22,50,95); padding-left:1rem; color:rgb(230,230,230); font-size: 0.7rem;}
+	.titlebar span { vertical-align:middle;line-height: 20px; }
+	.myrow {margin-top:.6svh}
+	.mobile .myrow {margin-top:.4svh}
+
+	#canvas { width:100%; height:calc(98svh - 20px - 1rem); border:1px solid rgb(22,50,95);}
+	.mobile #canvas, .fulll #canvas { height:calc(99svh - .5svh); }
+	.mobile .titlebar { height:20px;position:fixed;right:0;width:150px;}
+	.fulll .titlebar {height:20px;position:fixed;right:0;width:150px;}
 	</style>
 	<title>vpaint Demo</title>
-
-	<div class="w3-auto">
-		<div class="w3-row" style="margin-top:.7svh">
-			<div class="titlebar">
-				<span>vpaint 0.5 demo</span>
-				<span style="float:right;margin-right:1rem">&times;</span>
-			</div>
-			<canvas id="canvas" tabindex=-1></canvas>
+<body>
+	<div id="mc" class="w3-auto myrow">
+		<div class="titlebar" id="tbar">
+			<span>vpaint 0.5 demo</span>
+			<span style="float:right;margin-right:1rem"></span>
 		</div>
-	</div>
-	<div class="copy w3-auto">
-		&copy; 2023 by Isaiah.
+		<canvas id="canvas" tabindex=-1></canvas>
 	</div>
 	<script id="appjs" src="./app.js"></script>
-	<style>
-	.titlebar{
-		width:100%;
-		height: 20px;
-		background:rgb(22,50,95);
-		border-top-left-radius:8px;
-		border-top-right-radius:8px;
-		padding-left:1rem;
-		color:rgb(230,230,230);
-		font-size: 0.7rem;
-	}
-	.titlebar span { vertical-align: middle;line-height: 20px; }
-	#canvas {
-		width:100%;
-		height:calc(98svh - 25px - 1rem);
-		border:1px solid rgb(22,50,95);
-		border-radius: 1rem;
-		border-top-left-radius: 0;
-		border-top-right-radius: 0;
-	}
-	</style>
 	<script type="module" src="mui_helper.js"></script>
+	<script>
+	function calc_moble_size() {
+		var w = window.innerWidth;
+		var h = window.innerHeight;
+		if (w >= h * 2) {
+			document.body.className = ' mobile'
+		} else { if (document.body.className.indexOf('mobile') != -1){ document.body.className = ' '}}
+	}
+
+	window.addEventListener('resize', function(evt) {calc_moble_size();}, true);
+	calc_moble_size();
+
+	var qStr = window.location.search;
+	if (qStr.indexOf('full') != -1){ document.getElementById('mc').className = 'fulll'}
+	</script>
+</body>
 </html>

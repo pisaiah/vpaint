@@ -50,7 +50,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 
 	mut btn := ui.button_with_icon(cim)
 	btn.set_area_filled(false)
-	btn.set_bounds(10, 4, 256, 256)
+	btn.set_bounds(10, 2, 256, 256)
 	btn.after_draw_event_fn = hsl_btn_draw_evnt
 
 	mut slide := ui.new_slider(
@@ -60,12 +60,12 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	)
 	slide.after_draw_event_fn = slid_draw_evnt
 
-	slide.set_bounds(272, 4, 42, 256)
+	slide.set_bounds(272, 2, 42, 256)
 
 	mut modal := ui.modal(win, 'HSV Color Picker')
 	modal.needs_init = false
-	modal.in_width = 500
-	modal.in_height = 360
+	modal.in_width = 495
+	modal.in_height = 355
 	modal.top_off = 20
 	modal.add_child(btn)
 	modal.add_child(slide)
@@ -76,12 +76,12 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		max: 255
 		dir: .vert
 	)
-	aslid.set_bounds(325, 4, 32, 256)
+	aslid.set_bounds(325, 2, 32, 256)
 	aslid.after_draw_event_fn = aslid_draw_evnt
 	modal.add_child(aslid)
 
 	mut close := modal.create_close_btn(mut win, false)
-	y := 315
+	y := 312
 
 	close.set_click(default_modal_close_fn)
 	close.set_bounds(16, y, 222, 30)
@@ -99,7 +99,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	)
 	vbox.set_pos(374, 2)
 	mut lbl := ui.Label.new(text: ' ')
-	lbl.set_bounds(0, 1, 4, 28)
+	lbl.set_bounds(0, 1, 4, 23)
 
 	aha, mut ah := number_sect('H')
 	asa, mut ass := number_sect('S')
@@ -300,7 +300,7 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 
 	y := cp.btn.ry - 32
 
-	ty := cp.btn.ry + cp.btn.height + 5
+	ty := cp.btn.ry + cp.btn.height + 4
 
 	cp.modal.text = '${cp.color.to_css_string()}'
 
@@ -341,6 +341,10 @@ fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	cp.load_rgb(gx.rgba(r, g, b, a))
 }
 
+fn numfield_draw_evnt(mut e ui.DrawEvent) {
+	e.target.width = e.ctx.text_width('25555') + 20
+}
+
 fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
 	mut p := ui.Panel.new(
 		layout: ui.FlowLayout.new()
@@ -352,6 +356,7 @@ fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
 		numfield.text_change_event_fn = hsv_num_box_change_evnt
 	} else {
 		numfield.text_change_event_fn = rgb_num_box_change_evnt
+		numfield.subscribe_event('draw', numfield_draw_evnt)
 	}
 
 	mut lbl := ui.Label.new(text: txt)

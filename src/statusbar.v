@@ -35,7 +35,7 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	app.stat_lbl = status
 	// mut stat_lbl := &status
 
-	mut zoom_lbl := ui.label(window, '100%')
+	mut zoom_lbl := ui.Label.new(text: '100%')
 
 	zoom_lbl.subscribe_event('draw', fn (mut e ui.DrawEvent) {
 		mut com := e.target
