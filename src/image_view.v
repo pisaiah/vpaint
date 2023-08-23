@@ -15,16 +15,6 @@ mut:
 	file_size string
 }
 
-fn (this &ImageViewData) save() {
-	// dump(this.file.ext)
-	if this.file_name.ends_with('jpg') {
-		write_jpg(this.file, this.file_name)
-	} else {
-		write_img(this.file, this.file_name)
-	}
-	// dump('Saved')
-}
-
 pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 	mut vbox := ui.Panel.new(
 		layout: ui.FlowLayout.new(
@@ -93,16 +83,6 @@ fn make_gg_image(mut storage ImageViewData, mut win ui.Window, first bool) {
 		})
 	}
 	win.gg.update_pixel_data(storage.id, storage.file.data)
-}
-
-// Write as PNG
-pub fn write_img(img stbi.Image, path string) {
-	stbi.stbi_write_png(path, img.width, img.height, 4, img.data, img.width * 4) or { panic(err) }
-}
-
-// Write as JPG
-pub fn write_jpg(img stbi.Image, path string) {
-	stbi.stbi_write_jpg(path, img.width, img.height, 4, img.data, 80) or { panic(err) }
 }
 
 // Get RGB value from image loaded with STBI

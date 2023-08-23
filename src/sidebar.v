@@ -33,7 +33,7 @@ fn (mut app App) make_sidebar() {
 	img_drag_file := $embed_file('assets/icons8-drag-32.png')
 	mut test4 := app.icon_btn(img_drag_file.to_bytes(), &DragTool{})
 
-	// Drag
+	// Resize
 	img_resize_file := $embed_file('assets/resize.png')
 	mut test5 := app.icon_btn(img_resize_file.to_bytes(), &SelectTool{})
 	test5.set_click_fn(fn (win &ui.Window, b voidptr, c voidptr) {

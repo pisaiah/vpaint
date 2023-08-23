@@ -50,7 +50,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 
 	mut btn := ui.button_with_icon(cim)
 	btn.set_area_filled(false)
-	btn.set_bounds(10, 2, 256, 256)
+	btn.set_bounds(8, 2, 256, 256)
 	btn.after_draw_event_fn = hsl_btn_draw_evnt
 
 	mut slide := ui.new_slider(
@@ -64,8 +64,8 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 
 	mut modal := ui.modal(win, 'HSV Color Picker')
 	modal.needs_init = false
-	modal.in_width = 495
-	modal.in_height = 355
+	modal.in_width = 465
+	modal.in_height = 345
 	modal.top_off = 20
 	modal.add_child(btn)
 	modal.add_child(slide)
@@ -76,19 +76,19 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		max: 255
 		dir: .vert
 	)
-	aslid.set_bounds(325, 2, 32, 256)
+	aslid.set_bounds(320, 2, 35, 256)
 	aslid.after_draw_event_fn = aslid_draw_evnt
 	modal.add_child(aslid)
 
 	mut close := modal.create_close_btn(mut win, false)
-	y := 312
+	y := 304
 
 	close.set_click(default_modal_close_fn)
-	close.set_bounds(16, y, 222, 30)
+	close.set_bounds(16, y, 216, 30)
 
 	mut can := modal.create_close_btn(mut win, true)
 	can.text = 'Cancel'
-	can.set_bounds(252, y, 222, 30)
+	can.set_bounds(245, y, 200, 30)
 
 	mut vbox := ui.Panel.new(
 		layout: ui.BoxLayout.new(
@@ -97,7 +97,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 			hgap: 0
 		)
 	)
-	vbox.set_pos(374, 2)
+	vbox.set_pos(364, 2)
 	mut lbl := ui.Label.new(text: ' ')
 	lbl.set_bounds(0, 1, 4, 23)
 
@@ -356,8 +356,8 @@ fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
 		numfield.text_change_event_fn = hsv_num_box_change_evnt
 	} else {
 		numfield.text_change_event_fn = rgb_num_box_change_evnt
-		numfield.subscribe_event('draw', numfield_draw_evnt)
 	}
+	numfield.subscribe_event('draw', numfield_draw_evnt)
 
 	mut lbl := ui.Label.new(text: txt)
 	lbl.pack()

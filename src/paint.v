@@ -134,22 +134,8 @@ fn fit_lbl(mut lbl ui.Label) {
 // Image canvas ScrollView draw event
 // fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
 fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
-	mut app := e.ctx.win.get[&App]('app')
-	ws := e.ctx.gg.window_size()
-	x_pos := 64
-	bar_y := app.sidebar.y + 1
-	// app.sv.set_bounds(x_pos, bar_y, ws.width - x_pos, ws.height - 31 - bar_y)
-
-	// dump('draw')
-
-	/*
-	color := if 'background' in e.ctx.win.id_map {
-		reff := e.ctx.win.get[&gx.Color]('background')
-		gx.rgb(reff.r, reff.g, reff.b)
-	} else {
-		// gx.rgb(210, 220, 240)
-		gx.rgb(220, 225, 245)
-	}*/
-
-	// e.ctx.gg.draw_rect_filled(app.sv.x, app.sv.y, ws.width, ws.height, color)
+	// mut app := e.ctx.win.get[&App]('app')
+	// ws := e.ctx.gg.window_size()
+	// x_pos := 64
+	// bar_y := app.sidebar.y + 1
 }

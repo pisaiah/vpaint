@@ -46,7 +46,6 @@ pub fn rgb_to_hsv(col gx.Color) (f64, f64, f64) {
 		h = ((r - g) / d + 4.0) / 6.0
 	}
 
-	// println("h: $h")
 	if v != 0 {
 		s = d / v
 	}

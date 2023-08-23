@@ -25,7 +25,12 @@ fn undo_click(mut win ui.Window, com ui.MenuItem) {
 
 fn save_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	app.data.save()
+	app.save()
+}
+
+fn save_as_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.save_as()
 }
 
 // Make menubar
@@ -44,6 +49,19 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			ui.menu_item(
 				text: 'Save'
 				click_event_fn: save_click
+			),
+			ui.menu_item(
+				text: 'Save As...'
+				click_event_fn: save_as_click
+				/*
+				children: [
+					ui.menu_item(
+						text: 'PNG Image'
+					),
+					ui.menu_item(
+						text: 'JPG Image'
+					)
+				]*/
 			),
 			ui.menu_item(
 				text: 'Settings'
@@ -76,6 +94,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			ui.menu_item(
 				text: 'Undo'
 				click_event_fn: undo_click
+			),
+			ui.menu_item(
+				text: 'Resize Canvas'
+				click_event_fn: menu_resize_click
 			),
 		]
 	))
@@ -150,6 +172,11 @@ fn menu_size_custom_click(mut win ui.Window, com ui.MenuItem) {
 	app.show_size_modal()
 }
 
+fn menu_resize_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.show_resize_modal(app.canvas.w, app.canvas.h)
+}
+
 fn menu_size_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
 	size := com.text.replace(' px', '').int()
@@ -196,53 +223,67 @@ fn settings_click(mut win ui.Window, com ui.MenuItem) {
 fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut modal := ui.modal(win, 'About vPaint')
 
+	modal.top_off = 25
+	modal.in_width = 360
+	modal.in_height = 290
+
 	mut title := ui.Label.new(text: 'VPaint')
 	title.set_config(32, true, true)
 	title.pack()
 
-	mut label := ui.Label.new(
-		text: 'Simple Image Editor written in the V Programming Language.' +
-			'\n\n\u00A9 2022-2023 Isaiah. All Rights Reserved.'
+	mut p := ui.Panel.new(
+		layout: ui.BoxLayout.new(
+			ori: 1
+		)
 	)
+	p.add_child(title)
 
-	mut versions := ui.Label.new(
-		text: 'Version: 1.0 (Development Build) \u2014 UI Version: ${ui.version}'
+	txt := [
+		'Simple Image Editor written in the V Language.',
+		'(version 0.6-dev) (iUI: ${ui.version})',
+		'\t ',
+		'\u00A9 2022-2023 Isaiah.',
+		'Released under MIT License.',
+	]
+	for line in txt {
+		mut lbl := ui.Label.new(text: line)
+		lbl.pack()
+		p.add_child(lbl)
+	}
+
+	mut lp := ui.Panel.new(
+		layout: ui.BoxLayout.new(
+			ori: 0
+			hgap: 16
+		)
 	)
+	lp.set_bounds(-14, 0, modal.in_width - 32, 30)
 
 	icons8 := ui.link(
-		text: 'Icons by Icons8'
+		text: 'Icons8'
 		url: 'https://icons8.com/'
-		bounds: ui.Bounds{
-			x: 0
-			y: 16
-		}
 		pack: true
 	)
 
 	git := ui.link(
-		text: 'vpaint @ Github'
+		text: 'Github'
 		url: 'https://github.com/isaiahpatton/vpaint'
-		bounds: ui.Bounds{
-			x: 0
-			y: 16
-		}
 		pack: true
 	)
 
-	// label.set_config(18, true, false)
-	// versions.set_config(18, true, false)
-	versions.pack()
-	label.pack()
+	vlang := ui.link(
+		text: 'About V'
+		url: 'https://vlang.io'
+		pack: true
+	)
 
-	mut vbox := ui.Panel.new()
-	vbox.set_pos(32, 18)
-	vbox.add_child(title)
-	vbox.add_child(label)
-	vbox.add_child(versions)
-	vbox.add_child(icons8)
-	vbox.add_child(git)
+	p.set_bounds(14, 9, modal.in_width - 64, modal.in_height)
+	lp.add_child(icons8)
+	lp.add_child(git)
+	lp.add_child(vlang)
+	p.add_child(lp)
 
-	modal.add_child(vbox)
+	modal.add_child(p)
 
 	win.add_child(modal)
 }
