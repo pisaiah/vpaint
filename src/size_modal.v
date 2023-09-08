@@ -35,25 +35,32 @@ pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
 	y := this.in_height - 50
 	close.set_bounds(12, y, 120, 35)
 
-	close.set_click(fn (mut win ui.Window, btn ui.Button) {
-		win.components = win.components.filter(mut it !is ui.Modal)
-		mut width_lbl := win.get[&ui.TextField]('bs_size')
-		mut app := win.get[&App]('app')
-
-		app.brush_size = width_lbl.text.int()
-	})
+	close.subscribe_event('mouse_up', close_modal)
 
 	mut cancel := ui.button(
 		text: 'Cancel'
 		bounds: ui.Bounds{138, y, 90, 35}
 	)
 
-	cancel.set_click(fn (mut win ui.Window, btn ui.Button) {
-		win.components = win.components.filter(mut it !is ui.Modal)
-	})
+	cancel.subscribe_event('mouse_up', end_modal)
+
 	this.add_child(cancel)
 
 	this.children << close
 	this.close = close
 	return close
+}
+
+fn close_modal(mut e ui.MouseEvent) {
+	mut win := e.ctx.win
+	win.components = win.components.filter(mut it !is ui.Modal)
+	mut width_lbl := win.get[&ui.TextField]('bs_size')
+	mut app := win.get[&App]('app')
+
+	app.brush_size = width_lbl.text.int()
+}
+
+fn end_modal(mut e ui.MouseEvent) {
+	mut win := e.ctx.win
+	win.components = win.components.filter(mut it !is ui.Modal)
 }

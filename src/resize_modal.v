@@ -43,10 +43,8 @@ pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
 	cancel.set_bounds(165, y, 105, 30)
 
 	close.subscribe_event('mouse_up', resize_close_click)
+	cancel.subscribe_event('mouse_up', end_modal)
 
-	cancel.set_click(fn (mut win ui.Window, btn ui.Button) {
-		win.components = win.components.filter(mut it !is ui.Modal)
-	})
 	this.add_child(cancel)
 
 	this.children << close

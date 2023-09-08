@@ -83,7 +83,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	mut close := modal.create_close_btn(mut win, false)
 	y := 304
 
-	close.set_click(default_modal_close_fn)
+	close.subscribe_event('mouse_up', default_modal_close_fn)
 	close.set_bounds(16, y, 216, 30)
 
 	mut can := modal.create_close_btn(mut win, true)
@@ -139,7 +139,9 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	return cp
 }
 
-pub fn default_modal_close_fn(mut win ui.Window, btn ui.Button) {
+// pub fn default_modal_close_fn(mut win ui.Window, btn ui.Button) {
+pub fn default_modal_close_fn(mut e ui.MouseEvent) {
+	mut win := e.ctx.win
 	mut cp := win.get[&ColorPicker]('color_picker')
 	mut app := win.get[&App]('app')
 	app.set_color(cp.color)

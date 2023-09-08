@@ -52,7 +52,7 @@ fn main() {
 
 	mut app := &App{
 		sv: unsafe { nil }
-		sidebar: ui.hbox(window)
+		sidebar: ui.HBox.new()
 		data: unsafe { nil }
 		canvas: unsafe { nil }
 		win: window
