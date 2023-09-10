@@ -19,7 +19,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.30'
+          version: 'weekly.2023.35'
           version-file: ''
           check-latest: true
           stable: false
@@ -32,10 +32,10 @@ jobs:
           sudo apt install build-essential
           sudo apt-get --yes --force-yes install libxi-dev libxcursor-dev mesa-common-dev
           sudo apt-get --yes --force-yes install libgl1-mesa-glx
-          v install https://github.com/isaiahpatton/ui
-          git clone https://github.com/isaiahpatton/ui iui
+          v install https://github.com/pisaiah/ui
+          git clone https://github.com/pisaiah/ui iui
           cd iui
-          git clone https://github.com/isaiahpatton/vpaint
+          git clone https://github.com/pisaiah/vpaint
           v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
@@ -63,7 +63,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.30'
+          version: 'weekly.2023.35'
           version-file: ''
           check-latest: true
           stable: false
@@ -71,10 +71,10 @@ jobs:
       - uses: actions/checkout@v1
       - name: Compile
         run: |
-          v install https://github.com/isaiahpatton/ui
-          git clone https://github.com/isaiahpatton/ui iui
+          v install https://github.com/pisaiah/ui
+          git clone https://github.com/pisaiah/ui iui
           cd iui
-          git clone https://github.com/isaiahpatton/vpaint
+          git clone https://github.com/pisaiah/vpaint
           v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
@@ -102,7 +102,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.30'
+          version: 'weekly.2023.35'
           version-file: ''
           check-latest: true
           stable: false
@@ -114,12 +114,12 @@ jobs:
           git clone https://github.com/vlang/v
           cd v
           .\make.bat
-          git clone https://github.com/isaiahpatton/ui iui
+          git clone https://github.com/pisaiah/ui iui
           .\v.exe symlink
-          v install https://github.com/isaiahpatton/ui
+          v install https://github.com/pisaiah/ui
           cd iui
-          git clone https://github.com/isaiahpatton/vpaint
-          v -cc gcc -skip-unused -gc boehm -cflags -static vpaint
+          git clone https://github.com/pisaiah/vpaint
+          v -cc gcc -skip-unused -gc boehm -cflags -static -cflags -mwindow vpaint
       - name: Remove excluded
         shell: msys2 {0}
         run: |
