@@ -119,7 +119,7 @@ jobs:
           v install https://github.com/pisaiah/ui
           cd iui
           git clone https://github.com/pisaiah/vpaint
-          v -cc gcc -skip-unused -gc boehm -cflags -static -cflags -mwindow vpaint
+          v -cc gcc -skip-unused -gc boehm -cflags -static -cflags -mwindows vpaint
       - name: Remove excluded
         shell: msys2 {0}
         run: |
