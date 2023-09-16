@@ -57,3 +57,44 @@ pub fn rgb_to_hsv(col gx.Color) (f64, f64, f64) {
 
 	return h, s, v
 }
+
+fn abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+struct Point {
+	x int
+	y int
+}
+
+// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+fn bresenham(x int, y int, x1 int, y1 int) []Point {
+	mut x0 := x
+	mut y0 := y
+
+	dx := abs(x1 - x0)
+	dy := abs(y1 - y0)
+	sx := if x0 < x1 { 1 } else { -1 }
+	sy := if y0 < y1 { 1 } else { -1 }
+	mut err := dx - dy
+
+	mut pp := []Point{}
+	pp << Point{x1, y1}
+
+	for x0 != x1 || y0 != y1 {
+		pp << Point{x0, y0}
+		e2 := 2 * err
+		if e2 > -dy {
+			err -= dy
+			x0 += sx
+		}
+		if e2 < dx {
+			err += dx
+			y0 += sy
+		}
+	}
+	return pp
+}

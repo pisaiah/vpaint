@@ -18,6 +18,8 @@ mut:
 // Pencil Tool
 struct PencilTool {
 	tool_name string = 'Pencil'
+mut:
+	count int
 }
 
 fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -45,19 +47,27 @@ fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	}
 }
 
-fn (mut this PencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
+fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
 
-	for x in 0 .. size {
-		for y in 0 .. size {
-			img.set(img.mx + (x - half_size), img.my + (y - half_size), img.app.get_color())
+	if img.last_x != -1 {
+		pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
+		for p in pp {
+			// img.set(p.x, p.y, img.app.get_color())
+
+			for x in 0 .. size {
+				for y in 0 .. size {
+					img.set(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color())
+				}
+			}
 		}
 	}
 
-	img.set(img.mx, img.my, img.app.get_color())
+	img.last_x = img.mx
+	img.last_y = img.my
 	img.refresh()
 }
 
@@ -221,44 +231,6 @@ fn (mut this AirbrushTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 // Pencil Tool
 // Testing more percise.
-struct PencilTool2 {
-	tool_name string = 'Pencil (testing)'
-mut:
-	last_x int = -1
-	last_y int
-	count  int
-}
-
-fn (mut this PencilTool2) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	mut img := unsafe { &Image(a) }
-	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, img.zoom, img.zoom, 1, gx.blue)
-}
-
-fn (mut this PencilTool2) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
-	mut img := unsafe { &Image(a) }
-
-	if this.last_x != -1 {
-		min_x := math.min(this.last_x, img.mx)
-		max_x := math.max(this.last_x, img.mx)
-
-		m := f32(img.my - this.last_y) / (img.mx - this.last_x)
-		b := this.last_y - (m * this.last_x)
-
-		for i in min_x .. max_x {
-			yy := (m * i) + b
-			img.set(i, int(yy), img.app.get_color())
-		}
-	}
-
-	img.set(img.mx, img.my, img.app.get_color())
-	this.last_x = img.mx
-	this.last_y = img.my
-	img.refresh()
-}
-
-fn (mut this PencilTool2) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
-	this.last_x = -1
-}
 
 // Dropper Tool
 struct DropperTool {

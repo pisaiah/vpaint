@@ -42,8 +42,8 @@ fn (mut app App) make_sidebar() {
 	}, 0)
 
 	// Pencil
-	img_pencil_file2 := $embed_file('assets/icons8-pencil-drawing-32.png')
-	mut test6 := app.icon_btn(img_pencil_file2.to_bytes(), &PencilTool2{})
+	// img_pencil_file2 := $embed_file('assets/icons8-pencil-drawing-32.png')
+	// mut test6 := app.icon_btn(img_pencil_file2.to_bytes(), &PencilTool2{})
 
 	// Airbrush
 	img_airbrush_file := $embed_file('assets/icons8-paint-sprayer-32.png')
@@ -57,14 +57,19 @@ fn (mut app App) make_sidebar() {
 	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
 	mut test9 := app.icon_btn(img_wide_file.to_bytes(), &WidePencilTool{})
 
-	mut hbox := ui.Panel.new()
+	mut hbox := ui.Panel.new(
+		layout: ui.FlowLayout.new(
+			hgap: 2
+			vgap: 2
+		)
+	)
 
 	hbox.add_child(test)
 	hbox.add_child(test2)
 	hbox.add_child(test3)
 	hbox.add_child(test4)
 	hbox.add_child(test5)
-	hbox.add_child(test6)
+	// hbox.add_child(test6)
 	hbox.add_child(test7)
 	hbox.add_child(test8)
 	hbox.add_child(test9)
@@ -76,12 +81,12 @@ fn (mut app App) make_sidebar() {
 	group.add(test3)
 	group.add(test4)
 	group.add(test5)
-	group.add(test6)
+	// group.add(test6)
 	group.add(test7)
 	group.add(test8)
 	group.add(test9)
 
-	mut btns := [test, test2, test3, test4, test5, test6, test7, test8, test9]
+	mut btns := [test, test2, test3, test4, test5, test7, test8, test9]
 	for mut b in btns {
 		b.subscribe_event('after_draw', after_draw_btn)
 		b.subscribe_event('draw', draw_btn)

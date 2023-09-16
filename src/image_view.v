@@ -272,6 +272,8 @@ pub mut:
 	loaded        bool
 	history       []Change
 	history_index int
+	last_x        int = -1
+	last_y        int
 }
 
 pub fn image_from_data(data &ImageViewData) &Image {
@@ -347,6 +349,13 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 			tool.draw_click_fn(this, ctx)
 		}
 		this.is_mouse_rele = false
+	}
+
+	if !this.is_mouse_down {
+		if this.last_x != -1 {
+			this.last_x = -1
+			this.last_y = -1
+		}
 	}
 }
 
