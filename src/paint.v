@@ -10,7 +10,7 @@ struct App {
 mut:
 	win         &ui.Window
 	sv          &ui.ScrollView
-	sidebar     &ui.HBox
+	sidebar     &ui.Panel // HBox
 	canvas_zoom int
 	data        &ImageViewData
 	canvas      &Image
@@ -46,17 +46,17 @@ fn main() {
 		title: 'vPaint'
 		width: 700
 		height: 500
-		font_size: 16
+		font_size: 14
 		// ui_mode: true
 	)
 
 	mut app := &App{
 		sv: unsafe { nil }
-		sidebar: ui.HBox.new()
+		sidebar: ui.Panel.new(layout: ui.FlowLayout.new(vgap: 1, hgap: 1))
 		data: unsafe { nil }
 		canvas: unsafe { nil }
 		win: window
-		ribbon: ui.Panel.new()
+		ribbon: ui.Panel.new(layout: ui.FlowLayout.new(vgap: 4, hgap: 4))
 		status_bar: unsafe { nil }
 		stat_lbl: unsafe { nil }
 		tool: &PencilTool{}

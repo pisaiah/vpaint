@@ -6,11 +6,13 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 	// webasm build works better without closures
 	mut app := e.ctx.win.get[&App]('app')
 
-	app.sidebar.width = 64
+	h := app.sidebar.height
+	w := if h > 180 { 54 } else { 104 }
+	app.sidebar.width = w
+	app.sidebar.children[0].width = w
 
 	color := e.ctx.theme.menubar_background
-	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, app.sidebar.width, app.sidebar.height,
-		color)
+	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, w, app.sidebar.height, color)
 }
 
 fn (mut app App) make_sidebar() {
@@ -57,22 +59,21 @@ fn (mut app App) make_sidebar() {
 	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
 	mut test9 := app.icon_btn(img_wide_file.to_bytes(), &WidePencilTool{})
 
-	mut hbox := ui.Panel.new(
+	mut p := ui.Panel.new(
 		layout: ui.FlowLayout.new(
-			hgap: 2
+			hgap: 1
 			vgap: 2
 		)
 	)
 
-	hbox.add_child(test)
-	hbox.add_child(test2)
-	hbox.add_child(test3)
-	hbox.add_child(test4)
-	hbox.add_child(test5)
-	// hbox.add_child(test6)
-	hbox.add_child(test7)
-	hbox.add_child(test8)
-	hbox.add_child(test9)
+	p.add_child(test)
+	p.add_child(test2)
+	p.add_child(test3)
+	p.add_child(test4)
+	p.add_child(test5)
+	p.add_child(test7)
+	p.add_child(test8)
+	p.add_child(test9)
 
 	mut group := ui.buttongroup[ui.Button]()
 
@@ -81,7 +82,6 @@ fn (mut app App) make_sidebar() {
 	group.add(test3)
 	group.add(test4)
 	group.add(test5)
-	// group.add(test6)
 	group.add(test7)
 	group.add(test8)
 	group.add(test9)
@@ -95,7 +95,7 @@ fn (mut app App) make_sidebar() {
 	group.subscribe_event('mouse_up', app.group_clicked)
 	group.setup()
 
-	app.sidebar.add_child(hbox)
+	app.sidebar.add_child(p)
 }
 
 fn draw_btn(mut e ui.DrawEvent) {
@@ -127,7 +127,7 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 	cim := gg.cache_image(gg_im)
 	mut btn := ui.button_with_icon(cim)
 
-	btn.set_bounds(2, 0, 50, 32)
+	btn.set_bounds(2, 0, 46, 32)
 	btn.icon_width = 32
 
 	btn.set_area_filled(false)
