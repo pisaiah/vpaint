@@ -16,14 +16,15 @@ mut:
 }
 
 pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
-	mut vbox := ui.Panel.new(
+	mut p := ui.Panel.new(
 		layout: ui.FlowLayout.new(
 			hgap: 0
 			vgap: 0
 		)
 	)
 
-	mut png_file := stbi.load(file) or { return vbox }
+	mut png_file := stbi.load(file) or { app.make_new(0, 0) }
+
 	mut data := &ImageViewData{
 		file: png_file
 		file_name: file
@@ -33,20 +34,37 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 	mut img := image_from_data(data)
 	img.app = app
 	app.canvas = img
-	vbox.add_child(img)
+	p.add_child(img)
 
-	vbox.subscribe_event('draw', fn (mut e ui.DrawEvent) {
-		app := e.ctx.win.get[&App]('app')
+	p.subscribe_event('draw', fn (mut e ui.DrawEvent) {
+		mut app := e.ctx.win.get[&App]('app')
 		e.target.width = app.canvas.width + 2
 		e.target.height = app.canvas.height + 2
+
+		if app.need_open {
+			$if emscripten ? {
+				if C.emscripten_run_script_string(c'iui.task_result').vstring() == '1' {
+					C.emscripten_run_script(c'iui.task_result = "0"')
+					vall := C.emscripten_run_script_string(c'iui.latest_file.name').vstring()
+					app.canvas.open(vall)
+					app.need_open = false
+				}
+			}
+		}
 	})
 
-	file_size := format_size(os.file_size(file))
-	data.file_size = file_size
+	if os.exists(file) {
+		file_size := format_size(os.file_size(file))
+		data.file_size = file_size
+	}
 
-	vbox.set_pos(24, 24)
+	p.set_pos(24, 24)
 
-	return vbox
+	if app.data.file_size.len == 0 {
+		app.load_new(32, 32)
+	}
+
+	return p
 }
 
 fn (mut img Image) set_zoom(mult f32) {

@@ -6,5 +6,6 @@ paint
 *.so
 *.dylib
 *.dll
+vuntitled.png
 vls.log
 desktop.ini

@@ -5,13 +5,17 @@ import stbi
 import os
 
 fn (app &App) save() {
-	this := app.data
+	mut this := app.data
 
 	if this.file_name.ends_with('jpg') {
 		app.write_jpg(this.file, this.file_name)
 	} else {
 		app.write_img(this.file, this.file_name)
 	}
+
+	file_size := format_size(os.file_size(this.file_name))
+	this.file_size = file_size
+	emsave(this.file_name)
 }
 
 fn (app &App) save_as() {
@@ -112,6 +116,9 @@ fn (app &App) save_as() {
 		}
 		if good {
 			data.file_name = full_path
+			file_size := format_size(os.file_size(full_path))
+			data.file_size = file_size
+			emsave(data.file_name)
 		}
 	})
 	close.set_bounds(w - 280, y, 130, 30)

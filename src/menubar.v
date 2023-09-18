@@ -23,6 +23,16 @@ fn undo_click(mut win ui.Window, com ui.MenuItem) {
 	app.canvas.undo()
 }
 
+fn new_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.load_new(512, 512)
+}
+
+fn open_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.open()
+}
+
 fn save_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
 	app.save()
@@ -42,9 +52,11 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		children: [
 			ui.menu_item(
 				text: 'New'
+				click_event_fn: new_click
 			),
 			ui.menu_item(
 				text: 'Open'
+				click_event_fn: open_click
 			),
 			ui.menu_item(
 				text: 'Save'

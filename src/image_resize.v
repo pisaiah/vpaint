@@ -4,28 +4,90 @@ import stbi
 import gx
 import os
 
+// wasm
+pub fn C.emscripten_run_script(&char)
+pub fn C.emscripten_run_script_string(&char) &char
+pub fn C.emscripten_sleep(int)
+
+fn (mut app App) open() {
+	$if emscripten ? {
+		unsafe {
+			C.emscripten_run_script(c'iui.trigger = "openfiledialog"')
+			app.need_open = true
+		}
+	}
+}
+
+fn cstr(the_string string) &char {
+	return &char(the_string.str)
+}
+
+fn emsave(path string) {
+	$if emscripten ? {
+		C.emscripten_run_script(cstr('iui.trigger = "savefile=' + path + '"'))
+	}
+}
+
+fn (mut this Image) open(path string) {
+	mut data := this.data
+
+	this.zoom = 1
+
+	mut png_file := stbi.load(path) or { panic(err) }
+
+	data.file = png_file
+	data.file_name = path
+	data.file_size = format_size(os.file_size(path))
+
+	this.data = data
+	this.img = data.id
+	this.w = png_file.width
+	this.h = png_file.height
+	this.width = data.file.width
+	this.height = data.file.height
+	this.loaded = false
+}
+
+fn (mut app App) make_new(w int, h int) stbi.Image {
+	img_size := w * h * 4
+	img_pixels := unsafe { &u8(malloc(img_size)) }
+
+	png_file := stbi.Image{
+		ok: true
+		ext: 'png'
+		data: img_pixels
+		width: w
+		height: h
+		nr_channels: 4
+	}
+	return png_file
+}
+
+fn (mut app App) load_new(w int, h int) {
+	mut this := app.canvas
+
+	mut png_file := app.make_new(w, h)
+
+	mut data := this.data
+
+	this.zoom = 1
+
+	data.file = png_file
+	this.data = data
+	this.img = data.id
+	this.w = png_file.width
+	this.h = png_file.height
+	this.width = data.file.width
+	this.height = data.file.height
+	this.loaded = false
+}
+
 fn (mut this Image) resize(w int, h int) {
 	mut data := this.data
 
 	this.zoom = 1
 
-	tmp := os.temp_dir()
-	path := os.join_path(tmp, 'vpaint-resized-temp.png')
-
-	this.screenshot_png(path, w, h) or {}
-
-	mut png_file := stbi.load(path) or { panic(err) }
-
-	for x in 0 .. w {
-		for y in 0 .. h {
-			if x < this.w && y < this.h {
-				a := get_pixel(x, y, data.file)
-				set_pixel(png_file, x, y, a)
-			} else {
-				set_pixel(png_file, x, y, gx.white)
-			}
-		}
-	}
+	mut png_file := stbi.resize_uint8(data.file, w, h) or { panic(err) }
 
 	data.file = png_file
 	this.data = data
@@ -63,54 +125,8 @@ fn (mut this Image) invert_filter() {
 	this.refresh()
 }
 
-[heap]
-pub struct Screenshot {
-	width  int
-	height int
-	size   int
-mut:
-	pixels &u8 = unsafe { nil }
-}
-
-[manualfree]
-pub fn (mut this Image) screenshot_window(w int, h int) &Screenshot {
-	img_size := w * h * 4
-	img_pixels := unsafe { &u8(malloc(img_size)) }
-
-	C.v_sapp_gl_read_rgba_pixels(0, 0, w, h, img_pixels)
-
-	return &Screenshot{
-		width: w
-		height: h
-		size: img_size
-		pixels: img_pixels
-	}
-}
-
-// free - free *only* the Screenshot pixels.
-[unsafe]
-pub fn (mut ss Screenshot) free() {
-	unsafe {
-		free(ss.pixels)
-		ss.pixels = &u8(0)
-	}
-}
-
-// destroy - free the Screenshot pixels,
-// then free the screenshot data structure itself.
-[unsafe]
-pub fn (mut ss Screenshot) destroy() {
-	unsafe { ss.free() }
-	unsafe { free(ss) }
-}
-
-pub fn (mut this Image) screenshot_png(path string, w int, h int) ! {
-	ss := this.screenshot_window(w, h)
-	// stbi.set_flip_vertically_on_write(true)
-	stbi.stbi_write_png(path, ss.width, ss.height, 4, ss.pixels, ss.width * 4)!
-	unsafe { ss.destroy() }
-}
-
+// TODO: Better upscale;
+// Currently looks same as resize()
 fn (mut this Image) upscale() {
 	mut data := this.data
 	w := this.w * 2
@@ -118,12 +134,7 @@ fn (mut this Image) upscale() {
 
 	this.zoom = 1
 
-	tmp := os.temp_dir()
-	path := os.join_path(tmp, 'vpaint-resized-temp.png')
-
-	this.screenshot_png(path, w, h) or {}
-
-	mut png_file := stbi.load(path) or { panic(err) }
+	mut png_file := stbi.resize_uint8(data.file, w, h) or { panic(err) }
 
 	for x in 0 .. w {
 		for y in 0 .. h {

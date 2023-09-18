@@ -10,16 +10,13 @@ function doo_load_files() {
 	  // use key name to retrieve the corresponding value
 	  var value = localStorage.getItem(key);
 
-	  // console.log the iteration key and value
-	  console.log('Key: ' + key + ', Value: ' + value);  
-	  
 	  //write_file('home/web_user/meee/foldd/test.v', value)
 	  if (key.endsWith('.ttf')) {
 		continue;
 	  }
 	  
 	  var kkey = key.replace('//', '/');
-	 var is_file = mui.module.FS.analyzePath(kkey).exists
+	 var is_file = iui.module.FS.analyzePath(kkey).exists
 	 console.log(kkey + ': exists? ' + is_file)
 	  
 	  write_file(kkey, value);
@@ -37,37 +34,37 @@ function write_file(a, b) {
     var da = spl[i];
     dd += da + '/';
     try {
-    	mui.module.FS.mkdir(dd)
+    	iui.module.FS.mkdir(dd)
     } catch (exx) {}
   }
  
   try {
-   mui.module.FS.mkdir(dirr)
+   iui.module.FS.mkdir(dirr)
    } catch (exx) {}
-   mui.module.FS.writeFile(a, b)
+   iui.module.FS.writeFile(a, b)
   
 }
 
 function save_folder(pa) {
-  var is_file = mui.module.FS.isFile(mui.module.FS.stat(pa).mode)
+  var is_file = iui.module.FS.isFile(iui.module.FS.stat(pa).mode)
   console.log('saving: ' + pa + ' (' + is_file + ')')
  	if (!is_file) {
     var last = pa.substring(pa.lastIndexOf("/") + 1, pa.length);
     if (last.length <= 2 && last.includes('.')) {
       return;
     }
-    var lss = mui.module.FS.readdir(pa)
+    var lss = iui.module.FS.readdir(pa)
     for (var i = 0; i < lss.length; i++) {
      save_folder(pa + '/' + lss[i]) 
     }
   } else {
-    var con =  mui.module.FS.readFile(pa,  { encoding: 'utf8' });
+    var con =  iui.module.FS.readFile(pa,  { encoding: 'utf8' });
     console.log(con)
     localStorage.setItem(pa, con);
   }
 }
 
-window.mui = {
+window.iui = {
     module: null,
     latest_file: null,
     task_result: "0",
@@ -76,23 +73,23 @@ window.mui = {
         input.type = "file";
         await new Promise((promise_resolve, promise_reject) => {
             input.addEventListener("change", async e => {
-                mui.latest_file = e.target.files[0];
-                let array_buffer = await mui.latest_file.arrayBuffer();
-                mui.module.FS.writeFile(mui.latest_file.name, new Uint8Array(array_buffer));
+                iui.latest_file = e.target.files[0];
+                let array_buffer = await iui.latest_file.arrayBuffer();
+                iui.module.FS.writeFile(iui.latest_file.name, new Uint8Array(array_buffer));
                 promise_resolve();
             });
             input.click();
         });
-        mui.task_result = "1";
-        return mui.latest_file.name;
+        iui.task_result = "1";
+        return iui.latest_file.name;
     },
     save_file_dialog: async () => {
-        mui.latest_file = {name: prompt("File Name of that will be saved")};
+        iui.latest_file = {name: prompt("File Name of that will be saved")};
         try {
-            mui.module.FS.unlink(mui.latest_file.name);
+            iui.module.FS.unlink(iui.latest_file.name);
         } catch (error) {}
-        mui.task_result = "1";
-        mui.watch_file_until_action();
+        iui.task_result = "1";
+        iui.watch_file_until_action();
     },
     download_file: (filename, uia) => {
         let blob = new Blob([uia], {
@@ -110,20 +107,20 @@ window.mui = {
         }, 1000);
     },
     watch_file_until_action: async () => {
-        let the_file_name = mui.latest_file.name;
+        let the_file_name = iui.latest_file.name;
         let watcher = setInterval(() => {
-            if(mui.module.FS.analyzePath(the_file_name).exists){
+            if(iui.module.FS.analyzePath(the_file_name).exists){
                 clearInterval(watcher);
-                mui.download_file(the_file_name, mui.module.FS.readFile(the_file_name));
-                mui.module.FS.unlink(the_file_name);
+                iui.download_file(the_file_name, iui.module.FS.readFile(the_file_name));
+                iui.module.FS.unlink(the_file_name);
             }
         }, 500);
     },
     set trigger(val){
         if (val == "openfiledialog"){
-            mui.open_file_dialog();
+            return iui.open_file_dialog();
         } else if (val == "savefiledialog"){
-            mui.save_file_dialog();
+            iui.save_file_dialog();
         } else if (val == "keyboard-hide"){
             document.getElementById("canvas").focus();
             navigator.virtualKeyboard.hide();
@@ -134,10 +131,13 @@ window.mui = {
             doo_load_files();
         } else if (val == "savefiles") {
 			save_folder('/home/')
+		} else if (val.indexOf("savefile=") != -1) {
+			var the_file_name = val.split("savefile=")[1];
+			iui.download_file(the_file_name, iui.module.FS.readFile(the_file_name));
 		}
     }
 };
 
 (async () => {
-    mui.module = await loadWASM();
+    iui.module = await loadWASM();
 })();

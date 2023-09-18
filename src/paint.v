@@ -23,6 +23,7 @@ mut:
 	stat_lbl    &ui.Label
 	brush_size  int = 1
 	bg_id       int
+	need_open   bool
 }
 
 fn (app &App) get_color() gx.Color {
@@ -47,7 +48,7 @@ fn main() {
 		width: 700
 		height: 500
 		font_size: 14
-		// ui_mode: true
+		ui_mode: false
 	)
 
 	mut app := &App{
@@ -65,14 +66,14 @@ fn main() {
 
 	app.make_menubar(mut window)
 
-	mut path := os.resource_abs_path('v.png')
+	mut path := os.resource_abs_path('untitledv.png')
 
 	if os.args.len > 1 {
 		path = os.real_path(os.args[1])
 	}
 
 	if !os.exists(path) {
-		mut blank_png := $embed_file('v.png')
+		mut blank_png := $embed_file('blank.png')
 		os.write_file_array(path, blank_png.to_bytes()) or { panic(error) }
 	}
 

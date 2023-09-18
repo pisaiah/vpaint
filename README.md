@@ -4,11 +4,11 @@ Image Viewer & Editor written in the [V](https://vlang.io) Programming Language.
 
 <img src="https://github.com/isaiahpatton/vpaint/assets/16439221/84202923-5339-4108-8289-ba79353c0092">
 
-Online demo: [https://vpaint.app/demo](https://isaiahpatton.github.io/vpaint/demo/) *(slightly outdated)*
+Online demo: [https://vpaint.app/demo](https://pisaiah.github.io/vpaint/demo/)
 
 ## Compile dependencies
 - [iUI](https://github.com/isaiahpatton/ui)
-- V 0.4.0 or higher
+- V 0.4.1 or higher
 
 ## Credits
 - V - [https://vlang.io](https://vlang.io)
