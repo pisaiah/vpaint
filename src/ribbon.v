@@ -47,11 +47,6 @@ fn (mut app App) make_ribbon() {
 	app.ribbon.add_child(color_box)
 	app.ribbon.add_child(btn)
 
-	// Load hsv.png
-	// img_file := $embed_file('assets/hsv.png')
-	// data := img_file.to_bytes()
-	// TODO app.make_hsl_image(data)
-
 	img_file := $embed_file('assets/hsv.png')
 	data := img_file.to_bytes()
 
@@ -89,7 +84,6 @@ fn rgb_btn_click(mut a ui.Window, b voidptr, c voidptr) {
 	a.add_child(cp.modal)
 }
 
-// fn current_color_btn_draw(mut win ui.Window, mut com ui.Component) {
 fn current_color_btn_draw(mut e ui.DrawEvent) {
 	mut com := e.target
 	mut win := e.ctx.win

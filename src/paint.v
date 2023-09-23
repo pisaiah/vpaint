@@ -115,7 +115,7 @@ fn main() {
 	window.add_child(pan)
 
 	mut win := app.win
-	tb_file := $embed_file('assets/checker.png')
+	tb_file := $embed_file('assets/checker2.png')
 	data := tb_file.to_bytes()
 	gg_im := win.gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := win.gg.cache_image(gg_im)

@@ -36,22 +36,7 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 	app.canvas = img
 	p.add_child(img)
 
-	p.subscribe_event('draw', fn (mut e ui.DrawEvent) {
-		mut app := e.ctx.win.get[&App]('app')
-		e.target.width = app.canvas.width + 2
-		e.target.height = app.canvas.height + 2
-
-		if app.need_open {
-			$if emscripten ? {
-				if C.emscripten_run_script_string(c'iui.task_result').vstring() == '1' {
-					C.emscripten_run_script(c'iui.task_result = "0"')
-					vall := C.emscripten_run_script_string(c'iui.latest_file.name').vstring()
-					app.canvas.open(vall)
-					app.need_open = false
-				}
-			}
-		}
-	})
+	p.subscribe_event('draw', img_panel_draw)
 
 	if os.exists(file) {
 		file_size := format_size(os.file_size(file))
@@ -67,10 +52,38 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 	return p
 }
 
+fn img_panel_draw(mut e ui.DrawEvent) {
+	mut app := e.ctx.win.get[&App]('app')
+	e.target.width = app.canvas.width + 2
+	e.target.height = app.canvas.height + 2
+
+	if app.need_open {
+		$if emscripten ? {
+			if C.emscripten_run_script_string(c'iui.task_result').vstring() == '1' {
+				C.emscripten_run_script(c'iui.task_result = "0"')
+				vall := C.emscripten_run_script_string(c'iui.latest_file.name').vstring()
+				app.canvas.open(vall)
+				app.need_open = false
+			}
+		}
+	}
+}
+
 fn (mut img Image) set_zoom(mult f32) {
 	img.width = int(img.w * mult)
 	img.height = int(img.h * mult)
 	img.zoom = mult
+
+	mut sm := f32(128.0)
+
+	zm := mult
+	if zm > 10 {
+		sf := zm / 8
+		sm = (sf * 128) / 4
+	}
+
+	img.bw = int(img.width / sm)
+	img.bh = int(img.height / sm)
 }
 
 fn (mut img Image) get_zoom() f32 {
@@ -115,10 +128,9 @@ pub fn get_pixel(x int, y int, this stbi.Image) gx.Color {
 		return gx.rgba(0, 0, 0, 0)
 	}
 
-	image := this
 	unsafe {
-		data := &u8(image.data)
-		p := data + (4 * (y * image.width + x))
+		data := &u8(this.data)
+		p := data + (4 * (y * this.width + x))
 		r := p[0]
 		g := p[1]
 		b := p[2]
@@ -218,10 +230,15 @@ fn (mut this Image) set(x int, y int, color gx.Color) bool {
 }
 
 fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
+	from := this.get(x, y)
+	if from == color {
+		return true
+	}
+
 	change := Change{
 		x: x
 		y: y
-		from: this.get(x, y)
+		from: from
 		to: color
 		batch: batch
 	}
@@ -238,6 +255,10 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 		this.history.insert(0, change)
 	}
 
+	return set_pixel(this.data.file, x, y, color)
+}
+
+fn (mut this Image) set_no_undo(x int, y int, color gx.Color) bool {
 	return set_pixel(this.data.file, x, y, color)
 }
 
@@ -292,6 +313,8 @@ pub mut:
 	history_index int
 	last_x        int = -1
 	last_y        int
+	bw            int
+	bh            int
 }
 
 pub fn image_from_data(data &ImageViewData) &Image {
@@ -313,7 +336,7 @@ pub fn (mut this Image) load_if_not_loaded(ctx &ui.GraphicsContext) {
 
 	make_gg_image(mut this.data, mut win, true)
 	this.img = this.data.id
-	canvas_height := this.app.sv.height // - (this.app.sv.height / 4)
+	canvas_height := this.app.sv.height
 	zoom_fit := canvas_height / this.data.file.height
 	if zoom_fit > 1 {
 		this.set_zoom(zoom_fit - 1)
@@ -326,6 +349,7 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 		this.load_if_not_loaded(ctx)
 	}
 
+	// if this.width < 128 || this.height < 128 {
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
 		img_id: this.app.bg_id
 		img_rect: gg.Rect{
@@ -335,6 +359,29 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 			height: this.height
 		}
 	})
+	// TODO: improve this
+	/*
+	} else {
+		pp := this.width / this.bw
+		ph := this.height / this.bh
+
+		for x in 0 .. this.bw {
+			for y in 0 .. this.bh {
+				ctx.gg.draw_image_with_config(gg.DrawImageConfig{
+					img_id: this.app.bg_id
+					img_rect: gg.Rect{x: this.x + (pp * x), y: this.y + (ph * y), width: pp, height: ph}
+				})
+				if this.y + (pp * y) + pp > this.y + this.height {
+					break
+				}
+			}
+			
+			if this.x + (pp * x) + pp > this.x + this.app.sv.width {
+				break
+			}
+		}
+	}
+	*/
 
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
 		img_id: this.img
@@ -379,65 +426,45 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 
 // Updates which pixel the mouse is located
 pub fn (mut this Image) calculate_mouse_pixel(ctx &ui.GraphicsContext) {
-	mx := ctx.win.mouse_x
-	my := ctx.win.mouse_y
+	mx := ctx.win.mouse_x - this.x
+	my := ctx.win.mouse_y - this.y
 
-	// Simple Editing
-	for x in 0 .. this.w {
-		for y in 0 .. this.h {
-			sx := this.x + (x * this.zoom)
-			ex := sx + this.zoom
+	ix := int(mx / this.zoom)
+	sx := this.x + (ix * this.zoom)
 
-			sy := this.y + (y * this.zoom)
-			ey := sy + this.zoom
+	iy := int(my / this.zoom)
+	sy := this.y + (iy * this.zoom)
 
-			gxa := mx < ex || mx > this.x + (x * this.zoom) || mx < this.x
-			gy := my < ey //|| my < this.y
-
-			if mx >= sx && gxa {
-				if my >= sy && gy {
-					this.sx = sx
-					this.sy = sy
-					this.mx = x
-					this.my = y
-
-					break
-				}
-			}
-
-			if y == this.h - 1 {
-				if mx >= sx && gxa && my > this.y + (y * this.zoom) {
-					this.sx = sx
-					this.sy = sy
-					this.mx = x
-					this.my = y
-					break
-				}
-			}
-
-			if y == 0 {
-				if mx >= sx && gxa && my < this.y {
-					this.sx = sx
-					this.sy = sy
-					this.mx = x
-					this.my = y
-					break
-				}
-			}
+	if my > 0 {
+		if my > this.height {
+			nsy := this.y + ((this.h - 1) * this.zoom)
+			this.sy = nsy
+			this.my = this.h - 1
+		} else {
+			this.sy = sy
+			this.my = iy
 		}
+	} else {
+		this.sy = this.y
+		this.my = 0
 	}
 
-	if mx > this.x + ((this.w - 1) * this.zoom) {
-		sx := this.x + ((this.w - 1) * this.zoom)
+	if mx > ((this.w - 1) * this.zoom) {
+		nsx := this.x + ((this.w - 1) * this.zoom)
 
-		this.sx = sx
+		this.sx = nsx
 		this.mx = this.w - 1
+		return
 	}
 
-	if mx < this.x {
+	if mx < 0 {
 		this.sx = this.x
 		this.mx = 0
+		return
 	}
+
+	this.sx = sx
+	this.mx = ix
 }
 
 fn (this &Image) get_point_screen_pos(x int, y int) (f32, f32) {

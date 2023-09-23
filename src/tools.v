@@ -3,8 +3,15 @@ module main
 import iui as ui
 import gx
 import math
-import rand
+// import rand { intn }
 // import sokol.sapp
+
+// Use rand from stdlib
+// Saves 4KB on wasm build
+fn C.rand() int
+fn intn(max int) int {
+	return C.rand() % (max + 1)
+}
 
 // Tools
 interface Tool {
@@ -196,7 +203,7 @@ fn (mut this AirbrushTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 		for y in 0 .. size {
 			xpos := img.sx + (x * pix) - (half_size * pix)
 			ypos := img.sy + (y * pix) - (half_size * pix)
-			rand_int := rand.intn(size) or { -1 }
+			rand_int := intn(size)
 			if rand_int == 0 {
 				ctx.gg.draw_rounded_rect_empty(xpos, ypos, img.zoom, img.zoom, 1, gx.blue)
 			}
@@ -213,7 +220,7 @@ fn (mut this AirbrushTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 
 	for x in 0 .. size {
 		for y in 0 .. size {
-			rand_int := rand.intn(size) or { -1 }
+			rand_int := intn(size)
 			if rand_int == 0 {
 				img.set(img.mx + (x - half_size), img.my + (y - half_size), img.app.get_color())
 			}

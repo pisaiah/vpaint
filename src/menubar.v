@@ -25,7 +25,7 @@ fn undo_click(mut win ui.Window, com ui.MenuItem) {
 
 fn new_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	app.load_new(512, 512)
+	app.load_new(1024, 1024)
 }
 
 fn open_click(mut win ui.Window, com ui.MenuItem) {
@@ -43,10 +43,16 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	app.save_as()
 }
 
+fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	nz := app.canvas.zoom + 100
+	app.canvas.set_zoom(nz)
+}
+
 // Make menubar
 fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
-	window.bar = ui.menubar(window, window.theme)
+	window.bar = ui.Menubar.new()
 	window.bar.add_child(ui.menu_item(
 		text: 'File'
 		children: [
@@ -55,7 +61,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 				click_event_fn: new_click
 			),
 			ui.menu_item(
-				text: 'Open'
+				text: 'Open...'
 				click_event_fn: open_click
 			),
 			ui.menu_item(
@@ -65,15 +71,6 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			ui.menu_item(
 				text: 'Save As...'
 				click_event_fn: save_as_click
-				/*
-				children: [
-					ui.menu_item(
-						text: 'PNG Image'
-					),
-					ui.menu_item(
-						text: 'JPG Image'
-					)
-				]*/
 			),
 			ui.menu_item(
 				text: 'Settings'
@@ -127,7 +124,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			),
 			ui.menu_item(
 				text: 'Zoom-In'
-				// click_event_fn: app.menubar_zoom_in_click
+				click_event_fn: menu_zoom_in_click
 			),
 		]
 	))
@@ -149,7 +146,9 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		]
 	))
 
-	mut theme_menu := ui.menuitem('Theme')
+	mut theme_menu := ui.MenuItem.new(
+		text: 'Theme'
+	)
 	mut themes := ui.get_all_themes()
 	for theme2 in themes {
 		mut item := ui.menuitem(theme2.name)
