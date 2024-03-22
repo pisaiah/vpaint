@@ -45,7 +45,7 @@ fn modal_draw(mut e ui.DrawEvent) {
 fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	mut cim := 0
 	if 'HSL' in win.id_map {
-		hsl := &int(win.id_map['HSL'])
+		hsl := &int(unsafe { win.id_map['HSL'] })
 		cim = *hsl
 	}
 
@@ -304,8 +304,6 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 	x := cp.mx - 7 + com.rx
 	win.gg.draw_rounded_rect_empty(x, cp.my - 7 + com.ry, 16, 16, 32, gx.white)
 	win.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + com.ry, 16, 16, 32, gx.blue)
-
-	y := cp.btn.ry - 32
 
 	ty := cp.btn.ry + cp.btn.height + 4
 

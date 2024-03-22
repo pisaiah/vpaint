@@ -5,7 +5,7 @@ import iui as ui
 import os
 import gx
 
-[heap]
+@[heap]
 struct App {
 mut:
 	win         &ui.Window

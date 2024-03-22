@@ -2,7 +2,6 @@ module main
 
 import iui as ui
 import gx
-import time
 
 // Fill Tool
 struct FillTool {
@@ -25,8 +24,8 @@ fn (mut this FillTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	}
 	if this.next.len > 0 {
 		this.next.clear()
-		this.next.free()
-		free(this.next)
+		unsafe { this.next.free() }
+		unsafe { free(this.next) }
 		this.next = []Point{}
 		this.img.refresh()
 	}

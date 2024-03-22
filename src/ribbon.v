@@ -20,7 +20,6 @@ fn (mut app App) make_ribbon() {
 
 	size := 24
 
-	mut count := 0
 	for color in colors {
 		mut btn := ui.Button.new(text: ' ')
 		btn.set_background(color)
@@ -28,7 +27,6 @@ fn (mut app App) make_ribbon() {
 
 		btn.set_click_fn(cbc, color)
 		color_box.add_child(btn)
-		count += 1
 	}
 
 	box1.add_child(make_c_btn(0))
@@ -90,7 +88,6 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 	if mut com is ui.Button {
 		mut app := win.get[&App]('app')
 		bg := if com.text == '' { app.color } else { app.color_2 }
-		id := if com.text == '' { '1' } else { '2' }
 		com.set_background(bg)
 		sele := (com.text == ' ' && app.sele_color) || (com.text == '' && !app.sele_color)
 		if sele {

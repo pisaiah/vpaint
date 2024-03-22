@@ -93,9 +93,8 @@ fn (app &App) save_as() {
 	mut close := ui.Button.new(text: 'Save')
 	modal.add_child(close)
 	y := 250
-	bw := 210
 
-	close.subscribe_event('mouse_up', fn [app, mut data, mut cb, mut f, mut nam] (mut e ui.MouseEvent) {
+	close.subscribe_event('mouse_up', fn [app, mut data, mut f, mut nam] (mut e ui.MouseEvent) {
 		full_path := os.join_path(f.text, nam.text)
 		typ := os.file_ext(full_path).to_lower()
 
