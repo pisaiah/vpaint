@@ -49,7 +49,7 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 		cim = *hsl
 	}
 
-	mut btn := ui.button_with_icon(cim)
+	mut btn := ui.Button.new(icon: cim)
 	btn.set_area_filled(false)
 	btn.after_draw_event_fn = hsl_btn_draw_evnt
 
@@ -77,13 +77,13 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	aslid.after_draw_event_fn = aslid_draw_evnt
 	modal.add_child(aslid)
 
-	mut close := modal.create_close_btn(mut win, false)
+	mut close := modal.make_close_btn(false)
 	y := 295
 
 	close.subscribe_event('mouse_up', default_modal_close_fn)
 	close.set_bounds(16, y, 216, 30)
 
-	mut can := modal.create_close_btn(mut win, true)
+	mut can := modal.make_close_btn(true)
 	can.text = 'Cancel'
 	can.set_bounds(245, y, 200, 30)
 
@@ -310,8 +310,6 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 	cp.modal.text = '${cp.color.to_css_string()}'
 
 	win.gg.draw_rect_filled(cp.btn.rx, ty, cp.bw, 24, cp.color)
-
-	tcolor := gx.rgb(255 - cp.color.r, 255 - cp.color.g, 255 - cp.color.b)
 
 	br := f32(cp.color.r) * 299
 	bg := f32(cp.color.g) * 587

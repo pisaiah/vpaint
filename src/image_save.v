@@ -122,8 +122,7 @@ fn (app &App) save_as() {
 	})
 	close.set_bounds(w - 280, y, 130, 30)
 
-	mut win := app.win
-	mut can := modal.create_close_btn(mut win, true)
+	mut can := modal.make_close_btn(true)
 	can.text = 'Cancel'
 	can.set_bounds(w - 140, y, 130, 30)
 

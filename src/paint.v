@@ -43,7 +43,7 @@ fn (mut app App) set_color(c gx.Color) {
 
 fn main() {
 	// Create Window
-	mut window := ui.make_window(
+	mut window := ui.Window.new(
 		title: 'vPaint'
 		width: 700
 		height: 500
