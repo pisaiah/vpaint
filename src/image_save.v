@@ -93,9 +93,8 @@ fn (app &App) save_as() {
 	mut close := ui.Button.new(text: 'Save')
 	modal.add_child(close)
 	y := 250
-	bw := 210
 
-	close.subscribe_event('mouse_up', fn [app, mut data, mut cb, mut f, mut nam] (mut e ui.MouseEvent) {
+	close.subscribe_event('mouse_up', fn [app, mut data, mut f, mut nam] (mut e ui.MouseEvent) {
 		full_path := os.join_path(f.text, nam.text)
 		typ := os.file_ext(full_path).to_lower()
 
@@ -123,8 +122,7 @@ fn (app &App) save_as() {
 	})
 	close.set_bounds(w - 280, y, 130, 30)
 
-	mut win := app.win
-	mut can := modal.create_close_btn(mut win, true)
+	mut can := modal.make_close_btn(true)
 	can.text = 'Cancel'
 	can.set_bounds(w - 140, y, 130, 30)
 

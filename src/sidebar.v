@@ -38,10 +38,9 @@ fn (mut app App) make_sidebar() {
 	// Resize
 	img_resize_file := $embed_file('assets/resize.png')
 	mut test5 := app.icon_btn(img_resize_file.to_bytes(), &SelectTool{})
-	test5.set_click_fn(fn (win &ui.Window, b voidptr, c voidptr) {
-		mut app := win.get[&App]('app')
+	test5.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
 		app.show_resize_modal(app.canvas.w, app.canvas.h)
-	}, 0)
+	})
 
 	// Pencil
 	// img_pencil_file2 := $embed_file('assets/icons8-pencil-drawing-32.png')
@@ -125,8 +124,7 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 	mut gg := app.win.gg
 	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := gg.cache_image(gg_im)
-	mut btn := ui.button_with_icon(cim)
-
+	mut btn := ui.Button.new(icon: cim)
 	btn.set_bounds(2, 0, 46, 32)
 	btn.icon_width = 32
 
@@ -135,12 +133,8 @@ fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
 
 	btn.extra = tool.tool_name
 
-	btn.set_click_fn(tool_btn_click, tool)
+	btn.subscribe_event('mouse_up', fn [mut app, tool] (mut e ui.MouseEvent) {
+		app.tool = unsafe { tool }
+	})
 	return btn
-}
-
-fn tool_btn_click(winn voidptr, btn voidptr, tool &Tool) { //(mut app App)
-	mut win := unsafe { &ui.Window(winn) }
-	mut app := win.get[&App]('app')
-	app.tool = unsafe { tool }
 }

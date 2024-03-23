@@ -1,11 +1,13 @@
 # Binaries for programs and plugins
 main
 paint
+vpaint
 *.exe
 *.exe~
 *.so
 *.dylib
 *.dll
 vuntitled.png
+untitledv.png
 vls.log
 desktop.ini
