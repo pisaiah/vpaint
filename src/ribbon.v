@@ -7,6 +7,37 @@ import iui as ui
 fn (mut app App) make_ribbon() {
 	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 5))
 
+	mut color_box := app.make_color_box()
+
+	box1.add_child(make_c_btn(0))
+	box1.add_child(make_c_btn(10))
+
+	box1.set_bounds(5, 0, 50, 64)
+
+	mut hide_btn := ui.Button.new(text: 'Colors')
+
+	// Eye Dropper
+	img_picker_file := $embed_file('assets/rgb-picker.png')
+	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
+
+	app.ribbon.height = 74
+
+	app.ribbon.add_child(box1)
+	app.ribbon.add_child(color_box)
+	app.ribbon.add_child(btn)
+
+	img_file := $embed_file('assets/hsv.png')
+	data := img_file.to_bytes()
+
+	mut gg := app.win.gg
+	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
+
+	mut cim := 0
+	cim = gg.cache_image(gg_im)
+	app.win.id_map['HSL'] = &cim
+}
+
+fn (mut app App) make_color_box() &ui.Panel {
 	mut color_box := ui.Panel.new(
 		layout: ui.GridLayout.new(rows: 2, vgap: 4, hgap: 4)
 	)
@@ -31,31 +62,8 @@ fn (mut app App) make_ribbon() {
 		count += 1
 	}
 
-	box1.add_child(make_c_btn(0))
-	box1.add_child(make_c_btn(10))
-
-	box1.set_bounds(5, 0, 50, 64)
 	color_box.set_bounds(0, 0, (size + 6) * 10, 64)
-
-	// Eye Dropper
-	img_picker_file := $embed_file('assets/rgb-picker.png')
-	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
-
-	app.ribbon.height = 74
-
-	app.ribbon.add_child(box1)
-	app.ribbon.add_child(color_box)
-	app.ribbon.add_child(btn)
-
-	img_file := $embed_file('assets/hsv.png')
-	data := img_file.to_bytes()
-
-	mut gg := app.win.gg
-	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
-
-	mut cim := 0
-	cim = gg.cache_image(gg_im)
-	app.win.id_map['HSL'] = &cim
+	return color_box
 }
 
 fn make_c_btn(count int) &ui.Button {

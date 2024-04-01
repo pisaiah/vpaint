@@ -45,9 +45,9 @@ fn main() {
 	// Create Window
 	mut window := ui.make_window(
 		title: 'vPaint'
-		width: 700
-		height: 500
-		font_size: 14
+		width: 396 //700
+		height: 396 //500
+		font_size: 16
 		ui_mode: false
 	)
 

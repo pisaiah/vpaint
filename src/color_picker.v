@@ -137,7 +137,6 @@ fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
 	return cp
 }
 
-// pub fn default_modal_close_fn(mut win ui.Window, btn ui.Button) {
 pub fn default_modal_close_fn(mut e ui.MouseEvent) {
 	mut win := e.ctx.win
 	mut cp := win.get[&ColorPicker]('color_picker')
@@ -185,12 +184,12 @@ fn roun(a f64, place int) string {
 fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 	mut cp := win.get[&ColorPicker]('color_picker')
 
-	for i in 0 .. 33 {
-		v := 100 - (i * 3)
+	for i in 0 .. 51 {
+		v := 100 - (i * 2)
 		vp := f32(v) / 100
 		color := hsv_to_rgb(cp.h, f32(cp.s) / 100, vp)
-		y := com.ry + int(7.75 * i)
-		win.gg.draw_rect_filled(com.rx, y + 1, com.width - 1, 8, color)
+		y := com.ry + (5 * i)
+		win.gg.draw_rect_filled(com.rx, y, com.width - 1, 5, color)
 	}
 
 	if mut com is ui.Slider {
@@ -200,7 +199,7 @@ fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 		if com.is_mouse_down {
 			val := 100 - com.cur
 			strv := if cp.v == 100 { '100' } else { roun(val, 2) }
-			cp.v_field.text = strv //'${100 - com.cur}'
+			cp.v_field.text = strv
 		}
 		win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, ts, 32, win.theme.scroll_bar_color)
 		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, ts, 32, gx.blue)
@@ -222,7 +221,7 @@ fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 		val := 255 - (i * spa)
 		space := spa
 		color := gx.rgba(cpc.r, cpc.g, cpc.b, u8(val))
-		y := com.ry + int(space * i)
+		y := com.ry + space * i
 
 		ca := if cc { aa } else { bb }
 		cb := if cc { bb } else { aa }
@@ -296,6 +295,20 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 		cp.color = gx.rgba(color.r, color.g, color.b, cp.a_field.text.u8())
 	}
 	nv := 100 - cp.slid.cur
+	
+	/*ss := 25
+	for i in 0 .. ss {
+		wi := com.width / ss
+		hi := com.height / ss
+		for j in 0 .. ss {
+			w := cp.bw
+			h := (f32(i * wi) / w)
+			s := (f32(w - (j * wi)) / w)
+
+			color := hsv_to_rgb(h, s, 1)
+			win.gg.draw_rect_filled(com.rx + (i * wi), com.ry + (j * hi), wi, hi, color)
+		}
+	}*/
 
 	if cp.v != nv {
 		cp.update_text(2)
@@ -325,6 +338,8 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 		size: win.font_size
 		color: tco
 	})
+	
+	win.gg.draw_rect_empty(com.rx, com.ry, com.width, com.height, cp.color)
 }
 
 fn hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {

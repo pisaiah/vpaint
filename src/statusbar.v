@@ -24,11 +24,11 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	sb.subscribe_event('draw', statusbar_draw_event)
 
 	mut zoom_inc := app.zoom_btn(1)
-	zoom_inc.set_click_fn(on_zoom_inc_click, app)
+	zoom_inc.subscribe_event('mouse_up', app.on_zoom_inc)
 	zoom_inc.set_bounds(1, 0, 40, 25)
 
 	mut zoom_dec := app.zoom_btn(0)
-	zoom_dec.set_click_fn(on_zoom_dec_click, app)
+	zoom_dec.subscribe_event('mouse_up', app.on_zoom_dec)
 	zoom_dec.set_bounds(4, 0, 40, 25)
 
 	mut status := ui.Label.new(text: 'status')
@@ -51,10 +51,8 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	status.subscribe_event('draw', stat_lbl_draw_event)
 
 	mut zp := ui.Panel.new(
-		layout: ui.FlowLayout.new(vgap: 0, hgap: 4)
+		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
 	)
-	zp.set_bounds(0, 0, 160, 25)
-
 	sb.add_child_with_flag(status, ui.borderlayout_center)
 	zp.add_child(zoom_lbl)
 	zp.add_child(zoom_dec)
@@ -82,7 +80,7 @@ fn (mut app App) zoom_btn(val int) &ui.Button {
 	return btn
 }
 
-fn on_zoom_inc_click(win voidptr, btn voidptr, mut app App) {
+fn (mut app App) on_zoom_inc(mut e ui.MouseEvent) {
 	zoom := app.canvas.get_zoom()
 	new_zoom := if zoom >= 1 { zoom + 1 } else { zoom + .25 }
 
@@ -94,7 +92,7 @@ fn on_zoom_inc_click(win voidptr, btn voidptr, mut app App) {
 	app.canvas.set_zoom(new_zoom)
 }
 
-fn on_zoom_dec_click(win voidptr, mut btn ui.Button, mut app App) {
+fn (mut app App) on_zoom_dec(mut e ui.MouseEvent) {
 	zoom := app.canvas.get_zoom()
 	new_zoom := if zoom > 1 { zoom - 1 } else { zoom - .25 }
 

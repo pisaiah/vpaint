@@ -70,6 +70,17 @@ struct Point {
 	y int
 }
 
+
+[unsafe]
+fn (data &Point) free() {
+	// ...
+	unsafe {
+		free(data.x)
+		free(data.y)
+		free(data)
+	}
+}
+
 // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 fn bresenham(x int, y int, x1 int, y1 int) []Point {
 	mut x0 := x

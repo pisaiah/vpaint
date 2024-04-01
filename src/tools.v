@@ -4,7 +4,6 @@ import iui as ui
 import gx
 import math
 // import rand { intn }
-// import sokol.sapp
 
 // Use rand from stdlib
 // Saves 4KB on wasm build
