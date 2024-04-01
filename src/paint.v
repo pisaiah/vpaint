@@ -5,7 +5,7 @@ import iui as ui
 import os
 import gx
 
-[heap]
+@[heap]
 struct App {
 mut:
 	win         &ui.Window
@@ -43,7 +43,7 @@ fn (mut app App) set_color(c gx.Color) {
 
 fn main() {
 	// Create Window
-	mut window := ui.make_window(
+	mut window := ui.Window.new(
 		title: 'vPaint'
 		width: 396 //700
 		height: 396 //500

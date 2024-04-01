@@ -5,14 +5,15 @@ import gx
 import iui as ui
 
 fn (mut app App) make_ribbon() {
-	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 5))
+	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 0))
 
 	mut color_box := app.make_color_box()
 
 	box1.add_child(make_c_btn(0))
 	box1.add_child(make_c_btn(10))
 
-	box1.set_bounds(5, 0, 50, 64)
+	//box1.set_bounds(5, 0, 50, 64)
+	//box1.set_x(5)
 
 	mut hide_btn := ui.Button.new(text: 'Colors')
 
@@ -21,6 +22,10 @@ fn (mut app App) make_ribbon() {
 	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
 
 	app.ribbon.height = 74
+	
+	box1.set_x(5)
+	color_box.set_x(5)
+	btn.set_x(5)
 
 	app.ribbon.add_child(box1)
 	app.ribbon.add_child(color_box)
@@ -39,7 +44,7 @@ fn (mut app App) make_ribbon() {
 
 fn (mut app App) make_color_box() &ui.Panel {
 	mut color_box := ui.Panel.new(
-		layout: ui.GridLayout.new(rows: 2, vgap: 4, hgap: 4)
+		layout: ui.GridLayout.new(rows: 2, vgap: 3, hgap: 3)
 	)
 	colors := [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
 		gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
@@ -51,15 +56,14 @@ fn (mut app App) make_color_box() &ui.Panel {
 
 	size := 24
 
-	mut count := 0
 	for color in colors {
 		mut btn := ui.Button.new(text: ' ')
 		btn.set_background(color)
 		btn.border_radius = 32
-
-		btn.set_click_fn(cbc, color)
+		btn.subscribe_event('mouse_up', fn [mut app, color] (mut e ui.MouseEvent) {
+			app.set_color(color)
+		})
 		color_box.add_child(btn)
-		count += 1
 	}
 
 	color_box.set_bounds(0, 0, (size + 6) * 10, 64)
@@ -78,18 +82,17 @@ fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
 	mut gg := app.win.gg
 	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := gg.cache_image(gg_im)
-	mut btn := ui.button_with_icon(cim)
-
-	btn.set_bounds(0, 16, 32, 32)
-
-	btn.set_click_fn(rgb_btn_click, 0)
+	mut btn := ui.Button.new(icon: cim)
+	btn.set_bounds(0, 14, 32, 36)
+	btn.icon_width = 32
+	btn.icon_height = 32
+	
+	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
+		mut win := e.ctx.win
+		mut cp := color_picker(mut win, app.get_color())
+		win.add_child(cp.modal)
+	})
 	return btn
-}
-
-fn rgb_btn_click(mut a ui.Window, b voidptr, c voidptr) {
-	mut app := a.get[&App]('app')
-	mut cp := color_picker(mut a, app.get_color())
-	a.add_child(cp.modal)
 }
 
 fn current_color_btn_draw(mut e ui.DrawEvent) {
@@ -98,7 +101,6 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 	if mut com is ui.Button {
 		mut app := win.get[&App]('app')
 		bg := if com.text == '' { app.color } else { app.color_2 }
-		id := if com.text == '' { '1' } else { '2' }
 		com.set_background(bg)
 		sele := (com.text == ' ' && app.sele_color) || (com.text == '' && !app.sele_color)
 		if sele {
@@ -112,14 +114,6 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 			app.sele_color = !app.sele_color
 		}
 	}
-}
-
-fn cbc(a voidptr, b voidptr, c voidptr) {
-	btn := unsafe { &ui.Button(b) }
-	color := btn.override_bg_color
-	mut win := unsafe { &ui.Window(a) }
-	mut app := win.get[&App]('app')
-	app.set_color(color)
 }
 
 // fn ribbon_draw_fn(mut win ui.Window, mut com ui.Component) {

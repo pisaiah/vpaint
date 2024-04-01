@@ -4,9 +4,7 @@ import vweb
 import rand
 import os
 
-const (
-	port = 8080
-)
+const port = 8080
 
 struct App {
 	vweb.Context
@@ -37,7 +35,7 @@ pub fn (mut app App) index() vweb.Result {
 	return app.file(os.resource_abs_path('index.html'))
 }
 
-['/app.wasm']
+@['/app.wasm']
 pub fn (mut app App) was() vweb.Result {
 	return app.file(os.resource_abs_path('app.wasm'))
 }

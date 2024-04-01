@@ -157,11 +157,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Get short tag name
-        uses: jungwinter/split@v1
+        uses: winterjung/split@v2
         id: split
         with:
           msg: ${{ github.ref }}
-          seperator: /
+          separator: /
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
@@ -187,11 +187,11 @@ jobs:
           name: ${{ matrix.version }}
           path: ./${{ matrix.version }}
       - name: Get short tag name
-        uses: jungwinter/split@v1
+        uses: winterjung/split@v2
         id: split
         with:
           msg: ${{ github.ref }}
-          seperator: /
+          separator: /
       - name: Get release
         id: get_release_info
         uses: leahlundqvist/get-release@v1.3.1

@@ -6,7 +6,7 @@ import iui as ui
 import gg
 import os
 
-[heap]
+@[heap]
 struct ImageViewData {
 mut:
 	file      stbi.Image
@@ -298,8 +298,8 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 pub struct Image {
 	ui.Component_A
 pub mut:
-	app           &App
-	data          &ImageViewData
+	app           &App = unsafe { nil }
+	data          &ImageViewData = unsafe { nil }
 	w             int
 	h             int
 	sx            f32
@@ -319,7 +319,6 @@ pub mut:
 
 pub fn image_from_data(data &ImageViewData) &Image {
 	return &Image{
-		app: 0
 		data: data
 		img: data.id
 		w: data.file.width

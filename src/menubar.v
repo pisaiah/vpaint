@@ -151,7 +151,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	)
 	mut themes := ui.get_all_themes()
 	for theme2 in themes {
-		mut item := ui.menuitem(theme2.name)
+		mut item := ui.menu_item(text: theme2.name)
 		item.set_click(theme_click)
 		theme_menu.add_child(item)
 	}
