@@ -1,6 +1,5 @@
 module main
 
-import gg
 import iui as ui
 import os
 import gx
@@ -45,8 +44,8 @@ fn main() {
 	// Create Window
 	mut window := ui.Window.new(
 		title: 'vPaint'
-		width: 396 //700
-		height: 396 //500
+		width: 550 // 700
+		height: 450
 		font_size: 16
 		ui_mode: false
 	)
@@ -87,7 +86,7 @@ fn main() {
 	app.sv = sv
 	sv.set_bounds(0, 0, 500, 210)
 
-	sv.subscribe_event('draw', image_scrollview_draw_event_fn)
+	// sv.subscribe_event('draw', image_scrollview_draw_event_fn)
 
 	app.make_sidebar()
 

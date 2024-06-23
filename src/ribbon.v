@@ -12,8 +12,8 @@ fn (mut app App) make_ribbon() {
 	box1.add_child(make_c_btn(0))
 	box1.add_child(make_c_btn(10))
 
-	//box1.set_bounds(5, 0, 50, 64)
-	//box1.set_x(5)
+	// box1.set_bounds(5, 0, 50, 64)
+	// box1.set_x(5)
 
 	mut hide_btn := ui.Button.new(text: 'Colors')
 
@@ -22,7 +22,7 @@ fn (mut app App) make_ribbon() {
 	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
 
 	app.ribbon.height = 74
-	
+
 	box1.set_x(5)
 	color_box.set_x(5)
 	btn.set_x(5)
@@ -86,7 +86,7 @@ fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
 	btn.set_bounds(0, 14, 32, 36)
 	btn.icon_width = 32
 	btn.icon_height = 32
-	
+
 	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
 		mut win := e.ctx.win
 		mut cp := color_picker(mut win, app.get_color())

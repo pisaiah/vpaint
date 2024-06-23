@@ -70,8 +70,7 @@ struct Point {
 	y int
 }
 
-
-[unsafe]
+@[unsafe]
 fn (data &Point) free() {
 	// ...
 	unsafe {

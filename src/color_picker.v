@@ -295,7 +295,7 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 		cp.color = gx.rgba(color.r, color.g, color.b, cp.a_field.text.u8())
 	}
 	nv := 100 - cp.slid.cur
-	
+
 	/*ss := 25
 	for i in 0 .. ss {
 		wi := com.width / ss
@@ -334,7 +334,7 @@ fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
 		size: win.font_size
 		color: tco
 	})
-	
+
 	win.gg.draw_rect_empty(com.rx, com.ry, com.width, com.height, cp.color)
 }
 

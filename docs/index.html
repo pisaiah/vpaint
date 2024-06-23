@@ -3,6 +3,10 @@
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<style>
 		body{background:rgb(220,220,220);}
+		
+			body{background:rgb(220,220,220);}
+	@media (prefers-color-scheme: dark) { body { background: rgb(180,180,180);}}
+		
 		.w3-button {
 			padding-left: 1rem; padding-right: 1rem;
 			min-width: 45%;
@@ -17,11 +21,12 @@
 			background-repeat: no-repeat;
 			background-position: top 50% right 10px;
 		}
-		.copy {
+		.copy-old {
 			font-size: 11px;
 			color: rgba(0, 0, 0, .4);
 			margin-top: 2rem;
 		}
+		.copy { color:white; }
 		.lgc {background:rgb(210,210,210)}
 		#can2 {position:relative}
 		#ldd {
@@ -38,16 +43,20 @@
 		<div class="w3-row" style="margin-top:10vh">
 	
 		<div class="w3-third w3-mobile">
-			<h1 class="w3-xxxlarge">vPaint</h1>
+			<h1 class="w3-xxxlarge"><b>vPaint</b></h1>
 			<p class="w3-large">Simple Image Viewer & Editor written in the <a href="https://vlang.io/" target="_blank">V</a> Programming Language.</p>
 			<p>&nbsp;</p>
 			<a href="./demo/index.html"><button class="w3-button w3-blue w3-border bf">Demo</button></a><br>
-			<a href="https://github.com/isaiahpatton/vpaint" target="_blank"><button class="w3-button lgc w3-border">Github</button></a>
+			<a href="https://github.com/pisaiah/vpaint" target="_blank"><button class="w3-button lgc w3-border">Github</button></a>
 			<a href="https://discord.gg/NruVtYBf5g" target="_blank"><button class="w3-button lgc w3-border">Discord</button></a><hr>
 			<h3>Downloads:</h3>
-			<a href="https://github.com/isaiahpatton/vpaint/releases/download/0.5/vpaint_windows.zip"><button class="w3-button w3-green w3-border dl">Windows</button></a>
-			<a href="https://github.com/isaiahpatton/vpaint/releases/download/0.5/vpaint_linux.zip"><button class="w3-button w3-green w3-border dl">Linux</button></a>
+
+			<!--
+			<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_windows.zip"><button class="w3-button w3-green w3-border dl">Windows</button></a>
+			<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_linux.zip"><button class="w3-button w3-green w3-border dl">Linux</button></a>
 			<a href="https://bit.ly/vpaint-0-5-macos"><button class="w3-button w3-green w3-border dl">macos</button></a>
+			-->
+			<a href="https://github.com/pisaiah/vpaint/releases" target="_blank"><button class="w3-button w3-green w3-border dl">View Downloads</button></a>
 		</div>
 
 		<div class="w3-twothird w3-mobile">
@@ -61,10 +70,44 @@
 		</div>
 
 		</div>
+		<div class="w3-row w3-center"> <center>
+		</center>
+		</div>
 	</div>
 	<div class="copy w3-auto">
-		&copy; 2022 by Isaiah. Icons by Icons8.com
+		&copy; 2022-24 by Isaiah. Icons by Icons8.com
 	</div>
+	
+	
+	<div class="w3-container w3-padding-3a2" style="background:rgb(28,30,32);border-top: 3px solid #243342;color:rgb(230,230,230);padding:40px;margin-top:300px;">
+<div class="w3-container w3-content">
+
+<div class="w3-container w3-padding-16">
+<div class="w3-twothird">
+<p>Simple Image Viewer & Editor written in the V Programming Language.<br>
+
+</p>
+</div>
+<div class="w3-rest">
+<div class="w3-half"> Links: <ul>
+<li><a href="https://github.com/pisaiah/vpaint">Github</a></li>
+<li><a href="https://github.com/pisaiah/vpaint/releases">Releases</a></li>
+<li><a href="./demo/index.html">Try Online</a></li>
+</ul>
+</div>
+<div class="w3-half">Other: <ul>
+<li><a href="https://github.com/pisaiah/vide" target="_blank">Vide</a></li>
+<li><a href="https://vpaint.app" target="_blank">VPaint</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<br>
+</div>
+	<div class="copy" style="background:black;text-align:center;padding:16px">
+<p><small>Copyright © 2022-2024 Isaiah.</small></p>
+</div>
 	
 	<script>
 	var has_loaded = false;

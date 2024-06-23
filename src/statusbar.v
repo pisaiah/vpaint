@@ -9,7 +9,7 @@ fn statusbar_draw_event(mut e ui.DrawEvent) {
 	ws := win.gg.window_size()
 	mut sb := app.status_bar
 	sb.width = ws.width
-	sb.height = 35
+	sb.height = 32
 
 	win.gg.draw_rect_filled(sb.x, sb.y, sb.width, sb.height, win.theme.menubar_background)
 	win.gg.draw_rect_empty(sb.x, sb.y, sb.width, 1, win.theme.dropdown_border)
@@ -18,22 +18,21 @@ fn statusbar_draw_event(mut e ui.DrawEvent) {
 
 fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	mut sb := ui.Panel.new(
-		layout: ui.BorderLayout.new()
+		layout: ui.BorderLayout.new(vgap: 4)
 	)
 
 	sb.subscribe_event('draw', statusbar_draw_event)
 
 	mut zoom_inc := app.zoom_btn(1)
 	zoom_inc.subscribe_event('mouse_up', app.on_zoom_inc)
-	zoom_inc.set_bounds(1, 0, 40, 25)
+	zoom_inc.set_bounds(1, 0, 40, 26)
 
 	mut zoom_dec := app.zoom_btn(0)
 	zoom_dec.subscribe_event('mouse_up', app.on_zoom_dec)
-	zoom_dec.set_bounds(4, 0, 40, 25)
+	zoom_dec.set_bounds(4, 0, 40, 26)
 
 	mut status := ui.Label.new(text: 'status')
 	app.stat_lbl = status
-	// mut stat_lbl := &status
 
 	mut zoom_lbl := ui.Label.new(text: '100%')
 
@@ -65,7 +64,7 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 	app := e.ctx.win.get[&App]('app')
 	mouse_details := 'm: (${app.canvas.mx}, ${app.canvas.my})'
 	mut com := e.target
-	com.text = '${app.canvas.w} x ${app.canvas.h}     ${app.data.file_size}     ${mouse_details}'
+	com.text = '${app.canvas.w} x ${app.canvas.h} / ${app.data.file_size} / ${mouse_details}'
 	if mut com is ui.Label {
 		com.pack()
 	}
