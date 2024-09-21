@@ -4,15 +4,19 @@ import iui as ui
 import gx
 import math
 
-struct ColorPicker {
-	btn &ui.Button
+const hue_deg = 359
+
+@[heap]
+pub struct ColorPicker {
 mut:
-	bw      int = 250
+	btn     &ui.Button
 	modal   &ui.Modal
 	slid    &ui.Slider
 	aslid   &ui.Slider
+	bw      int = 250
 	mx      int
 	my      int
+	color   gx.Color
 	h       f64
 	s       int
 	v       f64
@@ -20,10 +24,14 @@ mut:
 	s_field &ui.TextField
 	v_field &ui.TextField
 	r_field &ui.TextField
-	// g_field &ui.TextField
-	// b_field &ui.TextField
 	a_field &ui.TextField
-	color   gx.Color
+}
+
+pub fn (mut cp ColorPicker) default_modal_close_fn(mut e ui.MouseEvent) {
+	mut win := e.ctx.win
+	mut app := win.get[&App]('app')
+	app.set_color(cp.color)
+	win.components = win.components.filter(mut it !is ui.Modal)
 }
 
 fn modal_draw(mut e ui.DrawEvent) {
@@ -42,148 +50,105 @@ fn modal_draw(mut e ui.DrawEvent) {
 	}
 }
 
-fn color_picker(mut win ui.Window, val gx.Color) &ColorPicker {
-	mut cim := 0
-	if 'HSL' in win.id_map {
-		hsl := &int(unsafe { win.id_map['HSL'] })
-		cim = *hsl
-	}
-
-	mut btn := ui.Button.new(icon: cim)
-	btn.set_area_filled(false)
-	btn.after_draw_event_fn = hsl_btn_draw_evnt
-
-	mut slide := ui.Slider.new(
-		min: 0
-		max: 100
-		dir: .vert
-	)
-	slide.after_draw_event_fn = slid_draw_evnt
-
+pub fn ColorPicker.new(c gx.Color) &ColorPicker {
 	mut modal := ui.Modal.new(title: 'HSV Color Picker')
 	modal.needs_init = false
 	modal.in_width = 465
 	modal.in_height = 335
 	modal.top_off = 20
-	modal.add_child(btn)
-	modal.add_child(slide)
 	modal.subscribe_event('draw', modal_draw)
+
+	mut btn := ui.Button.new(icon: -1)
+	btn.set_area_filled(false)
+
+	mut slide := ui.Slider.new(
+		min: 0
+		max: 101
+		dir: .vert
+	)
 
 	mut aslid := ui.Slider.new(
 		min: 0
-		max: 255
+		max: 256
 		dir: .vert
 	)
-	aslid.after_draw_event_fn = aslid_draw_evnt
-	modal.add_child(aslid)
 
-	mut close := modal.make_close_btn(false)
-	y := 295
+	mut cp := &ColorPicker{
+		btn:     btn
+		modal:   modal
+		slid:    slide
+		aslid:   aslid
+		h_field: ui.numeric_field(255)
+		s_field: ui.numeric_field(255)
+		v_field: ui.numeric_field(255)
+		r_field: ui.numeric_field(255)
+		a_field: ui.numeric_field(255)
+	}
+	slide.after_draw_event_fn = cp.slid_draw_evnt
+	aslid.after_draw_event_fn = cp.aslid_draw_evnt
 
-	close.subscribe_event('mouse_up', default_modal_close_fn)
-	close.set_bounds(16, y, 216, 30)
+	aha := cp.number_sect('H', mut cp.h_field)
+	asa := cp.number_sect('S', mut cp.s_field)
+	ava := cp.number_sect('V', mut cp.v_field)
+	ab := cp.number_sect('A', mut cp.a_field)
 
-	mut can := modal.make_close_btn(true)
-	can.text = 'Cancel'
-	can.set_bounds(245, y, 200, 30)
+	mut rb := cp.number_sect('R', mut cp.r_field)
 
 	mut vbox := ui.Panel.new(
 		layout: ui.BoxLayout.new(ori: 1, vgap: 5, hgap: 0)
 	)
-	vbox.set_pos(364, 2)
-	mut lbl := ui.Label.new(text: ' ')
-	lbl.set_bounds(0, 1, 4, 23)
-
-	aha, mut ah := number_sect('H')
-	asa, mut ass := number_sect('S')
-	ava, mut av := number_sect('V')
-
-	mut rb, mut rf := number_sect('R')
-	ab, mut af := number_sect('A')
+	vbox.set_pos(355, 2)
 
 	vbox.add_child(aha)
 	vbox.add_child(asa)
 	vbox.add_child(ava)
-	vbox.add_child(lbl)
+	// vbox.add_child(lbl)
 	vbox.add_child(ab)
 
-	mut rgb_title := ui.Titlebox.new(text: 'RGB', children: [rb])
+	mut rgb_title := ui.Titlebox.new(
+		text:     'RGB'
+		children: [rb]
+		padding:  4
+	)
 	rgb_title.set_bounds(320, 205, 35, 0)
 
 	modal.add_child(rgb_title)
 
 	modal.add_child(vbox)
 
-	mut cp := &ColorPicker{
-		btn: btn
-		slid: slide
-		aslid: aslid
-		modal: modal
-		h_field: ah
-		s_field: ass
-		v_field: av
-		r_field: rf
-		// g_field: gf
-		// b_field: bf
-		a_field: af
-	}
+	// Load Given gx.Color
+	cp.set_hsv_button_to_rgb(c)
+	cp.update_fields(0)
+
+	btn.after_draw_event_fn = cp.hsl_btn_draw_evnt
 
 	btn.set_bounds(8, 2, cp.bw, cp.bw)
 	slide.set_bounds(268, 2, 42, 256)
 	aslid.set_bounds(315, 2, 35, 192)
 
-	cp.load_rgb(val)
-	win.id_map['color_picker'] = cp
+	modal.add_child(btn)
+	modal.add_child(slide)
+	modal.add_child(aslid)
+
+	// close btn
+	mut close := modal.make_close_btn(false)
+	y := 295
+
+	close.subscribe_event('mouse_up', cp.default_modal_close_fn)
+	close.set_bounds(16, y, 216, 30)
+
+	mut can := modal.make_close_btn(true)
+	can.text = 'Cancel'
+	can.set_bounds(245, y, 200, 30)
+
 	return cp
-}
-
-pub fn default_modal_close_fn(mut e ui.MouseEvent) {
-	mut win := e.ctx.win
-	mut cp := win.get[&ColorPicker]('color_picker')
-	mut app := win.get[&App]('app')
-	app.set_color(cp.color)
-	win.components = win.components.filter(mut it !is ui.Modal)
-}
-
-fn (mut cp ColorPicker) load_rgb(color gx.Color) {
-	h, s, v := rgb_to_hsv(color)
-	cp.load_hsv(h, int(s * 100), v)
-	cp.a_field.text = '${color.a}'
-	cp.color.a = color.a
-	cp.update_text(1)
-	cp.a_field.text = '${color.a}'
-	cp.aslid.cur = 255 - color.a
-}
-
-fn (mut cp ColorPicker) load_hsv(h f64, s int, v f64) {
-	w := cp.bw
-
-	my := int((((s * w) - w) * -1) + 0)
-	mx := int(h * w)
-
-	cp.mx = mx
-	cp.my = my
-
-	cur := 100 - f32(100 * v)
-	cp.slid.scroll = false
-	cp.aslid.scroll = false
-	cp.slid.cur = cur
-	cp.v = 100 * v
-	cp.h = h
-	cp.s = s
-
-	cp.h_field.text = roun(h, 4)
-	cp.s_field.text = '${s * 100}' // roun(s, 4)
-	cp.v_field.text = '${int(v * 100)}'
 }
 
 fn roun(a f64, place int) string {
 	return '${a}'.substr_ni(0, place)
 }
 
-fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
-	mut cp := win.get[&ColorPicker]('color_picker')
-
+fn (mut cp ColorPicker) slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 	for i in 0 .. 51 {
 		v := 100 - (i * 2)
 		vp := f32(v) / 100
@@ -197,7 +162,7 @@ fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 		ts := 12
 		wid := (com.height * per) - per * ts
 		if com.is_mouse_down {
-			val := 100 - com.cur
+			val := 101 - com.cur
 			strv := if cp.v == 100 { '100' } else { roun(val, 2) }
 			cp.v_field.text = strv
 		}
@@ -206,9 +171,7 @@ fn slid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 	}
 }
 
-fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
-	mut cp := win.get[&ColorPicker]('color_picker')
-
+fn (mut cp ColorPicker) aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 	cpc := cp.color
 	len := 12
 	spa := 16
@@ -229,7 +192,6 @@ fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 
 		win.gg.draw_rect_filled(com.rx, y, fw, space, ca)
 		win.gg.draw_rect_filled(com.rx + fw, y, fw - 1, space, cb)
-
 		win.gg.draw_rect_filled(com.rx, y, com.width - 1, space, color)
 		cc = !cc
 	}
@@ -240,117 +202,48 @@ fn aslid_draw_evnt(mut win ui.Window, mut com ui.Component) {
 		ts := 12
 		wid := (com.height * per) - per * ts
 		if com.is_mouse_down {
+			if com.cur == 256 {
+				com.cur = 255
+			}
 			cur := 255 - u8(com.cur)
 			cp.a_field.text = '${cur}'
-			cp.update_text(2)
+			cp.update_fields(0)
 		}
 		win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, ts, 32, win.theme.scroll_bar_color)
 		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, ts, 32, gx.blue)
 	}
 }
 
-fn (mut cp ColorPicker) update_text(typ u8) {
-	cp.h_field.text = roun(cp.h, 5)
-	cp.s_field.text = '${cp.s}' // roun(cp.s, 5)
-	cp.v_field.text = if cp.v == 100 { '100' } else { roun(cp.v, 2) }
-
-	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
-	// cp.r_field.text = '${color.r}'
-	// cp.g_field.text = '${color.g}'
-	// cp.b_field.text = '${color.b}'
-
-	cp.r_field.text = '${color.r}, ${color.g}, ${color.b}'
-
-	cp.h_field.carrot_left = cp.h_field.text.len
-	cp.s_field.carrot_left = cp.s_field.text.len
-	cp.v_field.carrot_left = cp.v_field.text.len
-
-	if typ == 0 {
-		cp.r_field.carrot_left = cp.r_field.text.len
-	}
-
-	// cp.r_field.carrot_left = cp.r_field.text.len
-	// cp.g_field.carrot_left = cp.g_field.text.len
-	/// cp.b_field.carrot_left = cp.b_field.text.len
-	cp.a_field.carrot_left = cp.a_field.text.len
-	cp.color = gx.rgba(color.r, color.g, color.b, cp.a_field.text.u8())
-}
-
-fn hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
-	mut cp := win.get[&ColorPicker]('color_picker')
-	if com.is_mouse_down {
-		cp.mx = math.min(win.mouse_x, cp.btn.rx + cp.btn.width)
-		cp.my = math.min(win.mouse_y, cp.btn.ry + cp.btn.height)
-		cp.mx = math.max(cp.btn.rx, cp.mx) - cp.btn.rx
-		cp.my = math.max(cp.btn.ry, cp.my) - cp.btn.ry
-
-		w := cp.bw
-		cp.h = (f32(cp.mx) / w)
-		cp.s = int((f32(w - (cp.my)) / w) * 100)
-		cp.v = 100 - cp.slid.cur
-
-		cp.update_text(0)
-
-		color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
-		cp.color = gx.rgba(color.r, color.g, color.b, cp.a_field.text.u8())
-	}
-	nv := 100 - cp.slid.cur
-
-	/*ss := 25
-	for i in 0 .. ss {
-		wi := com.width / ss
-		hi := com.height / ss
-		for j in 0 .. ss {
-			w := cp.bw
-			h := (f32(i * wi) / w)
-			s := (f32(w - (j * wi)) / w)
-
-			color := hsv_to_rgb(h, s, 1)
-			win.gg.draw_rect_filled(com.rx + (i * wi), com.ry + (j * hi), wi, hi, color)
-		}
-	}*/
-
-	if cp.v != nv {
-		cp.update_text(2)
-	}
-	cp.v = nv
-	x := cp.mx - 7 + com.rx
-	win.gg.draw_rounded_rect_empty(x, cp.my - 7 + com.ry, 16, 16, 32, gx.white)
-	win.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + com.ry, 16, 16, 32, gx.blue)
-
-	ty := cp.btn.ry + cp.btn.height + 4
-
-	cp.modal.text = '${cp.color.to_css_string()}'
-
-	win.gg.draw_rect_filled(cp.btn.rx, ty, cp.bw, 24, cp.color)
-
-	br := f32(cp.color.r) * 299
-	bg := f32(cp.color.g) * 587
-	bb := f32(cp.color.b) * 114
-	o := (br + bg + bb) / 1000
-	tco := if o > 125 { gx.black } else { gx.white }
-
-	win.gg.draw_text(cp.btn.rx + 5, ty + 4, '${cp.color.to_css_string()}', gx.TextCfg{
-		size: win.font_size
-		color: tco
-	})
-
-	win.gg.draw_rect_empty(com.rx, com.ry, com.width, com.height, cp.color)
-}
-
-fn hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
-	mut cp := win.get[&ColorPicker]('color_picker')
-
-	h := cp.h_field.text.f64()
+fn (mut cp ColorPicker) hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
+	h := cp.h_field.text.int()
 	s := cp.s_field.text.int()
-	v := cp.v_field.text.f64() / 100
+	v := cp.v_field.text.int()
 
-	cp.load_hsv(h, s, v)
+	if h > 360 {
+		cp.h_field.text = '359'
+	}
+
+	if s > 100 {
+		cp.s_field.text = '100'
+	}
+
+	if v > 100 {
+		cp.v_field.text = '100'
+	}
+
+	cp.load_hsv_int(h, s, v)
+	cp.update_hsv_m()
 }
 
-fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
-	mut cp := win.get[&ColorPicker]('color_picker')
+fn numfield_draw_evnt(mut e ui.DrawEvent) {
+	if e.target.text.contains(',') {
+		e.target.width = e.ctx.text_width('255, 255, 255') + 20
+		return
+	}
+	e.target.width = e.ctx.text_width('255,255') + 20
+}
 
+fn (mut cp ColorPicker) rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	colors := cp.r_field.text.replace(' ', '').split(',')
 
 	if colors.len < 3 {
@@ -371,7 +264,6 @@ fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	b := colors[2].u8()
 
 	if colors.len > 3 {
-		dump(colors.len)
 		cp.r_field.text = '0, 0, 0'
 	}
 
@@ -380,31 +272,22 @@ fn rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
 	cp.load_rgb(gx.rgba(r, g, b, a))
 }
 
-fn numfield_draw_evnt(mut e ui.DrawEvent) {
-	if e.target.text.contains(',') {
-		e.target.width = e.ctx.text_width('255, 255, 255') + 20
-		return
-	}
-	e.target.width = e.ctx.text_width('25555') + 20
-}
-
-fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
+fn (mut cp ColorPicker) number_sect(txt string, mut numfield ui.TextField) &ui.Panel {
 	mut p := ui.Panel.new(
-		layout: ui.BoxLayout.new(hgap: 0, vgap: 0)
+		layout: ui.BoxLayout.new(hgap: 4, vgap: 0)
 	)
 
-	mut numfield := ui.numeric_field(255)
 	numfield.set_bounds(0, 0, 80, 0)
 	if txt == 'H' || txt == 'S' || txt == 'V' {
-		numfield.text_change_event_fn = hsv_num_box_change_evnt
+		numfield.text_change_event_fn = cp.hsv_num_box_change_evnt
 	} else {
-		numfield.text_change_event_fn = rgb_num_box_change_evnt
+		numfield.text_change_event_fn = cp.rgb_num_box_change_evnt
 	}
 	numfield.subscribe_event('draw', numfield_draw_evnt)
 
 	if txt == 'R' {
 		p.add_child(numfield)
-		return p, numfield
+		return p
 	}
 
 	mut lbl := ui.Label.new(text: txt)
@@ -413,5 +296,168 @@ fn number_sect(txt string) (&ui.Panel, &ui.TextField) {
 
 	p.add_child(numfield)
 	p.add_child(lbl)
-	return p, numfield
+	return p // , numfield
+}
+
+// Set the ColorPicker's HSV to the provided gx.Color
+fn (mut cp ColorPicker) set_hsv_button_to_rgb(c gx.Color) {
+	mut h, s, v := rgb_to_hsv(c)
+
+	cp.h = h
+	cp.s = int(f32(s) * 100)
+	cp.v = 100 * v
+	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
+	alpha := c.a // cp.a_field.text.u8()
+	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+
+	cp.slid.scroll = false
+	cp.aslid.scroll = false
+	cp.slid.cur = f32(101 - cp.v)
+	cp.aslid.cur = 255 - c.a // cp.a_field.text.u8()
+	cp.a_field.text = '${c.a}'
+
+	cp.update_hsv_m()
+}
+
+fn (mut cp ColorPicker) update_fields_text(typ int) {
+	cp.h_field.text = '${int(cp.h * hue_deg)}'
+	cp.s_field.text = '${cp.s}'
+	cp.v_field.text = '${int(cp.v)}'
+
+	cp.h_field.carrot_left = cp.h_field.text.len
+	cp.s_field.carrot_left = cp.s_field.text.len
+	cp.v_field.carrot_left = cp.v_field.text.len
+
+	cp.r_field.text = '${cp.color.r}, ${cp.color.g}, ${cp.color.b}'
+}
+
+// Update fields
+fn (mut cp ColorPicker) update_fields(typ int) {
+	cp.update_fields_text(typ)
+
+	if typ == 0 && !cp.r_field.is_selected {
+		cp.r_field.carrot_left = cp.r_field.text.len
+	}
+
+	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
+	alpha := cp.a_field.text.u8()
+	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+}
+
+fn (mut cp ColorPicker) update_hsv_m() {
+	w := cp.bw
+	cp.mx = int(cp.h * w)
+	cp.my = (-(cp.s * w) / 100) + w
+}
+
+fn (mut cp ColorPicker) get_slid_v() f32 {
+	val := 101 - cp.slid.cur
+	if val < 0 {
+		return 0
+	}
+	if val > 100 {
+		return 100
+	}
+
+	return val
+}
+
+// Turn mouse down (mx, my) into HSV
+fn (mut cp ColorPicker) do_hsv_mouse_down(wmx int, wmy int) {
+	cp.mx = math.min(wmx, cp.btn.rx + cp.btn.width)
+	cp.my = math.min(wmy, cp.btn.ry + cp.btn.height)
+	cp.mx = math.max(cp.btn.rx, cp.mx) - cp.btn.rx
+	cp.my = math.max(cp.btn.ry, cp.my) - cp.btn.ry
+
+	w := cp.bw
+	cp.h = (f32(cp.mx) / w)
+	cp.s = int((f32(w - (cp.my)) / w) * 100)
+	cp.v = cp.get_slid_v()
+
+	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
+	alpha := cp.a_field.text.u8()
+
+	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+
+	cp.update_fields(0)
+}
+
+fn (mut cp ColorPicker) hsl_btn_draw_evnt(mut win ui.Window, com &ui.Component) {
+	if com.is_mouse_down {
+		cp.do_hsv_mouse_down(win.mouse_x, win.mouse_y)
+	}
+
+	if cp.btn.icon == -1 {
+		mut cim := 0
+		if 'HSL' in win.id_map {
+			hsl := &int(unsafe { win.id_map['HSL'] })
+			cim = *hsl
+		}
+		cp.btn.icon = cim
+	}
+
+	nv := cp.get_slid_v()
+	if cp.v != nv {
+		cp.update_fields(0)
+	}
+	cp.v = nv
+
+	x := cp.mx - 7 + com.rx
+	win.gg.draw_rounded_rect_empty(x, cp.my - 7 + com.ry, 16, 16, 32, gx.white)
+	win.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + com.ry, 16, 16, 32, gx.blue)
+
+	ty := cp.btn.ry + cp.btn.height + 4
+
+	cp.modal.text = '${cp.color.to_css_string()}'
+
+	win.gg.draw_rect_filled(cp.btn.rx, ty, cp.bw, 24, cp.color)
+
+	br := f32(cp.color.r) * 299
+	bg := f32(cp.color.g) * 587
+	bb := f32(cp.color.b) * 114
+	o := (br + bg + bb) / 1000
+	tco := if o > 125 { gx.black } else { gx.white }
+
+	win.gg.draw_text(cp.btn.rx + 5, ty + 4, '${cp.color.to_css_string()}', gx.TextCfg{
+		size:  win.font_size
+		color: tco
+	})
+
+	win.gg.draw_rect_empty(com.rx, com.ry, com.width, com.height, gx.black)
+	win.gg.draw_rect_empty(com.rx - 1, com.ry - 1, com.width + 2, com.height + 2, cp.color)
+}
+
+fn (mut cp ColorPicker) load_rgb(color gx.Color) {
+	mut h, s, v := rgb_to_hsv(color)
+
+	cp.h = h
+	cp.s = int(f32(s) * 100)
+	cp.v = 100 * v
+	alpha := cp.a_field.text.u8()
+
+	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+
+	cp.update_hsv_m()
+	cp.update_fields_text(0)
+}
+
+fn (mut cp ColorPicker) load_hsv_int(h int, s int, v int) {
+	cp.h = f32(h) / hue_deg
+	cp.s = s
+	cp.v = v
+
+	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
+	alpha := cp.a_field.text.u8()
+	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+
+	cp.update_hsv_m()
+	cp.update_fields(0)
+
+	cp.slid.scroll = false
+	cp.aslid.scroll = false
+	cp.slid.cur = f32(101 - cp.v)
+	cp.aslid.cur = 255 - cp.a_field.text.u8()
+}
+
+fn (mut cp ColorPicker) load_hsv(h f64, s int, v f64) {
 }

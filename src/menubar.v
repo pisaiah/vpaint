@@ -54,30 +54,30 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
 	window.bar = ui.Menubar.new()
 	window.bar.add_child(ui.menu_item(
-		text: 'File'
+		text:     'File'
 		children: [
 			ui.menu_item(
-				text: 'New'
+				text:           'New'
 				click_event_fn: new_click
 			),
 			ui.menu_item(
-				text: 'Open...'
+				text:           'Open...'
 				click_event_fn: open_click
 			),
 			ui.menu_item(
-				text: 'Save'
+				text:           'Save'
 				click_event_fn: save_click
 			),
 			ui.menu_item(
-				text: 'Save As...'
+				text:           'Save As...'
 				click_event_fn: save_as_click
 			),
 			ui.menu_item(
-				text: 'Settings'
+				text:           'Settings'
 				click_event_fn: settings_click
 			),
 			ui.menu_item(
-				text: 'About Paint'
+				text:           'About Paint'
 				click_event_fn: about_click
 			),
 			ui.menu_item(
@@ -86,36 +86,36 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		]
 	))
 	window.bar.add_child(ui.menu_item(
-		text: 'Tools'
+		text:     'Tools'
 		children: [
 			ui.menu_item(
-				text: 'Upscale 2x'
+				text:           'Upscale 2x'
 				click_event_fn: upscale_click
 			),
 			ui.menu_item(
-				text: 'Apply Grayscale'
+				text:           'Apply Grayscale'
 				click_event_fn: grayscale_click
 			),
 			ui.menu_item(
-				text: 'Invert Image'
+				text:           'Invert Image'
 				click_event_fn: invert_click
 			),
 			ui.menu_item(
-				text: 'Undo'
+				text:           'Undo'
 				click_event_fn: undo_click
 			),
 			ui.menu_item(
-				text: 'Resize Canvas'
+				text:           'Resize Canvas'
 				click_event_fn: menu_resize_click
 			),
 		]
 	))
 
 	window.bar.add_child(ui.menu_item(
-		text: 'View'
+		text:     'View'
 		children: [
 			ui.menu_item(
-				text: 'Fit Canvas'
+				text:           'Fit Canvas'
 				click_event_fn: menubar_fit_zoom_click
 			),
 			ui.menu_item(
@@ -123,14 +123,14 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 				// click_event_fn: app.menubar_zoom_out_click
 			),
 			ui.menu_item(
-				text: 'Zoom-In'
+				text:           'Zoom-In'
 				click_event_fn: menu_zoom_in_click
 			),
 		]
 	))
 
 	window.bar.add_child(ui.menu_item(
-		text: 'Size'
+		text:     'Size'
 		children: [
 			size_menu_item(1),
 			size_menu_item(2),
@@ -140,7 +140,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			size_menu_item(32),
 			size_menu_item(64),
 			ui.menu_item(
-				text: 'Custom'
+				text:           'Custom'
 				click_event_fn: menu_size_custom_click
 			),
 		]
@@ -162,9 +162,9 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 
 	undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
 	mut undo_item := ui.menu_item(
-		text: 'Undo'
+		text:           'Undo'
 		click_event_fn: undo_click
-		icon: undo_icon
+		icon:           undo_icon
 	)
 	undo_item.width = 30
 	window.bar.add_child(undo_item)
@@ -172,7 +172,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 
 fn size_menu_item(size int) &ui.MenuItem {
 	item := ui.menu_item(
-		text: '${size} px'
+		text:           '${size} px'
 		click_event_fn: menu_size_click
 	)
 	return item
@@ -264,7 +264,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	mut lp := ui.Panel.new(
 		layout: ui.BoxLayout.new(
-			ori: 0
+			ori:  0
 			hgap: 16
 		)
 	)
@@ -272,19 +272,19 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	icons8 := ui.link(
 		text: 'Icons8'
-		url: 'https://icons8.com/'
+		url:  'https://icons8.com/'
 		pack: true
 	)
 
 	git := ui.link(
 		text: 'Github'
-		url: 'https://github.com/isaiahpatton/vpaint'
+		url:  'https://github.com/isaiahpatton/vpaint'
 		pack: true
 	)
 
 	vlang := ui.link(
 		text: 'About V'
-		url: 'https://vlang.io'
+		url:  'https://vlang.io'
 		pack: true
 	)
 

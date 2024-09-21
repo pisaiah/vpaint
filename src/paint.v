@@ -43,23 +43,23 @@ fn (mut app App) set_color(c gx.Color) {
 fn main() {
 	// Create Window
 	mut window := ui.Window.new(
-		title: 'vPaint'
-		width: 550 // 700
-		height: 450
+		title:     'vPaint'
+		width:     550 // 700
+		height:    450
 		font_size: 16
-		ui_mode: false
+		ui_mode:   false
 	)
 
 	mut app := &App{
-		sv: unsafe { nil }
-		sidebar: ui.Panel.new(layout: ui.FlowLayout.new(vgap: 1, hgap: 1))
-		data: unsafe { nil }
-		canvas: unsafe { nil }
-		win: window
-		ribbon: ui.Panel.new(layout: ui.FlowLayout.new(vgap: 4, hgap: 4))
+		sv:         unsafe { nil }
+		sidebar:    ui.Panel.new(layout: ui.FlowLayout.new(vgap: 1, hgap: 1))
+		data:       unsafe { nil }
+		canvas:     unsafe { nil }
+		win:        window
+		ribbon:     ui.Panel.new(layout: ui.FlowLayout.new(vgap: 4, hgap: 4))
 		status_bar: unsafe { nil }
-		stat_lbl: unsafe { nil }
-		tool: &PencilTool{}
+		stat_lbl:   unsafe { nil }
+		tool:       &PencilTool{}
 	}
 	window.id_map['app'] = app
 
@@ -79,9 +79,9 @@ fn main() {
 	mut tree := make_image_view(path, mut window, mut app)
 
 	mut sv := &ui.ScrollView{
-		children: [tree]
+		children:  [tree]
 		increment: 2
-		padding: 50
+		padding:   50
 	}
 	app.sv = sv
 	sv.set_bounds(0, 0, 500, 210)

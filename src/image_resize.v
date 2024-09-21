@@ -53,11 +53,11 @@ fn (mut app App) make_new(w int, h int) stbi.Image {
 	img_pixels := unsafe { &u8(malloc(img_size)) }
 
 	png_file := stbi.Image{
-		ok: true
-		ext: 'png'
-		data: img_pixels
-		width: w
-		height: h
+		ok:          true
+		ext:         'png'
+		data:        img_pixels
+		width:       w
+		height:      h
 		nr_channels: 4
 	}
 	return png_file

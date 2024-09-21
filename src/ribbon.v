@@ -15,7 +15,7 @@ fn (mut app App) make_ribbon() {
 	// box1.set_bounds(5, 0, 50, 64)
 	// box1.set_x(5)
 
-	mut hide_btn := ui.Button.new(text: 'Colors')
+	// mut hide_btn := ui.Button.new(text: 'Colors')
 
 	// Eye Dropper
 	img_picker_file := $embed_file('assets/rgb-picker.png')
@@ -89,7 +89,7 @@ fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
 
 	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
 		mut win := e.ctx.win
-		mut cp := color_picker(mut win, app.get_color())
+		mut cp := ColorPicker.new(app.get_color())
 		win.add_child(cp.modal)
 	})
 	return btn

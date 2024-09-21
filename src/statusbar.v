@@ -1,7 +1,6 @@
 module main
 
 import iui as ui
-import gg
 
 fn statusbar_draw_event(mut e ui.DrawEvent) {
 	mut win := e.ctx.win

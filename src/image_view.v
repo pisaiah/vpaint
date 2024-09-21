@@ -26,7 +26,7 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 	mut png_file := stbi.load(file) or { app.make_new(0, 0) }
 
 	mut data := &ImageViewData{
-		file: png_file
+		file:      png_file
 		file_name: file
 	}
 	app.data = data
@@ -110,7 +110,7 @@ fn make_gg_image(mut storage ImageViewData, mut win ui.Window, first bool) {
 		storage.id = win.gg.new_streaming_image(storage.file.width, storage.file.height,
 			4, gg.StreamingImageConfig{
 			pixel_format: .rgba8
-			mag_filter: .nearest
+			mag_filter:   .nearest
 		})
 	}
 	win.gg.update_pixel_data(storage.id, storage.file.data)
@@ -183,10 +183,10 @@ fn (this Change) compare(b Change) u8 {
 
 fn (mut this Image) note_multichange() {
 	change := Change{
-		x: -1
-		y: -1
-		from: gx.white
-		to: gx.white
+		x:     -1
+		y:     -1
+		from:  gx.white
+		to:    gx.white
 		batch: false
 	}
 	this.history.insert(0, change)
@@ -236,10 +236,10 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 	}
 
 	change := Change{
-		x: x
-		y: y
-		from: from
-		to: color
+		x:     x
+		y:     y
+		from:  from
+		to:    color
 		batch: batch
 	}
 
@@ -298,7 +298,7 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 pub struct Image {
 	ui.Component_A
 pub mut:
-	app           &App = unsafe { nil }
+	app           &App           = unsafe { nil }
 	data          &ImageViewData = unsafe { nil }
 	w             int
 	h             int
@@ -319,13 +319,13 @@ pub mut:
 
 pub fn image_from_data(data &ImageViewData) &Image {
 	return &Image{
-		data: data
-		img: data.id
-		w: data.file.width
-		h: data.file.height
-		width: data.file.width
+		data:   data
+		img:    data.id
+		w:      data.file.width
+		h:      data.file.height
+		width:  data.file.width
 		height: data.file.height
-		zoom: 1
+		zoom:   1
 	}
 }
 
@@ -350,11 +350,11 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 
 	// if this.width < 128 || this.height < 128 {
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
-		img_id: this.app.bg_id
+		img_id:   this.app.bg_id
 		img_rect: gg.Rect{
-			x: this.x
-			y: this.y
-			width: this.width
+			x:      this.x
+			y:      this.y
+			width:  this.width
 			height: this.height
 		}
 	})
@@ -383,11 +383,11 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	*/
 
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
-		img_id: this.img
+		img_id:   this.img
 		img_rect: gg.Rect{
-			x: this.x
-			y: this.y
-			width: this.width
+			x:      this.x
+			y:      this.y
+			width:  this.width
 			height: this.height
 		}
 	})

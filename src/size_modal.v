@@ -38,7 +38,7 @@ pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
 	close.subscribe_event('mouse_up', close_modal)
 
 	mut cancel := ui.button(
-		text: 'Cancel'
+		text:   'Cancel'
 		bounds: ui.Bounds{138, y, 90, 35}
 	)
 

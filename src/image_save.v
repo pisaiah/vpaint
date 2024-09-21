@@ -45,7 +45,7 @@ fn (app &App) save_as() {
 	f.set_bounds(0, 0, w - 30, 30)
 
 	mut cb := ui.Selectbox.new(
-		text: os.file_ext(file_name)[1..].to_upper()
+		text:  os.file_ext(file_name)[1..].to_upper()
 		items: ['PNG', 'JPG', 'BMP', 'TGA']
 	)
 
@@ -63,19 +63,19 @@ fn (app &App) save_as() {
 	})
 
 	mut tb_f := ui.Titlebox.new(
-		text: 'Save Folder'
+		text:     'Save Folder'
 		children: [f]
 	)
 
 	nam.set_bounds(0, 0, w - 200, 30)
 
 	mut tb_fn := ui.Titlebox.new(
-		text: 'File Name'
+		text:     'File Name'
 		children: [nam]
 	)
 
 	mut tb_cb := ui.Titlebox.new(
-		text: 'Save as Type'
+		text:     'Save as Type'
 		children: [cb]
 	)
 
