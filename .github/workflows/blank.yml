@@ -182,7 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Fetch artifacts
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.version }}
           path: ./${{ matrix.version }}
