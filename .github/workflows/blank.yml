@@ -19,7 +19,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.35'
+          version: 'weekly.2024.37'
           version-file: ''
           check-latest: true
           stable: false
@@ -63,7 +63,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.35'
+          version: 'weekly.2024.37'
           version-file: ''
           check-latest: true
           stable: false
@@ -102,7 +102,7 @@ jobs:
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
-          version: 'weekly.2023.35'
+          version: 'weekly.2024.37'
           version-file: ''
           check-latest: true
           stable: false
