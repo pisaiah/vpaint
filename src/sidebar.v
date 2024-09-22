@@ -15,48 +15,49 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, w, app.sidebar.height, color)
 }
 
+fn (mut app App) set_tool_by_name(name string) {
+	match name {
+		'Select' { app.tool = &SelectTool{} }
+		'Pencil' { app.tool = &PencilTool{} }
+		'Fill' { app.tool = &FillTool{} }
+		'Drag' { app.tool = &DragTool{} }
+		'Airbrush' { app.tool = &AirbrushTool{} }
+		'Dropper' { app.tool = &DropperTool{} }
+		'WidePencil' { app.tool = &WidePencilTool{} }
+		else { app.tool = &PencilTool{} }
+	}
+}
+
 fn (mut app App) make_sidebar() {
 	// Sidebar
 	app.sidebar.subscribe_event('draw', sidebar_draw_event)
 
-	// Select
 	img_sele_file := $embed_file('assets/select.png')
-	mut test := app.icon_btn(img_sele_file.to_bytes(), &SelectTool{})
-
-	// Pencil
 	img_pencil_file := $embed_file('assets/pencil-tip.png')
-	mut test2 := app.icon_btn(img_pencil_file.to_bytes(), &PencilTool{})
-
-	// Fill
 	img_fill_file := $embed_file('assets/fill-can.png')
-	mut test3 := app.icon_btn(img_fill_file.to_bytes(), &FillTool{})
-
-	// Drag
 	img_drag_file := $embed_file('assets/icons8-drag-32.png')
-	mut test4 := app.icon_btn(img_drag_file.to_bytes(), &DragTool{})
-
-	// Resize
 	img_resize_file := $embed_file('assets/resize.png')
-	mut test5 := app.icon_btn(img_resize_file.to_bytes(), &SelectTool{})
-	test5.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
-		app.show_resize_modal(app.canvas.w, app.canvas.h)
-	})
+	img_airbrush_file := $embed_file('assets/icons8-paint-sprayer-32.png')
+	img_dropper_file := $embed_file('assets/color-dropper.png')
+	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
+
+	// Buttons
+	mut test := app.icon_btn(img_sele_file.to_bytes(), 'Select')
+	mut test2 := app.icon_btn(img_pencil_file.to_bytes(), 'Pencil')
+	mut test3 := app.icon_btn(img_fill_file.to_bytes(), 'Fill')
+	mut test4 := app.icon_btn(img_drag_file.to_bytes(), 'Drag')
+	mut test5 := app.icon_btn(img_resize_file.to_bytes(), 'Select')
+	mut test7 := app.icon_btn(img_airbrush_file.to_bytes(), 'Airbrush')
+	mut test8 := app.icon_btn(img_dropper_file.to_bytes(), 'Dropper')
+	mut test9 := app.icon_btn(img_wide_file.to_bytes(), 'WidePencil')
 
 	// Pencil
 	// img_pencil_file2 := $embed_file('assets/icons8-pencil-drawing-32.png')
 	// mut test6 := app.icon_btn(img_pencil_file2.to_bytes(), &PencilTool2{})
 
-	// Airbrush
-	img_airbrush_file := $embed_file('assets/icons8-paint-sprayer-32.png')
-	mut test7 := app.icon_btn(img_airbrush_file.to_bytes(), &AirbrushTool{})
-
-	// Eye Dropper
-	img_dropper_file := $embed_file('assets/color-dropper.png')
-	mut test8 := app.icon_btn(img_dropper_file.to_bytes(), &DropperTool{})
-
-	// Pencil
-	img_wide_file := $embed_file('assets/icons8-pencil-drawing-32.png')
-	mut test9 := app.icon_btn(img_wide_file.to_bytes(), &WidePencilTool{})
+	test5.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
+		app.show_resize_modal(app.canvas.w, app.canvas.h)
+	})
 
 	mut p := ui.Panel.new(
 		layout: ui.FlowLayout.new(
@@ -120,7 +121,33 @@ fn after_draw_btn(mut e ui.DrawEvent) {
 fn (mut app App) group_clicked(mut e ui.MouseEvent) {
 }
 
-fn (mut app App) icon_btn(data []u8, tool &Tool) &ui.Button {
+fn (mut app App) icon_btn(data []u8, name string) &ui.Button {
+	mut gg := app.win.gg
+	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
+	cim := gg.cache_image(gg_im)
+	mut btn := ui.Button.new(icon: cim)
+	btn.set_bounds(2, 0, 46, 32)
+	btn.icon_width = 32
+
+	btn.set_area_filled(false)
+	btn.border_radius = -1
+
+	btn.extra = name // tool.tool_name
+	btn.text = name
+
+	btn.subscribe_event('mouse_up', fn [mut app, name] (mut e ui.MouseEvent) {
+		// Note: debug this.
+		// seems my closure impl for emscripten always returns
+		// the last 'name' instead of the real name.
+
+		dump(name)
+		dump(e.target.text)
+		app.set_tool_by_name(e.target.text)
+	})
+	return btn
+}
+
+fn (mut app App) icon_btn_old(data []u8, tool &Tool) &ui.Button {
 	mut gg := app.win.gg
 	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := gg.cache_image(gg_im)
