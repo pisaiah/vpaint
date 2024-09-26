@@ -61,6 +61,18 @@ fn (mut app App) make_color_box() &ui.Panel {
 		btn.set_background(color)
 		btn.border_radius = 32
 		btn.subscribe_event('mouse_up', fn [mut app, color] (mut e ui.MouseEvent) {
+			
+			mut btn := e.target
+			if mut btn is ui.Button {
+				btn_color := btn.override_bg_color
+				if btn_color != color {
+					// WASM does not support Closures
+					dump('Debug: Problem with Wasm closure')
+					app.set_color(btn_color)
+					return
+				}
+			}
+		
 			app.set_color(color)
 		})
 		color_box.add_child(btn)
