@@ -61,7 +61,6 @@ fn (mut app App) make_color_box() &ui.Panel {
 		btn.set_background(color)
 		btn.border_radius = 32
 		btn.subscribe_event('mouse_up', fn [mut app, color] (mut e ui.MouseEvent) {
-			
 			mut btn := e.target
 			if mut btn is ui.Button {
 				btn_color := btn.override_bg_color
@@ -72,7 +71,7 @@ fn (mut app App) make_color_box() &ui.Panel {
 					return
 				}
 			}
-		
+
 			app.set_color(color)
 		})
 		color_box.add_child(btn)
@@ -131,6 +130,6 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 // fn ribbon_draw_fn(mut win ui.Window, mut com ui.Component) {
 fn ribbon_draw_fn(mut e ui.DrawEvent) {
 	color := e.ctx.theme.menubar_background
-	e.ctx.gg.draw_rect_filled(e.target.x, e.target.y, e.target.width, e.target.height,
+	e.ctx.gg.draw_rect_filled(e.target.x, e.target.y - 1, e.target.width, e.target.height + 1,
 		color)
 }

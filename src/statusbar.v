@@ -11,8 +11,8 @@ fn statusbar_draw_event(mut e ui.DrawEvent) {
 	sb.height = 32
 
 	win.gg.draw_rect_filled(sb.x, sb.y, sb.width, sb.height, win.theme.menubar_background)
-	win.gg.draw_rect_empty(sb.x, sb.y, sb.width, 1, win.theme.dropdown_border)
-	win.gg.draw_rect_empty(sb.x, 26, sb.width, 1, win.theme.dropdown_border)
+	// win.gg.draw_rect_empty(sb.x, sb.y, sb.width, 1, win.theme.dropdown_border)
+	// win.gg.draw_rect_empty(sb.x, 26, sb.width, 1, win.theme.dropdown_border)
 }
 
 fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
@@ -63,7 +63,7 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 	app := e.ctx.win.get[&App]('app')
 	mouse_details := 'm: (${app.canvas.mx}, ${app.canvas.my})'
 	mut com := e.target
-	com.text = '${app.canvas.w} x ${app.canvas.h} / ${app.data.file_size} / ${mouse_details}'
+	com.text = '${app.canvas.w} x ${app.canvas.h} / ${app.data.file_size} / ${mouse_details} / ${app.tool.tool_name}'
 	if mut com is ui.Label {
 		com.pack()
 	}
@@ -73,8 +73,8 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 
 fn (mut app App) zoom_btn(val int) &ui.Button {
 	txt := if val == 0 { '-' } else { '+' }
-	mut btn := ui.button(text: txt)
-	btn.border_radius = 0
+	mut btn := ui.Button.new(text: txt)
+	btn.border_radius = 16
 	return btn
 }
 

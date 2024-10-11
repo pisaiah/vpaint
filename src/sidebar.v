@@ -2,17 +2,49 @@ module main
 
 import iui as ui
 
+fn (mut app App) sidebar_autohide_draw(w int) {
+	move := 5
+	hidden_size := 5
+
+	if app.win.mouse_x < app.sidebar.width + (hidden_size * 2) && app.win.mouse_y > app.sidebar.ry {
+		if app.sidebar.width < w {
+			app.sidebar.width += move
+			app.sidebar.children[0].set_hidden(false)
+		}
+	} else {
+		if app.sidebar.width > hidden_size {
+			app.sidebar.width -= move
+		} else {
+			app.sidebar.width = hidden_size
+			app.sidebar.children[0].set_hidden(true)
+		}
+	}
+	app.sidebar.children[0].x = app.sidebar.width - w
+}
+
 fn sidebar_draw_event(mut e ui.DrawEvent) {
 	// webasm build works better without closures
 	mut app := e.ctx.win.get[&App]('app')
 
 	h := app.sidebar.height
 	w := if h > 180 { 54 } else { 104 }
-	app.sidebar.width = w
-	app.sidebar.children[0].width = w
 
 	color := e.ctx.theme.menubar_background
-	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, w, app.sidebar.height, color)
+	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, app.sidebar.width, app.sidebar.height,
+		color)
+
+	if app.settings.autohide_sidebar {
+		app.sidebar_autohide_draw(w)
+		return
+	}
+
+	if app.sidebar.children[0].hidden {
+		app.sidebar.children[0].set_hidden(false)
+	}
+
+	app.sidebar.width = w
+	app.sidebar.children[0].x = 0
+	app.sidebar.children[0].width = w
 }
 
 fn (mut app App) set_tool_by_name(name string) {
@@ -135,13 +167,10 @@ fn (mut app App) icon_btn(data []u8, name string) &ui.Button {
 	btn.extra = name // tool.tool_name
 	btn.text = name
 
-	btn.subscribe_event('mouse_up', fn [mut app, name] (mut e ui.MouseEvent) {
+	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
 		// Note: debug this.
 		// seems my closure impl for emscripten always returns
 		// the last 'name' instead of the real name.
-
-		dump(name)
-		dump(e.target.text)
 		app.set_tool_by_name(e.target.text)
 	})
 	return btn

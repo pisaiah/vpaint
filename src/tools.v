@@ -233,11 +233,6 @@ fn (mut this AirbrushTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 fn (mut this AirbrushTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
-// Testing:
-
-// Pencil Tool
-// Testing more percise.
-
 // Dropper Tool
 struct DropperTool {
 	tool_name string = 'Eye Dropper'
@@ -303,15 +298,20 @@ fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 
 	size := img.app.brush_size
 	half_size := size / 2
-	// q_size := half_size / 2
 
-	for x in -half_size .. size + half_size {
-		for y in 0 .. 2 {
-			img.set(img.mx + (x - half_size), img.my + (y - 1), img.app.get_color())
+	if img.last_x != -1 {
+		pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
+		for p in pp {
+			for x in -half_size .. size + half_size {
+				for y in 0 .. 2 {
+					img.set(p.x + (x - half_size), p.y + (y - 1), img.app.get_color())
+				}
+			}
 		}
 	}
 
-	// img.set(img.mx, img.my, img.app.get_color())
+	img.last_x = img.mx
+	img.last_y = img.my
 	img.refresh()
 }
 

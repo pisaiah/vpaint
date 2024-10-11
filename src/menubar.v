@@ -5,12 +5,45 @@ import gx
 
 fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
+
+	txt := com.text
+
+	if txt.contains('bilinear') {
+		app.canvas.bilinear_interpolation(app.canvas.w * 2, app.canvas.h * 2)
+		return
+	}
+
+	if txt.contains('scale2x') {
+		app.canvas.scale2x()
+		return
+	}
+
+	if txt.contains('hq3x') {
+		app.canvas.hq3x()
+		return
+	}
+
 	app.canvas.upscale()
+}
+
+fn tool_item_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.set_tool_by_name(com.text)
+
+	// "Fake" a press
+	for mut btn in app.sidebar.children[0].children {
+		btn.is_selected = btn.text == com.text
+	}
 }
 
 fn grayscale_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
 	app.canvas.grayscale_filter()
+}
+
+fn inc_alpha_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	app.canvas.increase_alpha()
 }
 
 fn invert_click(mut win ui.Window, com ui.MenuItem) {
@@ -86,11 +119,28 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 		]
 	))
 	window.bar.add_child(ui.menu_item(
-		text:     'Tools'
+		text:     'Edit'
 		children: [
 			ui.menu_item(
 				text:           'Upscale 2x'
 				click_event_fn: upscale_click
+			),
+			ui.MenuItem.new(
+				text:     'Scaling...'
+				children: [
+					ui.MenuItem.new(
+						text:           'bilinear interpolation'
+						click_event_fn: upscale_click
+					),
+					ui.MenuItem.new(
+						text:           'scale2x'
+						click_event_fn: upscale_click
+					),
+					ui.MenuItem.new(
+						text:           'hq3x'
+						click_event_fn: upscale_click
+					),
+				]
 			),
 			ui.menu_item(
 				text:           'Apply Grayscale'
@@ -99,6 +149,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			ui.menu_item(
 				text:           'Invert Image'
 				click_event_fn: invert_click
+			),
+			ui.menu_item(
+				text:           'Increase Alpha'
+				click_event_fn: inc_alpha_click
 			),
 			ui.menu_item(
 				text:           'Undo'
@@ -110,6 +164,21 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			),
 		]
 	))
+
+	mut tool_item := ui.MenuItem.new(
+		text: 'Tools'
+	)
+
+	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil']
+
+	for label in labels {
+		tool_item.add_child(ui.MenuItem.new(
+			text:           label
+			click_event_fn: tool_item_click
+		))
+	}
+
+	window.bar.add_child(tool_item)
 
 	window.bar.add_child(ui.menu_item(
 		text:     'View'
@@ -151,7 +220,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	)
 	mut themes := ui.get_all_themes()
 	for theme2 in themes {
-		mut item := ui.menu_item(text: theme2.name)
+		mut item := ui.MenuItem.new(text: theme2.name)
 		item.set_click(theme_click)
 		theme_menu.add_child(item)
 	}
@@ -207,22 +276,29 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	mut theme := ui.theme_by_name(text)
 	win.set_theme(theme)
 
+	mut app := win.get[&App]('app')
+	app.settings.theme = text
+	app.set_theme_bg(text)
+	app.settings_save() or {}
+}
+
+fn (mut app App) set_theme_bg(text string) {
 	if text.contains('Dark') {
 		background := gx.rgb(25, 42, 77)
-		win.gg.set_bg_color(gx.rgb(25, 42, 77))
-		win.id_map['background'] = &background
+		app.win.gg.set_bg_color(gx.rgb(25, 42, 77))
+		app.win.id_map['background'] = &background
 	} else if text.contains('Black') {
-		win.gg.set_bg_color(gx.rgb(0, 0, 0))
+		app.win.gg.set_bg_color(gx.rgb(0, 0, 0))
 		background := gx.rgb(0, 0, 0)
-		win.id_map['background'] = &background
+		app.win.id_map['background'] = &background
 	} else if text.contains('Green Mono') {
-		win.gg.set_bg_color(gx.rgb(0, 16, 0))
+		app.win.gg.set_bg_color(gx.rgb(0, 16, 0))
 		background := gx.rgb(0, 16, 0)
-		win.id_map['background'] = &background
+		app.win.id_map['background'] = &background
 	} else {
 		background := gx.rgb(210, 220, 240)
-		win.gg.set_bg_color(background)
-		win.id_map['background'] = &background
+		app.win.gg.set_bg_color(background)
+		app.win.id_map['background'] = &background
 	}
 }
 

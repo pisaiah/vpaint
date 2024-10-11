@@ -144,7 +144,7 @@ fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
 		return ca
 	}
 
-	ratio := f32(1) / 2
+	ratio := f32(.5)
 	mut r := u8(0)
 	mut g := u8(0)
 	mut b := u8(0)

@@ -4,6 +4,14 @@ import iui as ui
 import os
 import gx
 
+// Settings
+struct Settings {
+mut:
+	autohide_sidebar bool
+	theme            string = 'Default'
+}
+
+// Our Paint App
 @[heap]
 struct App {
 mut:
@@ -23,6 +31,7 @@ mut:
 	brush_size  int = 1
 	bg_id       int
 	need_open   bool
+	settings    &Settings
 }
 
 fn (app &App) get_color() gx.Color {
@@ -60,9 +69,11 @@ fn main() {
 		status_bar: unsafe { nil }
 		stat_lbl:   unsafe { nil }
 		tool:       &PencilTool{}
+		settings:   &Settings{}
 	}
 	window.id_map['app'] = app
 
+	app.settings_load() or { println(err) }
 	app.make_menubar(mut window)
 
 	mut path := os.resource_abs_path('untitledv.png')
@@ -85,8 +96,6 @@ fn main() {
 	}
 	app.sv = sv
 	sv.set_bounds(0, 0, 500, 210)
-
-	// sv.subscribe_event('draw', image_scrollview_draw_event_fn)
 
 	app.make_sidebar()
 
@@ -120,8 +129,9 @@ fn main() {
 	cim := win.gg.cache_image(gg_im)
 	app.bg_id = cim
 
-	background := gx.rgb(210, 220, 240)
-	window.gg.set_bg_color(background)
+	// background := gx.rgb(210, 220, 240)
+	// window.gg.set_bg_color(background)
+
 	window.gg.run()
 }
 
