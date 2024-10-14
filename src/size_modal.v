@@ -28,7 +28,7 @@ fn (mut app App) show_size_modal() {
 }
 
 pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
-	mut close := ui.button(
+	mut close := ui.Button.new(
 		text: 'OK'
 	)
 
@@ -37,7 +37,7 @@ pub fn bs_create_close_btn(mut this ui.Modal) &ui.Button {
 
 	close.subscribe_event('mouse_up', close_modal)
 
-	mut cancel := ui.button(
+	mut cancel := ui.Button.new(
 		text:   'Cancel'
 		bounds: ui.Bounds{138, y, 90, 35}
 	)

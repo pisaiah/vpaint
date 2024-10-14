@@ -87,10 +87,18 @@ fn main() {
 		os.write_file_array(path, blank_png.to_bytes()) or { panic(error) }
 	}
 
-	mut tree := make_image_view(path, mut window, mut app)
+	mut image_panel := app.make_image_view(path)
+
+	if '-upscale' in os.args {
+		println('Upscaling ${os.args[1]}...')
+		out_path := os.args[3].split('-path=')[1]
+		app.canvas.scale2x()
+		app.write_img(app.data.file, out_path)
+		return
+	}
 
 	mut sv := &ui.ScrollView{
-		children:  [tree]
+		children:  [image_panel]
 		increment: 2
 		padding:   50
 	}

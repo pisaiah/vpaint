@@ -34,74 +34,21 @@ fn emsave(path string) {
 }
 
 fn (mut this Image) open(path string) {
-	mut data := this.data
+	png_file := stbi.load(path) or { panic(err) }
 
-	this.zoom = 1
-
-	mut png_file := stbi.load(path) or { panic(err) }
-
-	data.file = png_file
-	data.file_name = path
-	data.file_size = format_size(os.file_size(path))
-
-	this.data = data
-	this.img = data.id
-	this.w = png_file.width
-	this.h = png_file.height
-	this.width = data.file.width
-	this.height = data.file.height
-	this.loaded = false
-}
-
-fn (mut app App) make_new(w int, h int) stbi.Image {
-	img_size := w * h * 4
-	img_pixels := unsafe { &u8(malloc(img_size)) }
-
-	png_file := stbi.Image{
-		ok:          true
-		ext:         'png'
-		data:        img_pixels
-		width:       w
-		height:      h
-		nr_channels: 4
-	}
-	return png_file
+	this.data.file_name = path
+	this.data.file_size = format_size(os.file_size(path))
+	this.load_stbi(png_file)
 }
 
 fn (mut app App) load_new(w int, h int) {
-	mut this := app.canvas
-
-	mut png_file := app.make_new(w, h)
-
-	mut data := this.data
-
-	this.zoom = 1
-
-	data.file = png_file
-	this.data = data
-	this.img = data.id
-	this.w = png_file.width
-	this.h = png_file.height
-	this.width = data.file.width
-	this.height = data.file.height
-	this.loaded = false
+	png_file := make_stbi(w, h)
+	app.canvas.load_stbi(png_file)
 }
 
 fn (mut this Image) resize(w int, h int) {
-	mut data := this.data
-
-	this.zoom = 1
-
-	mut png_file := stbi.resize_uint8(data.file, w, h) or { panic(err) }
-
-	data.file = png_file
-	this.data = data
-	this.img = data.id
-	this.w = png_file.width
-	this.h = png_file.height
-	this.width = data.file.width
-	this.height = data.file.height
-	this.loaded = false
+	png_file := stbi.resize_uint8(this.data.file, w, h) or { panic(err) }
+	this.load_stbi(png_file)
 }
 
 fn (mut this Image) grayscale_filter() {
@@ -148,6 +95,7 @@ fn make_stbi(w int, h int) stbi.Image {
 fn (mut this Image) load_stbi(png_file stbi.Image) {
 	mut data := this.data
 	this.zoom = 1
+	data.file.free()
 	data.file = png_file
 	this.data = data
 	this.img = data.id
@@ -249,16 +197,15 @@ fn (mut this Image) scale2x() [][]gx.Color {
 	return dst
 }
 
-fn (mut this Image) hq3x() [][]gx.Color {
+fn (mut this Image) hq3x() {
 	src_width := this.w
 	src_height := this.h
-	mut dst := [][]gx.Color{len: src_height * 3, init: []gx.Color{len: src_width * 3}}
 
 	mut en := make_stbi(this.w * 3, this.h * 3)
 
 	for y in 0 .. src_height {
 		for x in 0 .. src_width {
-			c := this.get(x, y) //[y][x]
+			c := this.get(x, y)
 			a := if y > 0 { this.get(x, y - 1) } else { c }
 			b := if x > 0 { this.get(x - 1, y) } else { c }
 			d := if x < src_width - 1 { this.get(x + 1, y) } else { c }
@@ -267,34 +214,27 @@ fn (mut this Image) hq3x() [][]gx.Color {
 			// Fill the 3x3 block
 			for dy in 0 .. 3 {
 				for dx in 0 .. 3 {
-					dst[y * 3 + dy][x * 3 + dx] = c
+					set_pixel(en, x * 3 + dx, y * 3 + dy, c)
 				}
 			}
 
 			// Apply the hq3x rules
 			if a == b && a != d && b != e {
-				dst[y * 3][x * 3] = a
+				set_pixel(en, x * 3, y * 3, a)
 			}
 			if a == d && a != b && d != e {
-				dst[y * 3][x * 3 + 2] = d
+				set_pixel(en, x * 3 + 2, y * 3, d)
 			}
 			if e == b && e != a && b != d {
-				dst[y * 3 + 2][x * 3] = e
+				set_pixel(en, x * 3, y * 3 + 2, e)
 			}
 			if e == d && e != a && d != b {
-				dst[y * 3 + 2][x * 3 + 2] = e
+				set_pixel(en, x * 3 + 2, y * 3 + 2, e)
 			}
 		}
 	}
 
-	for x in 0 .. this.w * 3 {
-		for y in 0 .. this.h * 3 {
-			set_pixel(en, x, y, dst[y][x])
-		}
-	}
 	this.load_stbi(en)
-
-	return dst
 }
 
 fn (mut this Image) increase_alpha() {
@@ -306,7 +246,6 @@ fn (mut this Image) increase_alpha() {
 			}
 
 			new_color := gx.rgba(color.r, color.g, color.b, color.a + 5)
-
 			this.set(x, y, new_color)
 		}
 	}

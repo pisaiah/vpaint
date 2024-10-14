@@ -311,7 +311,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	mut modal := ui.modal(win, 'About vPaint')
 
 	modal.top_off = 25
-	modal.in_width = 360
+	modal.in_width = 300
 	modal.in_height = 290
 
 	mut title := ui.Label.new(text: 'VPaint')
@@ -319,32 +319,31 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	title.pack()
 
 	mut p := ui.Panel.new(
-		layout: ui.BoxLayout.new(
-			ori: 1
+		layout: ui.BorderLayout.new(
+			hgap: 20
 		)
 	)
-	p.add_child(title)
+	p.add_child_with_flag(title, ui.borderlayout_north)
 
 	txt := [
 		'Simple Image Editor written in the V Language.',
 		'(version 0.6-dev) (iUI: ${ui.version})',
 		'\t ',
-		'\u00A9 2022-2023 Isaiah.',
+		'Copyright \u00A9 2022-2024 Isaiah.',
 		'Released under MIT License.',
 	]
-	for line in txt {
-		mut lbl := ui.Label.new(text: line)
-		lbl.pack()
-		p.add_child(lbl)
-	}
+
+	mut lbl := ui.Label.new(text: txt.join('\n'))
+	lbl.pack()
+	p.add_child_with_flag(lbl, ui.borderlayout_center)
 
 	mut lp := ui.Panel.new(
 		layout: ui.BoxLayout.new(
 			ori:  0
-			hgap: 16
+			hgap: 30
 		)
 	)
-	lp.set_bounds(-14, 0, modal.in_width - 32, 30)
+	lp.set_bounds(0, 0, modal.in_width - 32, 30)
 
 	icons8 := ui.link(
 		text: 'Icons8'
@@ -354,7 +353,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 
 	git := ui.link(
 		text: 'Github'
-		url:  'https://github.com/isaiahpatton/vpaint'
+		url:  'https://github.com/pisaiah/vpaint'
 		pack: true
 	)
 
@@ -364,13 +363,16 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 		pack: true
 	)
 
-	p.set_bounds(14, 9, modal.in_width - 64, modal.in_height)
+	p.set_bounds(0, 9, modal.in_width, modal.in_height - 100)
 	lp.add_child(icons8)
 	lp.add_child(git)
 	lp.add_child(vlang)
-	p.add_child(lp)
+	p.add_child_with_flag(lp, ui.borderlayout_south)
 
 	modal.add_child(p)
+	modal.make_close_btn(true)
+	modal.close.set_bounds((modal.in_width / 2) - 50, modal.in_height - 45, 100, 30)
+	modal.needs_init = false
 
 	win.add_child(modal)
 }

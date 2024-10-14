@@ -81,27 +81,99 @@ fn (mut this PencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
 // Select Tool
+// TODO: Implement Selection
 struct SelectTool {
 	tool_name string = 'Select'
 mut:
 	dx        int = -1
 	dy        int
-	selection Selection
+	selection Selection = Selection{-1, -1, -1, -1}
+	sx        f32       = -1
+	sy        f32
+	moving    bool
 }
 
 struct Selection {
+mut:
 	x1 int
 	y1 int
 	x2 int
 	y2 int
 }
 
+pub fn (sel Selection) is_in(img &Image, px f32, py f32) bool {
+	x1, y1 := img.get_point_screen_pos(sel.x1 - 1, sel.y1 - 1)
+	x2, y2 := img.get_point_screen_pos(sel.x2, sel.y2)
+
+	width := (x2 - x1) + img.zoom
+	height := (y2 - y1) + img.zoom
+
+	x := x1
+	y := y1
+
+	midx := x + (width / 2)
+	midy := y + (height / 2)
+
+	return math.abs(midx - px) < (width / 2) && math.abs(midy - py) < (height / 2)
+}
+
+fn pos_only(num int) int {
+	return if num < 0 { 0 } else { num }
+}
+
+fn (mut this SelectTool) draw_moving_drag(img &Image, ctx &ui.GraphicsContext) {
+	swidth := this.selection.x2 - this.selection.x1
+	sheight := this.selection.y2 - this.selection.y1
+
+	tsx, tsy := img.get_pos_point(this.sx, this.sy)
+	dsx := tsx - this.selection.x1
+	dsy := tsy - this.selection.y1
+
+	mx_ := img.mx - dsx
+	my_ := img.my - dsy
+
+	mx := if mx_ + swidth >= img.w { img.w - swidth - 1 } else { pos_only(mx_) }
+	my := if my_ + sheight >= img.h { img.h - sheight - 1 } else { pos_only(my_) }
+
+	this.selection.x1 = mx
+	this.selection.y1 = my
+
+	this.selection.x2 = this.selection.x1 + swidth
+	this.selection.y2 = this.selection.y1 + sheight
+
+	this.sx, this.sy = img.get_point_screen_pos(mx + dsx, my + dsy)
+}
+
+fn (mut this SelectTool) draw_moving(img &Image, ctx &ui.GraphicsContext) {
+	this.moving = true
+
+	x1, y1 := img.get_point_screen_pos(this.selection.x1, this.selection.y1)
+	x2, y2 := img.get_point_screen_pos(this.selection.x2, this.selection.y2)
+
+	width := (x2 - x1) + img.zoom
+	height := (y2 - y1) + img.zoom
+
+	ctx.gg.draw_rounded_rect_empty(x1, y1, width, height, 1, gx.green)
+	ctx.gg.draw_rounded_rect_filled(x1, y1, width, height, 1, gx.rgba(0, 255, 0, 50))
+
+	sx, sy := img.get_point_screen_pos(img.mx, img.my)
+
+	if this.selection.is_in(img, sx, sy) && this.dx != -1 {
+		this.draw_moving_drag(img, ctx)
+	}
+}
+
 fn (mut this SelectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
-	if this.dx == -1 {
+	mut img := unsafe { &Image(a) }
+
+	if this.selection.x1 != -1 {
+		this.draw_moving(img, ctx)
 		return
 	}
 
-	mut img := unsafe { &Image(a) }
+	if this.dx == -1 {
+		return
+	}
 
 	xoff := img.mx - this.dx
 	yoff := img.my - this.dy
@@ -119,22 +191,38 @@ fn (mut this SelectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 
 fn (mut this SelectTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
+
 	if this.dx == -1 {
 		this.dx = img.mx
 		this.dy = img.my
+	}
+
+	if this.sx == -1 {
+		this.sx, this.sy = img.get_point_screen_pos(this.dx, this.dy)
 	}
 }
 
 fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
-	this.selection = Selection{
-		x1: math.min(img.mx, this.dx)
-		y1: math.min(img.my, this.dy)
-		x2: math.max(img.mx, this.dx)
-		y2: math.max(img.my, this.dy)
+	if !this.moving {
+		// Making Selection
+		this.selection = Selection{
+			x1: math.min(img.mx, this.dx)
+			y1: math.min(img.my, this.dy)
+			x2: math.max(img.mx, this.dx)
+			y2: math.max(img.my, this.dy)
+		}
+	} else {
+		// Clicked out of current Selection
+		this.moving = false
+		sx, sy := img.get_point_screen_pos(img.mx, img.my)
+		if !this.selection.is_in(img, sx, sy) {
+			this.selection = Selection{-1, -1, -1, -1}
+		}
 	}
 
+	this.sx = -1
 	this.dx = -1
 	this.dy = -1
 }

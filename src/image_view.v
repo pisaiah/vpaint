@@ -15,7 +15,7 @@ mut:
 	file_size string
 }
 
-pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
+pub fn (mut app App) make_image_view(file string) &ui.Panel {
 	mut p := ui.Panel.new(
 		layout: ui.FlowLayout.new(
 			hgap: 0
@@ -23,7 +23,7 @@ pub fn make_image_view(file string, mut win ui.Window, mut app App) &ui.Panel {
 		)
 	)
 
-	mut png_file := stbi.load(file) or { app.make_new(0, 0) }
+	mut png_file := stbi.load(file) or { make_stbi(0, 0) }
 
 	mut data := &ImageViewData{
 		file:      png_file
@@ -98,11 +98,11 @@ fn format_size(val f64) string {
 
 	if kb > 1024 {
 		mb := kb / by
-		str2 := '${mb}'.str()[0..4]
+		str2 := mb.str()[0..4]
 
-		return '${str} KB / ${str2} MB'
+		return str + ' KB / ${str2} MB'
 	}
-	return '${str} KB'
+	return str + ' KB'
 }
 
 fn make_gg_image(mut storage ImageViewData, mut win ui.Window, first bool) {
@@ -145,16 +145,10 @@ fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
 	}
 
 	ratio := f32(.5)
-	mut r := u8(0)
-	mut g := u8(0)
-	mut b := u8(0)
-	mut a := u8(0)
-	for color in [ca, cb] {
-		r += u8(color.r * ratio)
-		g += u8(color.g * ratio)
-		b += u8(color.b * ratio)
-		a += u8(color.a * ratio)
-	}
+	r := u8(ca.r * ratio) + u8(cb.r * ratio)
+	g := u8(ca.g * ratio) + u8(cb.g * ratio)
+	b := u8(ca.b * ratio) + u8(cb.b * ratio)
+	a := u8(ca.a * ratio) + u8(cb.a * ratio)
 	return gx.rgba(r, g, b, a)
 }
 
@@ -348,7 +342,6 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 		this.load_if_not_loaded(ctx)
 	}
 
-	// if this.width < 128 || this.height < 128 {
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
 		img_id:   this.app.bg_id
 		img_rect: gg.Rect{
@@ -358,29 +351,6 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 			height: this.height
 		}
 	})
-	// TODO: improve this
-	/*
-	} else {
-		pp := this.width / this.bw
-		ph := this.height / this.bh
-
-		for x in 0 .. this.bw {
-			for y in 0 .. this.bh {
-				ctx.gg.draw_image_with_config(gg.DrawImageConfig{
-					img_id: this.app.bg_id
-					img_rect: gg.Rect{x: this.x + (pp * x), y: this.y + (ph * y), width: pp, height: ph}
-				})
-				if this.y + (pp * y) + pp > this.y + this.height {
-					break
-				}
-			}
-			
-			if this.x + (pp * x) + pp > this.x + this.app.sv.width {
-				break
-			}
-		}
-	}
-	*/
 
 	ctx.gg.draw_image_with_config(gg.DrawImageConfig{
 		img_id:   this.img
@@ -470,6 +440,12 @@ fn (this &Image) get_point_screen_pos(x int, y int) (f32, f32) {
 	sx := this.x + (x * this.zoom)
 	sy := this.y + (y * this.zoom)
 	return sx, sy
+}
+
+fn (this &Image) get_pos_point(x f32, y f32) (int, int) {
+	px := (x - this.x) / this.zoom
+	py := (y - this.y) / this.zoom
+	return int(px), int(py)
 }
 
 fn refresh_img(mut storage ImageViewData, mut ctx gg.Context) {
