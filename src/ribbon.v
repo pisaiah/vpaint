@@ -66,7 +66,7 @@ fn (mut app App) make_color_box() &ui.Panel {
 				btn_color := btn.override_bg_color
 				if btn_color != color {
 					// WASM does not support Closures
-					dump('Debug: Problem with Wasm closure')
+					// dump('Debug: Problem with Wasm closure')
 					app.set_color(btn_color)
 					return
 				}

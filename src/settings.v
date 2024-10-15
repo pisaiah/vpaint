@@ -8,8 +8,6 @@ fn (mut app App) show_settings() {
 
 	mut panel := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1))
 
-	dump(app.settings)
-
 	mut box := ui.Checkbox.new(text: 'Auto-hide Sidebar')
 	box.is_selected = app.settings.autohide_sidebar
 	box.set_bounds(0, 0, 100, 24)
@@ -27,10 +25,31 @@ fn (mut app App) hide_sidebar_mouse_up(mut e ui.MouseEvent) {
 	app.settings_save() or {}
 }
 
-const default_config = ['# VPaint Configuration File']
+const default_config = ['# VPaint Configuration File', 'theme: Default']
+
+fn wasm_save_files() {
+	$if emscripten ? {
+		C.emscripten_run_script(c'iui.trigger = "savefiles"')
+	}
+}
+
+fn wasm_load_files() {
+	$if emscripten ? {
+		C.emscripten_run_script(c'iui.trigger = "lloadfiles"')
+	}
+}
+
+fn get_cfg_dir() string {
+	$if emscripten ? {
+		return os.home_dir()
+	}
+	return os.config_dir() or { os.home_dir() }
+}
 
 fn (mut app App) settings_load() ! {
-	cfg_dir := os.config_dir() or { return err }
+	wasm_load_files()
+
+	cfg_dir := get_cfg_dir()
 	dir := os.join_path(cfg_dir, '.vpaint')
 	file := os.join_path(dir, 'config.txt')
 
@@ -62,12 +81,13 @@ fn (mut app App) settings_load() ! {
 			mut theme := ui.theme_by_name(text)
 			app.win.set_theme(theme)
 			app.set_theme_bg(text)
+			app.settings.theme = text
 		}
 	}
 }
 
 fn (mut app App) settings_save() ! {
-	cfg_dir := os.config_dir() or { return err }
+	cfg_dir := get_cfg_dir()
 	dir := os.join_path(cfg_dir, '.vpaint')
 	file := os.join_path(dir, 'config.txt')
 
@@ -84,4 +104,8 @@ fn (mut app App) settings_save() ! {
 	txt << 'theme: ${app.settings.theme}'
 
 	os.write_file(file, txt.join('\n')) or { return err }
+
+	if app.wasm_load_tick > 25 {
+		wasm_save_files()
+	}
 }

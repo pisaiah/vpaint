@@ -26,6 +26,29 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 	// webasm build works better without closures
 	mut app := e.ctx.win.get[&App]('app')
 
+	$if emscripten ? {
+		if app.wasm_load_tick < 25 {
+			app.wasm_load_tick += 1
+		}
+
+		if app.wasm_load_tick > 5 && app.wasm_load_tick < 10 {
+			println('Wasm detected. Loading local storage.')
+			wasm_load_files()
+			app.wasm_load_tick = 10
+		}
+
+		if app.wasm_load_tick > 20 && app.wasm_load_tick < 26 {
+			// Load Settings after a few ticks
+			// for some reason, Emscripten will crash if FS is called without this.
+			println('Wasm detected. Reloading settings...')
+			app.settings_load() or {}
+			app.wasm_load_tick = 28
+			app.settings_save() or {}
+		}
+	}
+
+	// dump(e.ctx.gg.bg_color)
+
 	h := app.sidebar.height
 	w := if h > 180 { 54 } else { 104 }
 

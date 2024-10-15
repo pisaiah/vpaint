@@ -202,7 +202,7 @@ jobs:
           ../v.exe . -o v2w.exe
           git clone https://github.com/pisaiah/vpaint --depth 1
           dir
-          ./v2w.exe ../ vpaint
+          ./v2w.exe ../ vpaint -Os
       - name: Remove excluded
         run: |
            rm -rf .git

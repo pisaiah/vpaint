@@ -15,23 +15,24 @@ mut:
 @[heap]
 struct App {
 mut:
-	win         &ui.Window
-	sv          &ui.ScrollView
-	sidebar     &ui.Panel // HBox
-	canvas_zoom int
-	data        &ImageViewData
-	canvas      &Image
-	color       gx.Color
-	color_2     gx.Color = gx.white
-	sele_color  bool
-	tool        &Tool
-	ribbon      &ui.Panel
-	status_bar  &ui.Panel
-	stat_lbl    &ui.Label
-	brush_size  int = 1
-	bg_id       int
-	need_open   bool
-	settings    &Settings
+	win            &ui.Window
+	sv             &ui.ScrollView
+	sidebar        &ui.Panel // HBox
+	canvas_zoom    int
+	data           &ImageViewData
+	canvas         &Image
+	color          gx.Color
+	color_2        gx.Color = gx.white
+	sele_color     bool
+	tool           &Tool
+	ribbon         &ui.Panel
+	status_bar     &ui.Panel
+	stat_lbl       &ui.Label
+	brush_size     int = 1
+	bg_id          int
+	need_open      bool
+	settings       &Settings
+	wasm_load_tick int
 }
 
 fn (app &App) get_color() gx.Color {
@@ -73,7 +74,7 @@ fn main() {
 	}
 	window.id_map['app'] = app
 
-	app.settings_load() or { println(err) }
+	app.settings_load() or { println('Error loading settings: ${err}') }
 	app.make_menubar(mut window)
 
 	mut path := os.resource_abs_path('untitledv.png')
@@ -137,8 +138,10 @@ fn main() {
 	cim := win.gg.cache_image(gg_im)
 	app.bg_id = cim
 
-	// background := gx.rgb(210, 220, 240)
-	// window.gg.set_bg_color(background)
+	background := gx.rgb(210, 220, 240)
+	window.gg.set_bg_color(background)
+
+	app.set_theme_bg(app.win.theme.name)
 
 	window.gg.run()
 }
