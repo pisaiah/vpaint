@@ -15,7 +15,7 @@ jobs:
       ZIPNAME: vpaint_linux.zip
     steps:
       - name: Setup V
-        uses: vlang/setup-v@v1
+        uses: vlang/setup-v@v1.4
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
@@ -35,11 +35,18 @@ jobs:
           v install https://github.com/pisaiah/ui
           git clone https://github.com/pisaiah/ui iui
           cd iui
-          git clone https://github.com/pisaiah/vpaint
+          git clone https://github.com/pisaiah/vpaint --depth 1
           v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
            rm -rf .git
+           rm -rf docs
+           cd iui
+           cd vpaint
+           rm -rf docs
+           rm -rf *.v
+           cd ..
+           cd ..
       - name: Create ZIP archive
         run: |
            cd iui
@@ -59,7 +66,7 @@ jobs:
       ZIPNAME: vpaint_macos.zip
     steps:
       - name: Setup V
-        uses: vlang/setup-v@v1
+        uses: vlang/setup-v@v1.4
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
@@ -74,11 +81,18 @@ jobs:
           v install https://github.com/pisaiah/ui
           git clone https://github.com/pisaiah/ui iui
           cd iui
-          git clone https://github.com/pisaiah/vpaint
+          git clone https://github.com/pisaiah/vpaint --depth 1
           v -cc $CC -skip-unused -gc boehm vpaint
       - name: Remove excluded
         run: |
            rm -rf .git
+           rm -rf docs
+           cd iui
+           cd vpaint
+           rm -rf docs
+           rm -rf *.v
+           cd ..
+           cd ..
       - name: Create ZIP archive
         run: |
            cd iui
@@ -98,7 +112,7 @@ jobs:
       ZIPNAME: vpaint_windows.zip
     steps:
       - name: Setup V
-        uses: vlang/setup-v@v1
+        uses: vlang/setup-v@v1.4
         with:
           # Default: ${{ github.token }}
           token: ${{ github.token }}
@@ -111,37 +125,25 @@ jobs:
       - uses: msys2/setup-msys2@v2
       - name: Compile
         run: |
-          git clone https://github.com/vlang/v
-          cd v
-          .\make.bat
-          git clone https://github.com/pisaiah/ui iui
-          .\v.exe symlink
+          where v
           v install https://github.com/pisaiah/ui
-          cd iui
-          git clone https://github.com/pisaiah/vpaint
+          git clone https://github.com/pisaiah/vpaint --depth 1
           v -cc gcc -skip-unused -gc boehm -cflags -static -cflags -mwindows vpaint
       - name: Remove excluded
         shell: msys2 {0}
         run: |
            rm -rf .git
-           cd v
-           cd iui
+           rm -rf docs
            cd vpaint
+           rm -rf docs
            rm -rf *.v
-           cd ..
-           cd ..
            cd ..
       - name: Create archive
         shell: msys2 {0}
         run: |
-           cd v
-           cd iui
            cd vpaint
            cd ..
            powershell Compress-Archive vpaint $ZIPNAME
-           mv $ZIPNAME ../../
-           cd ..
-           cd ..
 # NB: the powershell Compress-Archive line is from:
 # https://superuser.com/a/1336434/194881
 # It is needed, because `zip` is not installed by default :-|
@@ -150,10 +152,77 @@ jobs:
         with:
           name: windows
           path: vpaint_windows.zip
-
+  build-emscripten:
+    env:
+      EM_VERSION: 1.39.18
+      EM_CACHE_FOLDER: 'emsdk-cache'
+      CC: gcc
+      ZIPNAME: vpaint_emscripten.zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mymindstorm/setup-emsdk@v14
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          # Make sure to set a version number!
+          version: 3.1.67
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: 'emsdk-cache'
+      - name: Verify
+        run: emcc -v
+      - name: Setup V
+        uses: vlang/setup-v@v1.4
+        with:
+          # Default: ${{ github.token }}
+          token: ${{ github.token }}
+          version: 'weekly.2024.37'
+          version-file: ''
+          check-latest: true
+          stable: false
+          architecture: ''
+      - uses: actions/checkout@v1
+      - name: Compile
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install libgc-dev
+          sudo apt install build-essential
+          sudo apt-get --yes --force-yes install libxi-dev libxcursor-dev mesa-common-dev
+          sudo apt-get --yes --force-yes install libgl1-mesa-glx
+          v install https://github.com/pisaiah/ui
+          git clone https://github.com/pisaiah/ui iui
+          cd iui
+          git clone https://github.com/vlang/v --depth 1
+          cd v
+          make
+          mv v v.exe
+          git clone https://github.com/pisaiah/v-emscripten-script
+          cd v-emscripten-script
+          ../v.exe . -o v2w.exe
+          git clone https://github.com/pisaiah/vpaint --depth 1
+          dir
+          ./v2w.exe ../ vpaint
+      - name: Remove excluded
+        run: |
+           rm -rf .git
+      - name: Create ZIP archive
+        run: |
+           cd iui
+           cd v
+           zip -r9 --symlinks $ZIPNAME v-emscripten-script/output/
+           mv $ZIPNAME ../../
+           cd ..
+           cd ..
+      - name: Create artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: emscripten
+          path: vpaint_emscripten.zip
+  
   release:
     name: Create Github Release
-    needs: [build-linux, build-windows, build-macos]
+    needs: [build-linux, build-windows, build-macos, build-emscripten]
     runs-on: ubuntu-20.04
     steps:
       - name: Get short tag name
@@ -178,7 +247,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        version: [linux, macos, windows]
+        version: [linux, macos, windows, emscripten]
     steps:
       - uses: actions/checkout@v1
       - name: Fetch artifacts
