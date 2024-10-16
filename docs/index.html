@@ -3,134 +3,149 @@
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<style>
 		body{background:rgb(220,220,220);}
-		
-			body{background:rgb(220,220,220);}
-	@media (prefers-color-scheme: dark) { body { background: rgb(180,180,180);}}
-		
-		.w3-button {
-			padding-left: 1rem; padding-right: 1rem;
-			min-width: 45%;
-			margin-bottom: 1rem;
-			border-radius: 8px;
+		body{background:rgb(220,220,220);}
+		@media (prefers-color-scheme: dark) { body { background: rgb(180,180,180);}}
+		.btn2 {
+		padding-left: 1rem; padding-right: 1rem;
+		min-width: 45%;
+		margin-bottom: 1rem;
+		border-radius: 8px;
 		}
 		.bf {min-width: 91%;}
 		.dl { min-width: 71%; margin-bottom: .5rem;}
 		.dl {
-			background-image: url('https://bit.ly/dwn-icon');
-			background-size: 32px;
-			background-repeat: no-repeat;
-			background-position: top 50% right 10px;
+		background-image: url('https://bit.ly/dwn-icon');
+		background-size: 32px;
+		background-repeat: no-repeat;
+		background-position: top 50% right 10px;
 		}
 		.copy-old {
-			font-size: 11px;
-			color: rgba(0, 0, 0, .4);
-			margin-top: 2rem;
+		font-size: 11px;
+		color: rgba(0, 0, 0, .4);
+		margin-top: 2rem;
 		}
-		.copy { color:white; }
+		.copy { color:rgb(255,255,255,.3); font-size: 12px;}
 		.lgc {background:rgb(210,210,210)}
 		#can2 {position:relative}
 		#ldd {
-			background: rgba(90, 90, 90,.7);
-			color: white;
-			display: inline-block;
-			padding: .2rem;
-			position: absolute;
-			left: 1%; bottom: 1%; border-radius: 4px;
+		background: rgba(90, 90, 90,.7);
+		color: white;
+		display: inline-block;
+		padding: .2rem;
+		position: absolute;
+		left: 1%; bottom: 1%; border-radius: 4px;
 		}
 	</style>
 	<title>vpaint</title>
+	<div class="w3-bar w3-black">
+		<a href="#" class="w3-bar-item w3-button w3-mobile w3-green">pisaiah.com</a>
+		<!--
+			<a href="#" class="w3-bar-item w3-button w3-mobile">Link 1</a>
+			   <a href="#" class="w3-bar-item w3-button w3-mobile">Link 2</a>
+			   <div class="w3-dropdown-hover w3-mobile">
+			     <button class="w3-button">Dropdown <i class="fa fa-caret-down"></i></button>
+			     <div class="w3-dropdown-content w3-bar-block w3-dark-grey">
+			       <a href="#" class="w3-bar-item w3-button w3-mobile">Link 1</a>
+			       <a href="#" class="w3-bar-item w3-button w3-mobile">Link 2</a>
+			       <a href="#" class="w3-bar-item w3-button w3-mobile">Link 3</a>
+			     </div>
+			   </div>
+			-->
+	</div>
 	<div class="w3-container w3-auto w3-margin-top">
 		<div class="w3-row" style="margin-top:10vh">
-	
-		<div class="w3-third w3-mobile">
-			<h1 class="w3-xxxlarge"><b>vPaint</b></h1>
-			<p class="w3-large">Simple Image Viewer & Editor written in the <a href="https://vlang.io/" target="_blank">V</a> Programming Language.</p>
-			<p>&nbsp;</p>
-			<a href="./demo/index.html"><button class="w3-button w3-blue w3-border bf">Demo</button></a><br>
-			<a href="https://github.com/pisaiah/vpaint" target="_blank"><button class="w3-button lgc w3-border">Github</button></a>
-			<a href="https://discord.gg/NruVtYBf5g" target="_blank"><button class="w3-button lgc w3-border">Discord</button></a><hr>
-			<h3>Downloads:</h3>
-
-			<!--
-			<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_windows.zip"><button class="w3-button w3-green w3-border dl">Windows</button></a>
-			<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_linux.zip"><button class="w3-button w3-green w3-border dl">Linux</button></a>
-			<a href="https://bit.ly/vpaint-0-5-macos"><button class="w3-button w3-green w3-border dl">macos</button></a>
-			-->
-			<a href="https://github.com/pisaiah/vpaint/releases" target="_blank"><button class="w3-button w3-green w3-border dl">View Downloads</button></a>
-		</div>
-
-		<div class="w3-twothird w3-mobile">
-			<div style="background-imaage: url('./demo/window.png');">
-				<img id="tb" src="./demo/titlebar.png" style="float:right">
-				<div id="can2">
-					<div id="ldd">Hover to load demo</div>
+			<div class="w3-third w3-mobile">
+				<h1 class="w3-xxxlarge"><b>vPaint</b></h1>
+				<p class="w3-large">Simple Image Viewer & Editor written in the <a href="https://vlang.io/" target="_blank">V</a> Programming Language.</p>
+				<p>&nbsp;</p>
+				<a href="./demo/index.html"><button class="w3-button btn2 w3-blue w3-border bf">Demo</button></a><br>
+				<a href="https://github.com/pisaiah/vpaint" target="_blank"><button class="w3-button btn2 lgc w3-border">Github</button></a>
+				<a href="https://discord.gg/NruVtYBf5g" target="_blank"><button class="w3-button btn2 lgc w3-border">Discord</button></a>
+				<hr>
+				<h3>Downloads:</h3>
+				<!--
+					<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_windows.zip"><button class="w3-button w3-green w3-border dl">Windows</button></a>
+					<a href="https://github.com/pisaiah/vpaint/releases/download/0.5/vpaint_linux.zip"><button class="w3-button w3-green w3-border dl">Linux</button></a>
+					<a href="https://bit.ly/vpaint-0-5-macos"><button class="w3-button w3-green w3-border dl">macos</button></a>
+					-->
+				<a href="https://github.com/pisaiah/vpaint/releases" target="_blank"><button class="w3-button w3-green w3-border dl">View Downloads</button></a>
+			</div>
+			<div class="w3-twothird w3-mobile">
+				<div style="background-imaage: url('./demo/window.png');">
+					<img id="tb" src="./demo/titlebar.png" style="float:right">
+					<div id="can2">
+						<div id="ldd">Hover to load demo</div>
+					</div>
+					<canvas id="canvas" tabindex=-1 style="display:none"></canvas>
 				</div>
-				<canvas id="canvas" tabindex=-1 style="display:none"></canvas>
 			</div>
 		</div>
-
-		</div>
-		<div class="w3-row w3-center"> <center>
-		</center>
+		<div class="w3-row w3-center">
+			<center>
+			</center>
 		</div>
 	</div>
 	<div class="copy w3-auto">
-		&copy; 2022-24 by Isaiah. Icons by Icons8.com
+		&copy; 2022-24 Isaiah.
 	</div>
-	
-	
-	<div class="w3-container w3-padding-3a2" style="background:rgb(28,30,32);border-top: 3px solid #243342;color:rgb(230,230,230);padding:40px;margin-top:300px;">
-<div class="w3-container w3-content">
-
-<div class="w3-container w3-padding-16">
-<div class="w3-twothird">
-<p>Simple Image Viewer & Editor written in the V Programming Language.<br>
-
-</p>
-</div>
-<div class="w3-rest">
-<div class="w3-half"> Links: <ul>
-<li><a href="https://github.com/pisaiah/vpaint">Github</a></li>
-<li><a href="https://github.com/pisaiah/vpaint/releases">Releases</a></li>
-<li><a href="./demo/index.html">Try Online</a></li>
-</ul>
-</div>
-<div class="w3-half">Other: <ul>
-<li><a href="https://github.com/pisaiah/vide" target="_blank">Vide</a></li>
-<li><a href="https://vpaint.app" target="_blank">VPaint</a></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<br>
-</div>
+	<div class="w3-row w3-center w3-gray" style="padding: 12px; padding-bottom: 30px">
+		<center>
+			<a href="https://x.com/v_language/status/1804490189697364189" target="_blank"><img src="./tweet.png"></a>
+		</center>
+	</div>
+	<div class="w3-container w3-padding-3a2" style="background:rgb(28,30,32);border-top: 3px solid #243342;color:rgb(230,230,230);padding:40px;maargin-top:300px;">
+		<div class="w3-container w3-content">
+			<div class="w3-container w3-padding-16">
+				<div class="w3-twothird">
+					<p>Simple Image Viewer & Editor written in the V Programming Language.<br>
+					</p>
+				</div>
+				<div class="w3-rest">
+					<div class="w3-half">
+						Links: 
+						<ul>
+							<li><a href="https://github.com/pisaiah/vpaint">Github</a></li>
+							<li><a href="https://github.com/pisaiah/vpaint/releases">Releases</a></li>
+							<li><a href="./demo/index.html">Try Online</a></li>
+						</ul>
+					</div>
+					<div class="w3-half">
+						Other: 
+						<ul>
+							<li><a href="https://github.com/pisaiah/vide" target="_blank">Vide</a></li>
+							<li><a href="https://vpaint.app" target="_blank">VPaint</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br>
+	</div>
 	<div class="copy" style="background:black;text-align:center;padding:16px">
-<p><small>Copyright © 2022-2024 Isaiah.</small></p>
-</div>
-	
+		<p><small>Copyright © 2022-2024 Isaiah.</small></p>
+	</div>
 	<script>
-	var has_loaded = false;
-
-	var ca = document.getElementById("canvas");
-	var c2 = document.getElementById("can2");
-	c2.addEventListener("mouseover", (event) => {
-		if (has_loaded) { return; }
+		var has_loaded = false;
 		
-		c2.style.display = "none";
-
-		var script = document.createElement('script');
-		script.type = "module";
-		script.src = "./demo/mui_helper.js";
-		script.async = false;
-		document.head.appendChild(script);
-		has_loaded = true;
-		ca.style.display = "block";
-	});
+		var ca = document.getElementById("canvas");
+		var c2 = document.getElementById("can2");
+		c2.addEventListener("mouseover", (event) => {
+			if (has_loaded) { return; }
+			
+			c2.style.display = "none";
+		
+			var script = document.createElement('script');
+			script.type = "module";
+			script.src = "./demo/iui_helper.js";
+			script.async = false;
+			document.head.appendChild(script);
+			has_loaded = true;
+			ca.style.display = "block";
+		});
 	</script>
 	<style>
-	#tb {max-width: 100%;}
-	#canvas, #can2 {
+		#tb {max-width: 100%;}
+		#canvas, #can2 {
 		float:right;
 		width:640px;
 		max-width: 100%;
@@ -143,6 +158,6 @@
 		border-top-left-radius: 0;
 		border-top-right-radius: 0;
 		background-image: url('./previeww.png');
-	}
+		}
 	</style>
 </html>
