@@ -3,8 +3,8 @@ module main
 import iui as ui
 
 fn (mut app App) sidebar_autohide_draw(w int) {
-	move := 5
-	hidden_size := 5
+	move := 3
+	hidden_size := 6
 
 	if app.win.mouse_x < app.sidebar.width + (hidden_size * 2) && app.win.mouse_y > app.sidebar.ry {
 		if app.sidebar.width < w {
@@ -46,8 +46,6 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 			app.settings_save() or {}
 		}
 	}
-
-	// dump(e.ctx.gg.bg_color)
 
 	h := app.sidebar.height
 	w := if h > 180 { 54 } else { 104 }

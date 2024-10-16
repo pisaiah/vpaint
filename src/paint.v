@@ -33,6 +33,7 @@ mut:
 	need_open      bool
 	settings       &Settings
 	wasm_load_tick int
+	cp             &ColorPicker
 }
 
 fn (app &App) get_color() gx.Color {
@@ -71,6 +72,7 @@ fn main() {
 		stat_lbl:   unsafe { nil }
 		tool:       &PencilTool{}
 		settings:   &Settings{}
+		cp:         unsafe { nil }
 	}
 	window.id_map['app'] = app
 

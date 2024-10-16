@@ -12,11 +12,6 @@ fn (mut app App) make_ribbon() {
 	box1.add_child(make_c_btn(0))
 	box1.add_child(make_c_btn(10))
 
-	// box1.set_bounds(5, 0, 50, 64)
-	// box1.set_x(5)
-
-	// mut hide_btn := ui.Button.new(text: 'Colors')
-
 	// Eye Dropper
 	img_picker_file := $embed_file('assets/rgb-picker.png')
 	mut btn := app.ribbon_icon_btn(img_picker_file.to_bytes())
@@ -24,8 +19,8 @@ fn (mut app App) make_ribbon() {
 	app.ribbon.height = 74
 
 	box1.set_x(5)
-	color_box.set_x(5)
-	btn.set_x(5)
+	color_box.set_x(10)
+	btn.set_x(10)
 
 	app.ribbon.add_child(box1)
 	app.ribbon.add_child(color_box)
@@ -77,6 +72,17 @@ fn (mut app App) make_color_box() &ui.Panel {
 		color_box.add_child(btn)
 	}
 
+	color_box.subscribe_event('draw', fn [mut color_box] (mut e ui.DrawEvent) {
+		w := e.target.parent.width
+		if w < 385 {
+			aa := w - 95
+			color_box.width = aa
+		} else if color_box.width < 300 {
+			color_box.width = (24 + 6) * 10
+		}
+	})
+
+	color_box.set_background(gx.rgba(0, 0, 0, 1))
 	color_box.set_bounds(0, 0, (size + 6) * 10, 64)
 	return color_box
 }
@@ -100,8 +106,17 @@ fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
 
 	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
 		mut win := e.ctx.win
-		mut cp := ColorPicker.new(app.get_color())
-		win.add_child(cp.modal)
+
+		if isnil(app.cp) {
+			app.cp = ColorPicker.new()
+
+			app.cp.subscribe_event('color_picked', fn [mut app] (cp &ColorPicker) {
+				app.set_color(cp.color)
+			})
+		}
+
+		mut modal := app.cp.open_color_picker(app.get_color())
+		win.add_child(modal)
 	})
 	return btn
 }
