@@ -52,6 +52,7 @@ fn modal_draw(mut e ui.DrawEvent) {
 	}
 
 	// Responsive Size
+	/*
 	mut tar := e.target
 	if mut tar is ui.Modal {
 		wss := e.ctx.gg.window_size()
@@ -72,6 +73,7 @@ fn modal_draw(mut e ui.DrawEvent) {
 		tar.children[1].y = tar.in_height - 40
 		tar.children[2].y = tar.in_height - 40
 	}
+	*/
 }
 
 pub fn (mut cp ColorPicker) subscribe_event(val string, f fn (voidptr)) {

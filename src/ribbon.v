@@ -20,7 +20,8 @@ fn (mut app App) make_ribbon() {
 
 	box1.set_x(5)
 	color_box.set_x(10)
-	btn.set_x(10)
+	btn.set_x(5)
+	btn.border_radius = 2
 
 	app.ribbon.add_child(box1)
 	app.ribbon.add_child(color_box)

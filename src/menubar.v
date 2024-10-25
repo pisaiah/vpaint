@@ -76,9 +76,15 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	app.save_as()
 }
 
+fn menu_zoom_out_click(mut win ui.Window, com ui.MenuItem) {
+	mut app := win.get[&App]('app')
+	nz := app.canvas.zoom - 1
+	app.canvas.set_zoom(nz)
+}
+
 fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	nz := app.canvas.zoom + 100
+	nz := app.canvas.zoom + 1
 	app.canvas.set_zoom(nz)
 }
 
@@ -86,35 +92,47 @@ fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
 fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
 	window.bar = ui.Menubar.new()
+	window.bar.set_animate(true)
+
+	// Win11 MSPaint has 7px padding on menu bar
+	window.bar.set_padding(7)
+
 	window.bar.add_child(ui.menu_item(
 		text:     'File'
 		children: [
 			ui.menu_item(
 				text:           'New'
 				click_event_fn: new_click
+				uicon:          '\ue8e5'
 			),
 			ui.menu_item(
 				text:           'Open...'
 				click_event_fn: open_click
+				uicon:          '\ue8e5'
 			),
 			ui.menu_item(
 				text:           'Save'
 				click_event_fn: save_click
+				uicon:          '\ue74e'
 			),
 			ui.menu_item(
 				text:           'Save As...'
 				click_event_fn: save_as_click
+				uicon:          '\ue792'
 			),
 			ui.menu_item(
 				text:           'Settings'
 				click_event_fn: settings_click
+				uicon:          '\ue713'
 			),
 			ui.menu_item(
 				text:           'About Paint'
 				click_event_fn: about_click
+				uicon:          '\ue946'
 			),
 			ui.menu_item(
-				text: 'About iUI'
+				text:  'About iUI'
+				uicon: '\ue946'
 			),
 		]
 	))
@@ -170,11 +188,13 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	)
 
 	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil']
+	uicons := ['\uED63', '', '', '', '', '\uEF3C', '\uED63']
 
-	for label in labels {
+	for i, label in labels {
 		tool_item.add_child(ui.MenuItem.new(
 			text:           label
 			click_event_fn: tool_item_click
+			uicon:          uicons[i]
 		))
 	}
 
@@ -186,14 +206,17 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			ui.menu_item(
 				text:           'Fit Canvas'
 				click_event_fn: menubar_fit_zoom_click
+				uicon:          '\uE71E'
 			),
 			ui.menu_item(
-				text: 'Zoom-out'
-				// click_event_fn: app.menubar_zoom_out_click
+				text:           'Zoom-out'
+				uicon:          '\uE71F'
+				click_event_fn: menu_zoom_out_click
 			),
 			ui.menu_item(
 				text:           'Zoom-In'
 				click_event_fn: menu_zoom_in_click
+				uicon:          '\uE8A3'
 			),
 		]
 	))
@@ -282,6 +305,14 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	app.settings_save() or {}
 }
 
+fn (mut app App) set_theme(name string) {
+	mut theme := ui.theme_by_name(name)
+	app.win.set_theme(theme)
+	app.settings.theme = name
+	app.set_theme_bg(name)
+	app.settings_save() or {}
+}
+
 fn (mut app App) set_theme_bg(text string) {
 	if text.contains('Dark') {
 		background := gx.rgb(25, 42, 77)
@@ -325,15 +356,7 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	)
 	p.add_child_with_flag(title, ui.borderlayout_north)
 
-	txt := [
-		'Simple Image Editor written in the V Language.',
-		'(version 0.6-dev) (iUI: ${ui.version})',
-		'\t ',
-		'Copyright \u00A9 2022-2024 Isaiah.',
-		'Released under MIT License.',
-	]
-
-	mut lbl := ui.Label.new(text: txt.join('\n'))
+	mut lbl := ui.Label.new(text: about_text.join('\n'))
 	lbl.pack()
 	p.add_child_with_flag(lbl, ui.borderlayout_center)
 

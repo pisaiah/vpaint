@@ -6,16 +6,72 @@ import os
 fn (mut app App) show_settings() {
 	mut page := ui.Page.new(title: 'Settings')
 
+	mut p := ui.Panel.new(
+		layout: ui.FlowLayout.new()
+	)
+
 	mut panel := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1))
 
 	mut box := ui.Checkbox.new(text: 'Auto-hide Sidebar')
 	box.is_selected = app.settings.autohide_sidebar
-	box.set_bounds(0, 0, 100, 24)
+	box.set_bounds(0, 0, 150, 24)
 	box.subscribe_event('mouse_up', app.hide_sidebar_mouse_up)
 
-	panel.add_child(box)
+	// Auto-hide Sidebar
+	mut card := ui.SettingsCard.new(
+		uicon:       '\uE700'
+		text:        'Sidebar Hidden'
+		description: 'Select whether to auto-hide the side tool bar'
+		stretch:     true
+	)
+	card.add_child(box)
 
-	page.add_child(panel)
+	// App Theme
+	mut theme_card := ui.SettingsCard.new(
+		uicon:       '\uE790'
+		text:        'App Theme'
+		description: 'Select which app theme to display'
+		stretch:     true
+	)
+
+	mut cb := ui.Selectbox.new(
+		text:  app.win.theme.name
+		items: ['Light', 'Dark', 'Ocean', 'Black Red', 'Seven', 'Seven Dark']
+	)
+
+	cb.set_bounds(0, 0, 140, 30)
+	cb.subscribe_event('item_change', fn (mut e ui.ItemChangeEvent) {
+		txt := e.target.text.replace('Light', 'Default')
+		mut app := e.ctx.win.get[&App]('app')
+		app.set_theme(txt)
+	})
+	theme_card.add_child(cb)
+
+	panel.add_child(card)
+	panel.add_child(theme_card)
+
+	mut lbl := ui.Label.new(
+		text: 'About vPaint\n${about_text.join('\n')}\n'
+	)
+	lbl.pack()
+
+	mut about_p := ui.Panel.new(layout: ui.FlowLayout.new(hgap: 10, vgap: 10))
+	about_p.add_child(lbl)
+
+	p.add_child(panel)
+	p.add_child(about_p)
+
+	p.subscribe_event('draw', fn (mut e ui.DrawEvent) {
+		// pw := page.width
+
+		pw := e.ctx.gg.window_size().width
+
+		tt := int(pw * f32(0.65))
+		size := if pw < 800 { pw } else { tt }
+		e.target.children[0].width = size - 10
+	})
+
+	page.add_child(p)
 	app.win.add_child(page)
 }
 

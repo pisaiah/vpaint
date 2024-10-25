@@ -4,6 +4,15 @@ import iui as ui
 import os
 import gx
 
+// About Info
+const about_text = [
+	'Simple Image Editor written in the V Language.',
+	'(version 0.6-dev) (iUI: ${ui.version})',
+	'\t ',
+	'Copyright \u00A9 2022-2024 Isaiah.',
+	'Released under MIT License.',
+]
+
 // Settings
 struct Settings {
 mut:
@@ -146,19 +155,4 @@ fn main() {
 	app.set_theme_bg(app.win.theme.name)
 
 	window.gg.run()
-}
-
-fn fit_lbl(mut lbl ui.Label) {
-	lbl.pack()
-	lbl.x = 10
-	lbl.y = (32 / 2) - (lbl.height / 2) // Y-Center
-}
-
-// Image canvas ScrollView draw event
-// fn image_scrollview_draw_event_fn(mut win ui.Window, com &ui.Component) {
-fn image_scrollview_draw_event_fn(mut e ui.DrawEvent) {
-	// mut app := e.ctx.win.get[&App]('app')
-	// ws := e.ctx.gg.window_size()
-	// x_pos := 64
-	// bar_y := app.sidebar.y + 1
 }

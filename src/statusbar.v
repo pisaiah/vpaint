@@ -41,8 +41,9 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 		zoom := int(app.canvas.get_zoom() * 100)
 		com.text = '${zoom}%'
 		if mut com is ui.Label {
-			com.pack()
-			com.set_y(16 - (com.height / 2)) // Y-Center
+			com.center_text_y = true
+			com.width = e.ctx.text_width(com.text)
+			com.height = com.parent.height
 		}
 	})
 
@@ -51,7 +52,7 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	mut zp := ui.Panel.new(
 		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
 	)
-	sb.add_child_with_flag(status, ui.borderlayout_center)
+	sb.add_child_with_flag(status, ui.borderlayout_west)
 	zp.add_child(zoom_lbl)
 	zp.add_child(zoom_dec)
 	zp.add_child(zoom_inc)
@@ -74,7 +75,7 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 fn (mut app App) zoom_btn(val int) &ui.Button {
 	txt := if val == 0 { '-' } else { '+' }
 	mut btn := ui.Button.new(text: txt)
-	btn.border_radius = 16
+	btn.border_radius = 8
 	return btn
 }
 
