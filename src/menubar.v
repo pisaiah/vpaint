@@ -97,131 +97,14 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	// Win11 MSPaint has 7px padding on menu bar
 	window.bar.set_padding(7)
 
-	window.bar.add_child(ui.menu_item(
-		text:     'File'
-		children: [
-			ui.menu_item(
-				text:           'New'
-				click_event_fn: new_click
-				uicon:          '\ue8e5'
-			),
-			ui.menu_item(
-				text:           'Open...'
-				click_event_fn: open_click
-				uicon:          '\ue8e5'
-			),
-			ui.menu_item(
-				text:           'Save'
-				click_event_fn: save_click
-				uicon:          '\ue74e'
-			),
-			ui.menu_item(
-				text:           'Save As...'
-				click_event_fn: save_as_click
-				uicon:          '\ue792'
-			),
-			ui.menu_item(
-				text:           'Settings'
-				click_event_fn: settings_click
-				uicon:          '\ue713'
-			),
-			ui.menu_item(
-				text:           'About Paint'
-				click_event_fn: about_click
-				uicon:          '\ue946'
-			),
-			ui.menu_item(
-				text:  'About iUI'
-				uicon: '\ue946'
-			),
-		]
-	))
-	window.bar.add_child(ui.menu_item(
-		text:     'Edit'
-		children: [
-			ui.menu_item(
-				text:           'Upscale 2x'
-				click_event_fn: upscale_click
-			),
-			ui.MenuItem.new(
-				text:     'Scaling...'
-				children: [
-					ui.MenuItem.new(
-						text:           'bilinear interpolation'
-						click_event_fn: upscale_click
-					),
-					ui.MenuItem.new(
-						text:           'scale2x'
-						click_event_fn: upscale_click
-					),
-					ui.MenuItem.new(
-						text:           'hq3x'
-						click_event_fn: upscale_click
-					),
-				]
-			),
-			ui.menu_item(
-				text:           'Apply Grayscale'
-				click_event_fn: grayscale_click
-			),
-			ui.menu_item(
-				text:           'Invert Image'
-				click_event_fn: invert_click
-			),
-			ui.menu_item(
-				text:           'Increase Alpha'
-				click_event_fn: inc_alpha_click
-			),
-			ui.menu_item(
-				text:           'Undo'
-				click_event_fn: undo_click
-			),
-			ui.menu_item(
-				text:           'Resize Canvas'
-				click_event_fn: menu_resize_click
-			),
-		]
-	))
+	// Add MenuItems
+	window.bar.add_child(make_file_menu())
+	window.bar.add_child(make_edit_menu())
+	window.bar.add_child(make_view_menu())
+	window.bar.add_child(make_tool_menu())
+	window.bar.add_child(make_shape_menu())
 
-	mut tool_item := ui.MenuItem.new(
-		text: 'Tools'
-	)
-
-	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil']
-	uicons := ['\uED63', '', '', '', '', '\uEF3C', '\uED63']
-
-	for i, label in labels {
-		tool_item.add_child(ui.MenuItem.new(
-			text:           label
-			click_event_fn: tool_item_click
-			uicon:          uicons[i]
-		))
-	}
-
-	window.bar.add_child(tool_item)
-
-	window.bar.add_child(ui.menu_item(
-		text:     'View'
-		children: [
-			ui.menu_item(
-				text:           'Fit Canvas'
-				click_event_fn: menubar_fit_zoom_click
-				uicon:          '\uE71E'
-			),
-			ui.menu_item(
-				text:           'Zoom-out'
-				uicon:          '\uE71F'
-				click_event_fn: menu_zoom_out_click
-			),
-			ui.menu_item(
-				text:           'Zoom-In'
-				click_event_fn: menu_zoom_in_click
-				uicon:          '\uE8A3'
-			),
-		]
-	))
-
-	window.bar.add_child(ui.menu_item(
+	window.bar.add_child(ui.MenuItem.new(
 		text:     'Size'
 		children: [
 			size_menu_item(1),
@@ -231,7 +114,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 			size_menu_item(16),
 			size_menu_item(32),
 			size_menu_item(64),
-			ui.menu_item(
+			ui.MenuItem.new(
 				text:           'Custom'
 				click_event_fn: menu_size_custom_click
 			),
@@ -253,7 +136,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	undo_img := $embed_file('assets/undo.png')
 
 	undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
-	mut undo_item := ui.menu_item(
+	mut undo_item := ui.MenuItem.new(
 		text:           'Undo'
 		click_event_fn: undo_click
 		icon:           undo_icon
@@ -262,8 +145,165 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	window.bar.add_child(undo_item)
 }
 
+// File Item
+fn make_file_menu() &ui.MenuItem {
+	item := ui.MenuItem.new(
+		text:     'File'
+		children: [
+			ui.MenuItem.new(
+				text:           'New'
+				click_event_fn: new_click
+				uicon:          '\ue8e5'
+			),
+			ui.MenuItem.new(
+				text:           'Open...'
+				click_event_fn: open_click
+				uicon:          '\ue8e5'
+			),
+			ui.MenuItem.new(
+				text:           'Save'
+				click_event_fn: save_click
+				uicon:          '\ue74e'
+			),
+			ui.MenuItem.new(
+				text:           'Save As...'
+				click_event_fn: save_as_click
+				uicon:          '\ue792'
+			),
+			ui.MenuItem.new(
+				text:           'Settings'
+				click_event_fn: settings_click
+				uicon:          '\ue713'
+			),
+			ui.MenuItem.new(
+				text:           'About Paint'
+				click_event_fn: about_click
+				uicon:          '\ue946'
+			),
+			ui.MenuItem.new(
+				text:  'About iUI'
+				uicon: '\ue946'
+			),
+		]
+	)
+	return item
+}
+
+// Edit Item
+fn make_edit_menu() &ui.MenuItem {
+	item := ui.MenuItem.new(
+		text:     'Edit'
+		children: [
+			ui.MenuItem.new(
+				text:           'Upscale 2x'
+				click_event_fn: upscale_click
+			),
+			ui.MenuItem.new(
+				text:     'Scaling...'
+				children: [
+					ui.MenuItem.new(
+						text:           'bilinear interpolation'
+						click_event_fn: upscale_click
+					),
+					ui.MenuItem.new(
+						text:           'scale2x'
+						click_event_fn: upscale_click
+					),
+					ui.MenuItem.new(
+						text:           'hq3x'
+						click_event_fn: upscale_click
+					),
+				]
+			),
+			ui.MenuItem.new(
+				text:           'Apply Grayscale'
+				click_event_fn: grayscale_click
+			),
+			ui.MenuItem.new(
+				text:           'Invert Image'
+				click_event_fn: invert_click
+			),
+			ui.MenuItem.new(
+				text:           'Increase Alpha'
+				click_event_fn: inc_alpha_click
+			),
+			ui.MenuItem.new(
+				text:           'Undo'
+				click_event_fn: undo_click
+			),
+			ui.MenuItem.new(
+				text:           'Resize Canvas'
+				click_event_fn: menu_resize_click
+			),
+		]
+	)
+	return item
+}
+
+// Tools
+fn make_tool_menu() &ui.MenuItem {
+	mut tool_item := ui.MenuItem.new(
+		text: 'Tools'
+	)
+
+	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil']
+	uicons := ['\uED63', '', '', '', '', '\uEF3C', '\uED63', '', '']
+
+	for i, label in labels {
+		tool_item.add_child(ui.MenuItem.new(
+			text:           label
+			click_event_fn: tool_item_click
+			uicon:          uicons[i]
+		))
+	}
+	return tool_item
+}
+
+// Shapes
+fn make_shape_menu() &ui.MenuItem {
+	mut item := ui.MenuItem.new(
+		text: 'Shapes'
+	)
+
+	labels := ['Line', 'Rectangle']
+	uicons := ['\uF7AF', '\uE739']
+
+	for i, label in labels {
+		item.add_child(ui.MenuItem.new(
+			text:           label
+			click_event_fn: tool_item_click
+			uicon:          uicons[i]
+		))
+	}
+	return item
+}
+
+// View Menu
+fn make_view_menu() &ui.MenuItem {
+	return ui.MenuItem.new(
+		text:     'View'
+		children: [
+			ui.MenuItem.new(
+				text:           'Fit Canvas'
+				click_event_fn: menubar_fit_zoom_click
+				uicon:          '\uE71E'
+			),
+			ui.MenuItem.new(
+				text:           'Zoom-out'
+				uicon:          '\uE71F'
+				click_event_fn: menu_zoom_out_click
+			),
+			ui.MenuItem.new(
+				text:           'Zoom-In'
+				click_event_fn: menu_zoom_in_click
+				uicon:          '\uE8A3'
+			),
+		]
+	)
+}
+
 fn size_menu_item(size int) &ui.MenuItem {
-	item := ui.menu_item(
+	item := ui.MenuItem.new(
 		text:           '${size} px'
 		click_event_fn: menu_size_click
 	)

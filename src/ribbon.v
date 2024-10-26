@@ -145,7 +145,7 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 
 // fn ribbon_draw_fn(mut win ui.Window, mut com ui.Component) {
 fn ribbon_draw_fn(mut e ui.DrawEvent) {
-	color := e.ctx.theme.menubar_background
+	color := e.ctx.theme.textbox_background
 	e.ctx.gg.draw_rect_filled(e.target.x, e.target.y - 1, e.target.width, e.target.height + 1,
 		color)
 }

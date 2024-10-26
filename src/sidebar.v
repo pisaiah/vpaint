@@ -77,6 +77,8 @@ fn (mut app App) set_tool_by_name(name string) {
 		'Airbrush' { app.tool = &AirbrushTool{} }
 		'Dropper' { app.tool = &DropperTool{} }
 		'WidePencil' { app.tool = &WidePencilTool{} }
+		'Line' { app.tool = &LineTool{} }
+		'Rectangle' { app.tool = &RectTool{} }
 		else { app.tool = &PencilTool{} }
 	}
 }

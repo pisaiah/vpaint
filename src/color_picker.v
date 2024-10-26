@@ -94,7 +94,7 @@ fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
 
 	m.subscribe_event('draw', modal_draw)
 	m.needs_init = false
-	m.in_width = 440
+	m.in_width = 445
 	m.in_height = 335
 	m.top_off = 20
 

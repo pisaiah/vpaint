@@ -62,10 +62,7 @@ fn (mut app App) show_settings() {
 	p.add_child(about_p)
 
 	p.subscribe_event('draw', fn (mut e ui.DrawEvent) {
-		// pw := page.width
-
 		pw := e.ctx.gg.window_size().width
-
 		tt := int(pw * f32(0.65))
 		size := if pw < 800 { pw } else { tt }
 		e.target.children[0].width = size - 10
