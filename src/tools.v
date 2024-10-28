@@ -359,40 +359,45 @@ fn (mut this DropperTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 fn (mut this DropperTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
-// Pencil Tool
-struct WidePencilTool {
-	tool_name string = 'Wide Pencil'
+// Custom Pencil Tool
+struct CustomPencilTool {
+	tool_name string = 'Custom Pencil'
+mut:
+	width int = 8
+	height int = 2
 }
 
-fn (mut this WidePencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
+fn (mut this CustomPencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
-	size := img.app.brush_size
-	// half_size := size / 2
-	q_size := 1 // half_size / 2
+	size := if this.width > 0 { this.width } else { img.app.brush_size }
+	height := if this.height > 0 { this.height } else { img.app.brush_size }
+
+	q_size := height / 2
 	pix := img.zoom
 
 	xpos := img.sx - (size * pix)
 	ypos := img.sy - (q_size * pix)
 
 	width := img.zoom + (((size * 2) - 1) * pix)
-	hei := img.zoom + ((2 - 1) * pix)
+	hei := img.zoom + ((height- 1) * pix)
 
 	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, hei, 1, gx.blue)
 }
 
-fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
+fn (mut this CustomPencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
-	size := img.app.brush_size
+	size := if this.width > 0 { this.width } else { img.app.brush_size }
+	height := if this.height > 0 { this.height } else { img.app.brush_size }
 	half_size := size / 2
 
 	if img.last_x != -1 {
 		pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
 		for p in pp {
 			for x in -half_size .. size + half_size {
-				for y in 0 .. 2 {
-					img.set(p.x + (x - half_size), p.y + (y - 1), img.app.get_color())
+				for y in 0 .. height {
+					img.set(p.x + (x - half_size), p.y + (y - (height / 2)), img.app.get_color())
 				}
 			}
 		}
@@ -403,7 +408,7 @@ fn (mut this WidePencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 	img.refresh()
 }
 
-fn (mut this WidePencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+fn (mut this CustomPencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
 

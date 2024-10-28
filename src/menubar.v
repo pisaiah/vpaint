@@ -28,7 +28,16 @@ fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 
 fn tool_item_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	app.set_tool_by_name(com.text)
+	
+	if com.text == 'CustomPencil' {
+		if app.tool.tool_name != 'Custom Pencil' {
+			app.tool = &CustomPencilTool{}
+		}
+		app.show_custom_pencil_modal()
+		
+	} else {
+		app.set_tool_by_name(com.text)
+	}
 
 	// "Fake" a press
 	for mut btn in app.sidebar.children[0].children {
@@ -133,13 +142,12 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 
 	window.bar.add_child(theme_menu)
 
-	undo_img := $embed_file('assets/undo.png')
+	// undo_img := $embed_file('assets/undo.png')
+	// undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
 
-	undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
 	mut undo_item := ui.MenuItem.new(
-		text:           'Undo'
 		click_event_fn: undo_click
-		icon:           undo_icon
+		uicon: '\ue966' 
 	)
 	undo_item.width = 30
 	window.bar.add_child(undo_item)
@@ -153,12 +161,12 @@ fn make_file_menu() &ui.MenuItem {
 			ui.MenuItem.new(
 				text:           'New'
 				click_event_fn: new_click
-				uicon:          '\ue8e5'
+				uicon:          '\ue130'
 			),
 			ui.MenuItem.new(
 				text:           'Open...'
 				click_event_fn: open_click
-				uicon:          '\ue8e5'
+				uicon:          '\ue838'
 			),
 			ui.MenuItem.new(
 				text:           'Save'
@@ -173,16 +181,16 @@ fn make_file_menu() &ui.MenuItem {
 			ui.MenuItem.new(
 				text:           'Settings'
 				click_event_fn: settings_click
-				uicon:          '\ue713'
+				uicon:          '\ue995'
 			),
 			ui.MenuItem.new(
 				text:           'About Paint'
 				click_event_fn: about_click
-				uicon:          '\ue946'
+				uicon:          '\ue949'
 			),
 			ui.MenuItem.new(
 				text:  'About iUI'
-				uicon: '\ue946'
+				uicon: '\ue949'
 			),
 		]
 	)
@@ -228,10 +236,12 @@ fn make_edit_menu() &ui.MenuItem {
 				click_event_fn: inc_alpha_click
 			),
 			ui.MenuItem.new(
+				uicon:          '\ue966' 
 				text:           'Undo'
 				click_event_fn: undo_click
 			),
 			ui.MenuItem.new(
+				uicon:          '\uea58'
 				text:           'Resize Canvas'
 				click_event_fn: menu_resize_click
 			),
@@ -246,8 +256,8 @@ fn make_tool_menu() &ui.MenuItem {
 		text: 'Tools'
 	)
 
-	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil']
-	uicons := ['\uED63', '', '', '', '', '\uEF3C', '\uED63', '', '']
+	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil', 'CustomPencil']
+	uicons := ['\uED63', '\ue90c', '\uf047', '\ue003', '\uec5a', '\ue90b', '\uED63', '', '']
 
 	for i, label in labels {
 		tool_item.add_child(ui.MenuItem.new(
@@ -266,7 +276,7 @@ fn make_shape_menu() &ui.MenuItem {
 	)
 
 	labels := ['Line', 'Rectangle']
-	uicons := ['\uF7AF', '\uE739']
+	uicons := ['\ue937', '\ue003']
 
 	for i, label in labels {
 		item.add_child(ui.MenuItem.new(
@@ -286,17 +296,17 @@ fn make_view_menu() &ui.MenuItem {
 			ui.MenuItem.new(
 				text:           'Fit Canvas'
 				click_event_fn: menubar_fit_zoom_click
-				uicon:          '\uE71E'
+				uicon:          '\uf002'
 			),
 			ui.MenuItem.new(
 				text:           'Zoom-out'
-				uicon:          '\uE71F'
+				uicon:          '\ue989'
 				click_event_fn: menu_zoom_out_click
 			),
 			ui.MenuItem.new(
 				text:           'Zoom-In'
 				click_event_fn: menu_zoom_in_click
-				uicon:          '\uE8A3'
+				uicon:          '\ue988'
 			),
 		]
 	)
@@ -379,7 +389,7 @@ fn settings_click(mut win ui.Window, com ui.MenuItem) {
 }
 
 fn about_click(mut win ui.Window, com ui.MenuItem) {
-	mut modal := ui.modal(win, 'About vPaint')
+	mut modal := ui.Modal.new(title: 'About vPaint')
 
 	modal.top_off = 25
 	modal.in_width = 300
