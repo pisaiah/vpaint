@@ -70,17 +70,42 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 
 fn (mut app App) set_tool_by_name(name string) {
 	match name {
-		'Select' { app.tool = &SelectTool{} }
-		'Pencil' { app.tool = &PencilTool{} }
-		'Fill' { app.tool = &FillTool{} }
-		'Drag' { app.tool = &DragTool{} }
-		'Airbrush' { app.tool = &AirbrushTool{} }
-		'Dropper' { app.tool = &DropperTool{} }
-		'WidePencil' { app.tool = &CustomPencilTool{width: 0, height: 2} }
-		'CustomPencil' { app.tool = &CustomPencilTool{} }
-		'Line' { app.tool = &LineTool{} }
-		'Rectangle' { app.tool = &RectTool{} }
-		else { app.tool = &PencilTool{} }
+		'Select' {
+			app.tool = &SelectTool{}
+		}
+		'Pencil' {
+			app.tool = &PencilTool{}
+		}
+		'Fill' {
+			app.tool = &FillTool{}
+		}
+		'Drag' {
+			app.tool = &DragTool{}
+		}
+		'Airbrush' {
+			app.tool = &AirbrushTool{}
+		}
+		'Dropper' {
+			app.tool = &DropperTool{}
+		}
+		'WidePencil' {
+			app.tool = &CustomPencilTool{
+				width:  0
+				height: 2
+			}
+		}
+		'CustomPencil' {
+			app.tool = &CustomPencilTool{}
+		}
+		'Line' {
+			app.tool = &LineTool{}
+		}
+		'Rectangle' {
+			app.tool = &RectTool{}
+		}
+		else {
+			app.tool = &PencilTool{}
+		}
 	}
 }
 

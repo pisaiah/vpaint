@@ -28,13 +28,12 @@ fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 
 fn tool_item_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	
+
 	if com.text == 'CustomPencil' {
 		if app.tool.tool_name != 'Custom Pencil' {
 			app.tool = &CustomPencilTool{}
 		}
 		app.show_custom_pencil_modal()
-		
 	} else {
 		app.set_tool_by_name(com.text)
 	}
@@ -147,7 +146,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 
 	mut undo_item := ui.MenuItem.new(
 		click_event_fn: undo_click
-		uicon: '\ue966' 
+		uicon:          '\ue966'
 	)
 	undo_item.width = 30
 	window.bar.add_child(undo_item)
@@ -236,7 +235,7 @@ fn make_edit_menu() &ui.MenuItem {
 				click_event_fn: inc_alpha_click
 			),
 			ui.MenuItem.new(
-				uicon:          '\ue966' 
+				uicon:          '\ue966'
 				text:           'Undo'
 				click_event_fn: undo_click
 			),
@@ -256,7 +255,8 @@ fn make_tool_menu() &ui.MenuItem {
 		text: 'Tools'
 	)
 
-	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil', 'CustomPencil']
+	labels := ['Pencil', 'Fill', 'Drag', 'Select', 'Airbrush', 'Dropper', 'WidePencil',
+		'CustomPencil']
 	uicons := ['\uED63', '\ue90c', '\uf047', '\ue003', '\uec5a', '\ue90b', '\uED63', '', '']
 
 	for i, label in labels {

@@ -363,7 +363,7 @@ fn (mut this DropperTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 struct CustomPencilTool {
 	tool_name string = 'Custom Pencil'
 mut:
-	width int = 8
+	width  int = 8
 	height int = 2
 }
 
@@ -380,7 +380,7 @@ fn (mut this CustomPencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext)
 	ypos := img.sy - (q_size * pix)
 
 	width := img.zoom + (((size * 2) - 1) * pix)
-	hei := img.zoom + ((height- 1) * pix)
+	hei := img.zoom + ((height - 1) * pix)
 
 	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, hei, 1, gx.blue)
 }
@@ -410,7 +410,6 @@ fn (mut this CustomPencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 
 fn (mut this CustomPencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 }
-
 
 // Line Tool
 struct LineTool {
@@ -448,7 +447,7 @@ fn (mut this LineTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 
 fn (mut this LineTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
-	
+
 	if this.sx == -1 {
 		this.sx = img.mx
 		this.sy = img.my
@@ -461,7 +460,8 @@ fn (mut this LineTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 		pp := bresenham(this.sx, this.sy, img.mx, img.my)
 		for p in pp {
 			aa, bb := img.get_point_screen_pos(p.x, p.y)
-			g.gg.draw_rect_empty(aa - (half_size * img.zoom), bb - (half_size * img.zoom), img.zoom * size, img.zoom * size, gx.blue)
+			g.gg.draw_rect_empty(aa - (half_size * img.zoom), bb - (half_size * img.zoom),
+				img.zoom * size, img.zoom * size, gx.blue)
 		}
 	}
 }
@@ -484,7 +484,7 @@ fn (mut this LineTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 	}
 
 	img.refresh()
-	
+
 	// Reset
 	this.sx = -1
 	this.sy = -1
@@ -526,7 +526,7 @@ fn (mut this RectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 
 fn (mut this RectTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
-	
+
 	if this.sx == -1 {
 		this.sx = img.mx
 		this.sy = img.my
@@ -537,21 +537,24 @@ fn (mut this RectTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 
 	x1 := if this.sx < img.mx { this.sx } else { img.mx }
 	y1 := if this.sy < img.my { this.sy } else { img.my }
-	
+
 	x2 := if this.sx < img.mx { img.mx } else { this.sx }
 	y2 := if this.sy < img.my { img.my } else { this.sy }
 
 	if this.sx != -1 {
-
 		aa, bb := img.get_point_screen_pos(x1, y1)
 		cc, dd := img.get_point_screen_pos(x2, y2)
 		pix_size := img.zoom * size
-		
+
 		// Top, Bottom, Left, Right
-		g.gg.draw_rect_filled(aa - (half_size * img.zoom), bb - (half_size * img.zoom), pix_size + (cc - aa), pix_size, gx.blue)
-		g.gg.draw_rect_filled(aa - (half_size * img.zoom), dd - (half_size * img.zoom), pix_size + (cc - aa), pix_size, gx.blue)
-		g.gg.draw_rect_filled(aa - (half_size * img.zoom), bb - (half_size * img.zoom), pix_size, pix_size + (dd - bb), gx.blue)
-		g.gg.draw_rect_filled(cc - (half_size * img.zoom), bb - (half_size * img.zoom), pix_size, pix_size + (dd - bb), gx.blue)
+		g.gg.draw_rect_filled(aa - (half_size * img.zoom), bb - (half_size * img.zoom),
+			pix_size + (cc - aa), pix_size, gx.blue)
+		g.gg.draw_rect_filled(aa - (half_size * img.zoom), dd - (half_size * img.zoom),
+			pix_size + (cc - aa), pix_size, gx.blue)
+		g.gg.draw_rect_filled(aa - (half_size * img.zoom), bb - (half_size * img.zoom),
+			pix_size, pix_size + (dd - bb), gx.blue)
+		g.gg.draw_rect_filled(cc - (half_size * img.zoom), bb - (half_size * img.zoom),
+			pix_size, pix_size + (dd - bb), gx.blue)
 	}
 }
 
@@ -560,10 +563,10 @@ fn (mut this RectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 	size := img.app.brush_size
 	half_size := size / 2
-	
+
 	x1 := if this.sx < img.mx { this.sx } else { img.mx }
 	y1 := if this.sy < img.my { this.sy } else { img.my }
-	
+
 	x2 := if this.sx < img.mx { img.mx } else { this.sx }
 	y2 := if this.sy < img.my { img.my } else { this.sy }
 
@@ -586,7 +589,7 @@ fn (mut this RectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 	img.set(x2, y2, c)
 	img.refresh()
-	
+
 	// Reset
 	this.sx = -1
 	this.sy = -1

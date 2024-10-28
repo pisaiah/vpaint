@@ -62,19 +62,18 @@ fn resize_close_click(mut e ui.MouseEvent) {
 	app.canvas.resize(width_lbl.text.int(), heigh_lbl.text.int())
 }
 
-
 // Custom Pencil Button
 fn (mut app App) show_custom_pencil_modal() {
 	mut modal := ui.Modal.new(title: 'Custom Pencil Tool')
 
 	modal.in_width = 300
 	modal.in_height = 200
-	
+
 	mut tool := app.tool
 
 	mut width_box := ui.text_field(text: '0')
 	mut heigh_box := ui.text_field(text: '0')
-	
+
 	if mut tool is CustomPencilTool {
 		width_box.text = '${tool.width}'
 		heigh_box.text = '${tool.height}'
@@ -90,7 +89,7 @@ fn (mut app App) show_custom_pencil_modal() {
 
 	mut info := ui.Label.new(text: 'Override Size (0 = No Override, use tool size)')
 	p.add_child(info)
-	
+
 	mut lbl2 := ui.Label.new()
 	p.add_child(lbl2)
 
@@ -131,7 +130,7 @@ fn customp_close_click(mut e ui.MouseEvent) {
 	e.ctx.win.components = e.ctx.win.components.filter(mut it !is ui.Modal)
 	mut width_lbl := e.ctx.win.get[&ui.TextField]('over_width')
 	mut heigh_lbl := e.ctx.win.get[&ui.TextField]('over_heigh')
-	
+
 	mut app := e.ctx.win.get[&App]('app')
 	mut tool := app.tool
 
@@ -139,6 +138,4 @@ fn customp_close_click(mut e ui.MouseEvent) {
 		tool.width = width_lbl.text.int()
 		tool.height = heigh_lbl.text.int()
 	}
-	
-	
 }
