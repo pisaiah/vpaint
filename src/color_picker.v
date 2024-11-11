@@ -142,7 +142,7 @@ fn (mut cp ColorPicker) make_picker_panel(w int, h int) &ui.Panel {
 
 	// TODO: fix mouse scroll in Slider
 	slid.scroll = false
-	aslid.scroll = false
+	//aslid.scroll = false
 
 	// Add to panel
 	p.add_child(btn)

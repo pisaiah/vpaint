@@ -108,6 +108,19 @@ fn main() {
 		app.write_img(app.data.file, out_path)
 		return
 	}
+	
+	if os.args.len == 4 && os.args[2].contains('-upscale=') {
+		times := os.args[2].split('-upscale=')[1].int()
+		
+		println('Upscaling ${times}x "${os.args[1]}"...')
+		out_path := os.args[3].split('-path=')[1]
+		
+		for _ in 0 .. times {
+			app.canvas.scale2x()
+		}
+		app.write_img(app.data.file, out_path)
+		return
+	}
 
 	mut sv := &ui.ScrollView{
 		children:  [image_panel]
