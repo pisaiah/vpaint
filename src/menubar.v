@@ -395,9 +395,13 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	modal.in_width = 300
 	modal.in_height = 290
 
-	mut title := ui.Label.new(text: 'VPaint')
-	title.set_config(32, true, true)
-	title.pack()
+	mut title := ui.Label.new(
+		text: 'VPaint'
+		bold: true
+		em_size: 2
+		vertical_align: .middle
+		pack: true
+	)
 
 	mut p := ui.Panel.new(
 		layout: ui.BorderLayout.new(
@@ -406,8 +410,11 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	)
 	p.add_child_with_flag(title, ui.borderlayout_north)
 
-	mut lbl := ui.Label.new(text: about_text.join('\n'))
-	lbl.pack()
+	mut lbl := ui.Label.new(
+		text: about_text.join('\n')
+		pack: true
+		vertical_align: .middle
+	)
 	p.add_child_with_flag(lbl, ui.borderlayout_center)
 
 	mut lp := ui.Panel.new(

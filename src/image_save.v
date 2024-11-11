@@ -18,6 +18,34 @@ fn (app &App) save() {
 	emsave(this.file_name)
 }
 
+fn responsive_field(mut e ui.DrawEvent) {
+	padding := 20
+	tw := e.ctx.text_width(e.target.text) + padding
+
+	ws := e.ctx.gg.window_size().width
+	inw := if ws < 500 { ws } else { 500 }
+	min := inw / 3
+	e.target.width = if tw > min { tw } else { min }
+}
+
+fn responsive_modal(mut e ui.DrawEvent) {
+	mut tar := e.get_target[ui.Modal]()
+	ws := e.ctx.gg.window_size().width
+
+	inw := if ws < 500 { ws } else { 500 }
+	nnw := inw - 10
+	if tar.in_width == nnw {
+		return
+	}
+	tar.in_width = nnw
+	tar.children[0].width = nnw - 1
+	tar.children[0].height = tar.in_height
+	tar.children[0].children[1].width = nnw
+}
+
+fn responsive_modal_panel(mut e ui.DrawEvent) {
+}
+
 fn (app &App) save_as() {
 	mut data := app.data
 
@@ -25,8 +53,10 @@ fn (app &App) save_as() {
 		title: 'Save As..'
 	)
 
+	modal.subscribe_event('draw', responsive_modal)
+
 	modal.top_off = 5
-	modal.in_height = 300
+	modal.in_height = 280
 	w := modal.in_width - 10
 
 	mut p := ui.Panel.new(
@@ -34,7 +64,7 @@ fn (app &App) save_as() {
 			ori: 1
 		)
 	)
-	p.set_bounds(4, 0, w, modal.in_height)
+	// p.set_bounds(4, 0, w, modal.in_height)
 
 	folder := os.dir(data.file_name)
 	file_name := os.file_name(data.file_name)
@@ -42,7 +72,8 @@ fn (app &App) save_as() {
 	mut f := ui.TextField.new(
 		text: folder
 	)
-	f.set_bounds(0, 0, w - 30, 30)
+	f.set_bounds(0, 0, w / 2, 30)
+	f.subscribe_event('draw', responsive_field)
 
 	mut cb := ui.Selectbox.new(
 		text:  os.file_ext(file_name)[1..].to_upper()
@@ -62,12 +93,11 @@ fn (app &App) save_as() {
 		}
 	})
 
-	mut tb_f := ui.Titlebox.new(
-		text:     'Save Folder'
-		children: [f]
-	)
+	mut tb_f := ui.SettingsCard.new(text: 'Save Folder', description: 'The Directory to save in')
+	tb_f.stretch = true
+	tb_f.add_child(f)
 
-	nam.set_bounds(0, 0, w - 200, 30)
+	nam.set_bounds(0, 0, w - 210, 30)
 
 	mut tb_fn := ui.Titlebox.new(
 		text:     'File Name'
@@ -79,8 +109,10 @@ fn (app &App) save_as() {
 		children: [cb]
 	)
 
-	mut p2 := ui.Panel.new()
-	p2.set_bounds(0, 0, w, 35)
+	mut p2 := ui.Panel.new(layout: ui.FlowLayout.new())
+	p2.subscribe_event('draw', responsive_modal_panel)
+
+	p2.set_bounds(0, 0, w, 170)
 	p2.add_child(tb_fn)
 	p2.add_child(tb_cb)
 
@@ -92,7 +124,6 @@ fn (app &App) save_as() {
 
 	mut close := ui.Button.new(text: 'Save')
 	modal.add_child(close)
-	y := 250
 
 	close.subscribe_event('mouse_up', fn [app, mut data, mut f, mut nam] (mut e ui.MouseEvent) {
 		full_path := os.join_path(f.text, nam.text)
@@ -113,6 +144,9 @@ fn (app &App) save_as() {
 		if typ == '.tga' {
 			good = app.write_tga(data.file, full_path)
 		}
+		if typ == '.svg' {
+			// TOOD
+		}
 		if good {
 			data.file_name = full_path
 			file_size := format_size(os.file_size(full_path))
@@ -120,11 +154,13 @@ fn (app &App) save_as() {
 			emsave(data.file_name)
 		}
 	})
-	close.set_bounds(w - 280, y, 130, 30)
 
 	mut can := modal.make_close_btn(true)
 	can.text = 'Cancel'
-	can.set_bounds(w - 140, y, 130, 30)
+
+	y := modal.in_height - 40 // 250
+	close.set_bounds(w - 280, y, 135, 30)
+	can.set_bounds(w - 140, y, 80, 30)
 
 	app.win.add_child(modal)
 }

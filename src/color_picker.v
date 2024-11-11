@@ -113,6 +113,7 @@ fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
 
 	close.subscribe_event('mouse_up', cp.default_modal_close_fn)
 	close.set_bounds(12, y, 208, 30)
+	close.set_accent_filled(true)
 
 	mut can := m.make_close_btn(true)
 	can.text = 'Cancel'

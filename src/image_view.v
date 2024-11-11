@@ -224,10 +224,18 @@ fn (mut this Image) set(x int, y int, color gx.Color) bool {
 }
 
 fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
+
+	if x < 0 || y < 0 || x >= this.w || y >= this.h {
+		// dump('${x} ${y}')
+		return false
+	}
+
 	from := this.get(x, y)
 	if from == color {
 		return true
 	}
+	
+	// dump('debug: set2 ${this.history.len}')
 
 	change := Change{
 		x:     x
@@ -249,7 +257,8 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 		this.history.insert(0, change)
 	}
 
-	return set_pixel(this.data.file, x, y, color)
+	set_pix(this.data.file, x, y, color)
+	return true
 }
 
 fn (mut this Image) set_no_undo(x int, y int, color gx.Color) bool {
@@ -261,8 +270,9 @@ fn (mut this Image) get(x int, y int) gx.Color {
 }
 
 fn (mut this Image) refresh() {
-	mut data := this.data
-	refresh_img(mut data, mut this.app.win.gg)
+	// mut data := this.data
+	// refresh_img(mut data, mut this.app.win.gg)
+	this.app.win.gg.update_pixel_data(this.data.id, this.data.file.data)
 }
 
 // Get RGB value from image loaded with STBI
@@ -283,6 +293,17 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 		p[2] = color.b
 		p[3] = color.a
 		return true
+	}
+}
+
+fn set_pix(image stbi.Image, x int, y int, color gx.Color) {
+	unsafe {
+		data := &u8(image.data)
+		p := data + (4 * (y * image.width + x))
+		p[0] = color.r
+		p[1] = color.g
+		p[2] = color.b
+		p[3] = color.a
 	}
 }
 
