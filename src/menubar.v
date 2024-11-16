@@ -96,6 +96,11 @@ fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
 	app.canvas.set_zoom(nz)
 }
 
+fn img_prop_item_click(mut e ui.MouseEvent) {
+	mut app := e.ctx.win.get[&App]('app')
+	app.show_prop_modal()
+}
+
 // Make menubar
 fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
@@ -176,6 +181,11 @@ fn make_file_menu() &ui.MenuItem {
 				text:           'Save As...'
 				click_event_fn: save_as_click
 				uicon:          '\ue792'
+			),
+			ui.MenuItem.new(
+				text:     'Image Properties'
+				click_fn: img_prop_item_click
+				uicon:    '\uE90E'
 			),
 			ui.MenuItem.new(
 				text:           'Settings'
@@ -275,8 +285,8 @@ fn make_shape_menu() &ui.MenuItem {
 		text: 'Shapes'
 	)
 
-	labels := ['Line', 'Rectangle']
-	uicons := ['\ue937', '\ue003']
+	labels := ['Line', 'Rectangle', 'Oval']
+	uicons := ['\ue937', '\ue003', '\uea57']
 
 	for i, label in labels {
 		item.add_child(ui.MenuItem.new(
@@ -396,11 +406,11 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	modal.in_height = 290
 
 	mut title := ui.Label.new(
-		text: 'VPaint'
-		bold: true
-		em_size: 2
+		text:           'VPaint'
+		bold:           true
+		em_size:        2
 		vertical_align: .middle
-		pack: true
+		pack:           true
 	)
 
 	mut p := ui.Panel.new(
@@ -411,8 +421,8 @@ fn about_click(mut win ui.Window, com ui.MenuItem) {
 	p.add_child_with_flag(title, ui.borderlayout_north)
 
 	mut lbl := ui.Label.new(
-		text: about_text.join('\n')
-		pack: true
+		text:           about_text.join('\n')
+		pack:           true
 		vertical_align: .middle
 	)
 	p.add_child_with_flag(lbl, ui.borderlayout_center)

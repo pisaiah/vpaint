@@ -4,6 +4,13 @@ module main
 import gx
 import math
 
+fn wasm_keyboard_show(val bool) {
+	$if emscripten ? {
+		value := if val { '"keyboard-show"' } else { 'keyboard-hide' }
+		C.emscripten_run_script(cstr('iui.trigger = ' + value))
+	}
+}
+
 // h, s, l in [0,1]
 pub fn hsv_to_rgb(h f64, s f64, v f64) gx.Color {
 	c := v * s

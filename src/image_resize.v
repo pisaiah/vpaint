@@ -174,7 +174,7 @@ fn (mut this Image) scale2x() [][]gx.Color {
 
 	for y in 0 .. src_height {
 		for x in 0 .. src_width {
-			c := this.get(x, y) // src[y][x]
+			c := this.get(x, y)
 			a := if y > 0 { this.get(x, y - 1) } else { c }
 			b := if x > 0 { this.get(x - 1, y) } else { c }
 			d := if x < src_width - 1 { this.get(x + 1, y) } else { c }

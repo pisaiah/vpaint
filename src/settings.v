@@ -152,10 +152,11 @@ fn (mut app App) settings_save() ! {
 		os.write_file(file, default_config.join('\n')) or { println(err) }
 	}
 
-	mut txt := ['# VPaint Configuration File']
-	txt << 'autohide_sidebar: ${app.settings.autohide_sidebar}'
-	txt << 'theme: ${app.settings.theme}'
-
+	mut txt := [
+		'# VPaint Configuration File',
+		'autohide_sidebar: ${app.settings.autohide_sidebar}',
+		'theme: ${app.settings.theme}',
+	]
 	os.write_file(file, txt.join('\n')) or { return err }
 
 	if app.wasm_load_tick > 25 {

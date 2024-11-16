@@ -48,7 +48,9 @@ fn (mut app App) make_color_box() &ui.Panel {
 		gx.rgb(163, 73, 164), gx.rgb(255, 255, 255), gx.rgb(195, 195, 195),
 		gx.rgb(185, 122, 87), gx.rgb(255, 174, 201), gx.rgb(255, 200, 15),
 		gx.rgb(239, 228, 176), gx.rgb(180, 230, 30), gx.rgb(153, 217, 235),
-		gx.rgb(112, 146, 190), gx.rgba(200, 190, 230, 0)]
+		gx.rgb(112, 146, 190), gx.rgba(0, 0, 0, 0)]
+
+	// gx.rgba(200, 190, 230, 0)
 
 	size := 24
 
@@ -90,8 +92,9 @@ fn (mut app App) make_color_box() &ui.Panel {
 
 fn make_c_btn(count int) &ui.Button {
 	txt := if count == 0 { '' } else { ' ' }
-	mut current_btn := ui.button(text: txt)
-	current_btn.set_bounds(0, 0, 35, 25)
+	mut current_btn := ui.Button.new(text: txt)
+	current_btn.set_bounds(0, 0, 26, 26)
+	current_btn.border_radius = 16
 	current_btn.subscribe_event('draw', current_color_btn_draw)
 	return current_btn
 }
@@ -131,12 +134,12 @@ fn current_color_btn_draw(mut e ui.DrawEvent) {
 		com.set_background(bg)
 		sele := (com.text == ' ' && app.sele_color) || (com.text == '' && !app.sele_color)
 		if sele {
-			o := 4
+			o := 3
 			ry := com.ry
 			width := com.width + (o * 2)
-			heigh := com.height + o
-			win.gg.draw_rect_filled(com.rx - o, ry - (o / 2), width, heigh, win.theme.button_bg_hover)
-			win.gg.draw_rect_empty(com.rx - o, ry - (o / 2), width, heigh, win.theme.button_border_hover)
+			heigh := com.height + (o * 2)
+			e.ctx.gg.draw_rounded_rect_filled(com.rx - o, ry - o, width, heigh, 16, e.ctx.theme.button_bg_hover)
+			e.ctx.gg.draw_rounded_rect_empty(com.rx - o, ry - o, width, heigh, 16, e.ctx.theme.accent_fill)
 		} else if com.is_mouse_rele {
 			app.sele_color = !app.sele_color
 		}

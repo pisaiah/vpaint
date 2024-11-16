@@ -224,7 +224,6 @@ fn (mut this Image) set(x int, y int, color gx.Color) bool {
 }
 
 fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
-
 	if x < 0 || y < 0 || x >= this.w || y >= this.h {
 		// dump('${x} ${y}')
 		return false
@@ -234,7 +233,7 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 	if from == color {
 		return true
 	}
-	
+
 	// dump('debug: set2 ${this.history.len}')
 
 	change := Change{

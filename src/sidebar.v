@@ -48,9 +48,9 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 	}
 
 	h := app.sidebar.height
-	w := if h > 180 { 54 } else { 104 }
+	w := if h > 180 { 46 } else { 104 }
 
-	color := e.ctx.theme.menubar_background
+	color := e.ctx.theme.textbox_background
 	e.ctx.gg.draw_rect_filled(0, app.sidebar.ry, app.sidebar.width, app.sidebar.height,
 		color)
 
@@ -102,6 +102,9 @@ fn (mut app App) set_tool_by_name(name string) {
 		}
 		'Rectangle' {
 			app.tool = &RectTool{}
+		}
+		'Oval', 'Circle' {
+			app.tool = &OvalTool{}
 		}
 		else {
 			app.tool = &PencilTool{}
@@ -189,12 +192,12 @@ fn draw_btn(mut e ui.DrawEvent) {
 fn after_draw_btn(mut e ui.DrawEvent) {
 	if e.target.is_selected {
 		mut btn := e.target
-		for i in 1 .. 3 {
+		for i in 1 .. 2 {
 			x := btn.x + i
 			y := btn.y + i
 			w := btn.width - (2 * i)
 			h := btn.height - (2 * i)
-			e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.button_border_hover)
+			e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.accent_fill)
 		}
 	}
 }
@@ -207,7 +210,7 @@ fn (mut app App) icon_btn(data []u8, name string) &ui.Button {
 	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
 	cim := gg.cache_image(gg_im)
 	mut btn := ui.Button.new(icon: cim)
-	btn.set_bounds(2, 0, 46, 32)
+	btn.set_bounds(0, 0, 42, 32)
 	btn.icon_width = 32
 
 	btn.set_area_filled(false)

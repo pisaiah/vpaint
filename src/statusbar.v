@@ -30,7 +30,10 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	zoom_dec.subscribe_event('mouse_up', app.on_zoom_dec)
 	zoom_dec.set_bounds(4, 0, 40, 26)
 
-	mut status := ui.Label.new(text: 'status')
+	mut status := ui.Label.new(
+		text:           'status'
+		vertical_align: .middle
+	)
 	app.stat_lbl = status
 
 	mut zoom_lbl := ui.Label.new(text: '100%')
@@ -49,10 +52,31 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 
 	status.subscribe_event('draw', stat_lbl_draw_event)
 
+	mut stat_btn := ui.Button.new(
+		text: '\uE90E'
+	)
+	status.set_bounds(0, 0, 0, 24)
+	stat_btn.set_bounds(0, 0, 24, 24)
+	stat_btn.font = 1
+
+	stat_btn.subscribe_event('mouse_up', fn (mut e ui.MouseEvent) {
+		mut app := e.ctx.win.get[&App]('app')
+		app.show_prop_modal()
+	})
+
+	mut west_panel := ui.Panel.new(
+		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
+	)
+
+	west_panel.set_bounds(0, 0, 250, 0)
+
+	west_panel.add_child(stat_btn)
+	west_panel.add_child(status)
+
 	mut zp := ui.Panel.new(
 		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
 	)
-	sb.add_child_with_flag(status, ui.borderlayout_west)
+	sb.add_child_with_flag(west_panel, ui.borderlayout_west)
 	zp.add_child(zoom_lbl)
 	zp.add_child(zoom_dec)
 	zp.add_child(zoom_inc)
@@ -64,17 +88,24 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 	app := e.ctx.win.get[&App]('app')
 	mouse_details := 'm: (${app.canvas.mx}, ${app.canvas.my})'
 	mut com := e.target
-	com.text = '${app.canvas.w} x ${app.canvas.h} / ${app.data.file_size} / ${mouse_details} / ${app.tool.tool_name}'
-	if mut com is ui.Label {
-		com.pack()
+
+	ww := e.ctx.gg.window_size().width
+	if ww < 400 {
+		com.text = '${mouse_details} / ${app.tool.tool_name}'
+	} else {
+		com.text = '${app.canvas.w}x${app.canvas.h} / ${app.data.file_size} / ${mouse_details} / ${app.tool.tool_name}'
 	}
-	com.set_x(10)
-	com.set_y(10)
+
+	if mut com is ui.Label {
+		com.width = e.ctx.text_width(com.text)
+		com.height = 24
+	}
 }
 
 fn (mut app App) zoom_btn(val int) &ui.Button {
-	txt := if val == 0 { '-' } else { '+' }
+	txt := if val == 0 { '\ue989' } else { '\ue988' }
 	mut btn := ui.Button.new(text: txt)
+	btn.font = 1
 	btn.border_radius = 8
 	return btn
 }

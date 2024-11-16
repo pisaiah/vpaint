@@ -5,6 +5,8 @@ import gx
 import math
 
 const hue_deg = 359
+const modal_width = 445
+const compact_width = 360
 
 @[heap]
 struct ColorPicker {
@@ -44,36 +46,30 @@ fn modal_draw(mut e ui.DrawEvent) {
 			tar.top_off = 2
 		}
 	}
-	if h > 700 {
-		mut tar := e.target
-		if mut tar is ui.Modal {
-			// tar.top_off = (tar.height / 2) - (tar.in_height)
-		}
-	}
 
 	// Responsive Size
-	/*
 	mut tar := e.target
 	if mut tar is ui.Modal {
 		wss := e.ctx.gg.window_size()
 		ws := wss.width
-		if ws > 0 && ws < tar.in_width {
-			tar.top_off = 0
-			tar.in_width = ws - 10
-			tar.in_height = wss.height - 40 - tar.top_off
-			tar.children[0].width = ws - 10
-			tar.children[0].height = tar.in_height - 1
-		} else if ws > 440 {
-			tar.in_width = 440
-			tar.in_height = 335
-			tar.children[0].width = 430
-			tar.children[0].height = 335
+
+		if ws < modal_width {
+			tar.in_width = compact_width
+			tar.in_height = 395
+		} else {
+			tar.in_width = modal_width
+			tar.in_height = 330
 		}
 
-		tar.children[1].y = tar.in_height - 40
-		tar.children[2].y = tar.in_height - 40
+		tar.children[0].width = tar.in_width
+		tar.children[1].y = tar.in_height - 50
+		tar.children[2].y = tar.in_height - 50
+
+		bw := (tar.in_width - 20) / 2
+		tar.children[1].width = bw - 20
+		tar.children[2].x = bw + 5 // 20
+		tar.children[2].width = bw - 5
 	}
-	*/
 }
 
 pub fn (mut cp ColorPicker) subscribe_event(val string, f fn (voidptr)) {
@@ -94,7 +90,7 @@ fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
 
 	m.subscribe_event('draw', modal_draw)
 	m.needs_init = false
-	m.in_width = 445
+	m.in_width = modal_width
 	m.in_height = 335
 	m.top_off = 20
 
@@ -112,7 +108,7 @@ fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
 	y := 292
 
 	close.subscribe_event('mouse_up', cp.default_modal_close_fn)
-	close.set_bounds(12, y, 208, 30)
+	close.set_bounds(20, y, 200, 30)
 	close.set_accent_filled(true)
 
 	mut can := m.make_close_btn(true)
@@ -140,10 +136,6 @@ fn (mut cp ColorPicker) make_picker_panel(w int, h int) &ui.Panel {
 	btn.set_bounds(0, 0, cp.bw, cp.bw)
 	slid.set_bounds(0, 0, 38, 256)
 	aslid.set_bounds(0, 0, 30, 256) // old h: 192
-
-	// TODO: fix mouse scroll in Slider
-	slid.scroll = false
-	//aslid.scroll = false
 
 	// Add to panel
 	p.add_child(btn)
@@ -237,35 +229,56 @@ fn (mut cp ColorPicker) slid_value_change(mut e ui.FloatValueChangeEvent) {
 	cp.update_color()
 }
 
+fn p1_draw_responsive(mut e ui.DrawEvent) {
+	mut p1 := e.get_target[ui.Panel]()
+	wss := e.ctx.gg.window_size()
+	ws := wss.width
+
+	if ws < modal_width {
+		if mut p1.layout is ui.BoxLayout {
+			p1.layout = ui.GridLayout.new(cols: 4)
+		}
+		p1.width = compact_width - 20
+		p1.height = 32 * 2
+	} else {
+		if mut p1.layout is ui.GridLayout {
+			p1.layout = ui.BoxLayout.new(ori: 1, hgap: 4, vgap: 8)
+			p1.width = 0
+			p1.height = 0
+		}
+	}
+}
+
 fn (mut cp ColorPicker) make_fields() &ui.Panel {
-	mut p1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 0))
-	mut p := ui.Panel.new(
-		layout: ui.GridLayout.new(cols: 2)
-	)
-	p.set_bounds(0, 0, 80, 100)
+	mut p1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 4, vgap: 8))
+	mut l1 := ui.Label.new(text: 'HSV', pack: true, vertical_align: .middle)
+
+	p1.subscribe_event('draw', p1_draw_responsive)
+	p1.add_child(l1)
 
 	for val in ['H', 'S', 'V', 'A'] {
+		if val == 'A' {
+			mut lbl := ui.Label.new(text: 'Alpha', pack: true, vertical_align: .middle)
+			p1.add_child(lbl)
+		}
+
 		mut f := ui.numeric_field(255)
-		mut lbl := ui.Label.new(text: val)
-		f.text_change_event_fn = cp.hsv_num_box_change_evnt
-		p.add_child(f)
-		p.add_child(lbl)
+		f.subscribe_event('draw', numfield_draw_evnt)
+		f.subscribe_event('text_change', cp.hsv_num_box_change_evnt)
+		p1.add_child(f)
 		cp.fields << f
 	}
-
-	p1.add_child(p)
 
 	for val in ['RGB'] {
 		mut f := ui.TextField.new(text: '255, 255, 255,')
 		f.subscribe_event('draw', numfield_draw_evnt)
 		f.numeric = true
 
-		mut lbl := ui.Label.new(text: val)
-		lbl.pack()
-		f.text_change_event_fn = cp.rgb_num_box_change_evnt
+		mut lbl := ui.Label.new(text: val, pack: true, vertical_align: .middle)
+		f.subscribe_event('text_change', cp.rgb_num_box_change_evnt)
+
 		p1.add_child(lbl)
 		p1.add_child(f)
-		// p1.add_child(lbl)
 		cp.fields << f
 	}
 
@@ -277,10 +290,16 @@ fn numfield_draw_evnt(mut e ui.DrawEvent) {
 		e.target.width = e.ctx.text_width('255, 255, 255') + 10
 		return
 	}
-	e.target.width = e.ctx.text_width('255,255') + 20
+
+	if e.target.parent.width > 150 {
+		// Let GridLayout do size
+		return
+	}
+
+	e.target.width = e.target.parent.width - 5 // e.ctx.text_width('255,255')
 }
 
-fn (mut cp ColorPicker) rgb_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
+fn (mut cp ColorPicker) rgb_num_box_change_evnt(mut e ui.TextChangeEvent) {
 	colors := cp.fields[4].text.replace(' ', '').split(',')
 
 	if colors.len < 3 {
@@ -364,12 +383,6 @@ fn (mut cp ColorPicker) hsl_btn_draw_evnt(mut e ui.DrawEvent) {
 
 	ty := cp.btn.ry - 24 - 8 // cp.btn.ry + cp.btn.height + 4
 
-	// TODO e.target.parent.parent.text = '${cp.color.to_css_string()}'
-
-	// ty := cp.btn.ry + cp.btn.height + 4
-
-	// cp.modal.text = '${cp.color.to_css_string()}'
-
 	e.ctx.gg.draw_rect_filled(cp.btn.rx, ty, cp.bw, 24, cp.color)
 
 	br := f32(cp.color.r) * 299
@@ -392,7 +405,7 @@ fn (mut cp ColorPicker) hsl_btn_draw_evnt(mut e ui.DrawEvent) {
 
 const field_max = [359, 100, 100]
 
-fn (mut cp ColorPicker) hsv_num_box_change_evnt(win &ui.Window, mut com ui.TextField) {
+fn (mut cp ColorPicker) hsv_num_box_change_evnt(mut e ui.TextChangeEvent) {
 	for i, max in field_max {
 		if cp.fields[i].text.int() > max {
 			cp.fields[i].text = '${max}'
@@ -425,7 +438,7 @@ fn (mut cp ColorPicker) load_rgb(color gx.Color) {
 	cp.h = h
 	cp.s = int(f32(s) * 100)
 	cp.v = 100 * v
-	alpha := color.a // cp.fields[3].text.u8()
+	alpha := color.a
 
 	cp.fields[3].text = '${alpha}'
 	cp.slid.cur = f32(100 - cp.v)
@@ -433,7 +446,6 @@ fn (mut cp ColorPicker) load_rgb(color gx.Color) {
 	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
 
 	cp.update_hsv_m()
-	// cp.update_fields_text()
 	cp.update_text_fields()
 }
 
