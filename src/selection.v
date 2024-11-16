@@ -220,24 +220,30 @@ fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 			sw := this.selection.x2 - this.selection.x1 + 1
 			sh := this.selection.y2 - this.selection.y1 + 1
 
-			img.note_multichange()
+			// img.note_multichange()
+
+			mut change := Multichange.new()
+
+			for x in 0 .. sw {
+				for y in 0 .. sh {
+					img.set_raw(this.selection.og.x + x, this.selection.og.y + y, img.app.color_2, mut
+						change)
+				}
+			}
+
+			img.push(change)
+			change = Multichange.new()
+			change.batch = true
 
 			for x in 0 .. sw {
 				for y in 0 .. sh {
 					c := this.selection.px[x][y]
 
-					// Remove old
-					if img.get(this.selection.og.x + x, this.selection.og.y + y).a != 0 {
-						img.set2(this.selection.og.x + x, this.selection.og.y + y, img.app.color_2,
-							true)
-					}
-
 					// Set New
-					if c.a != 0 {
-						img.set2(this.selection.x1 + x, this.selection.y1 + y, c, true)
-					}
+					img.set_raw(this.selection.x1 + x, this.selection.y1 + y, c, mut change)
 				}
 			}
+			img.push(change)
 			img.refresh()
 
 			this.selection = Selection{-1, -1, -1, -1, [][]gx.Color{}, ui.Bounds{}}

@@ -25,7 +25,8 @@ mut:
 struct PencilTool {
 	tool_name string = 'Pencil'
 mut:
-	count int
+	count  int
+	change Multichange = Multichange.new()
 }
 
 fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -64,7 +65,8 @@ fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 		for p in pp {
 			for x in 0 .. size {
 				for y in 0 .. size {
-					img.set(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color())
+					img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
+						this.change)
 				}
 			}
 		}
@@ -76,6 +78,9 @@ fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 }
 
 fn (mut this PencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+	img.push(this.change)
+	this.change = Multichange.new()
 }
 
 // Drag Tool
@@ -128,6 +133,8 @@ fn (mut this DragTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 // Pencil Tool
 struct AirbrushTool {
 	tool_name string = 'Airbrush'
+mut:
+	change Multichange = Multichange.new()
 }
 
 fn (mut this AirbrushTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -160,16 +167,20 @@ fn (mut this AirbrushTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 		for y in 0 .. size {
 			rand_int := intn(size)
 			if rand_int == 0 {
-				img.set(img.mx + (x - half_size), img.my + (y - half_size), img.app.get_color())
+				img.set_raw(img.mx + (x - half_size), img.my + (y - half_size), img.app.get_color(), mut
+					this.change)
 			}
 		}
 	}
 
-	img.set(img.mx, img.my, img.app.get_color())
+	img.set_raw(img.mx, img.my, img.app.get_color(), mut this.change)
 	img.refresh()
 }
 
 fn (mut this AirbrushTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+	img.push(this.change)
+	this.change = Multichange.new()
 }
 
 // Dropper Tool
@@ -214,8 +225,9 @@ fn (mut this DropperTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 struct CustomPencilTool {
 	tool_name string = 'Custom Pencil'
 mut:
-	width  int = 8
-	height int = 2
+	width  int         = 8
+	height int         = 2
+	change Multichange = Multichange.new()
 }
 
 fn (mut this CustomPencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -248,7 +260,8 @@ fn (mut this CustomPencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 		for p in pp {
 			for x in -half_size .. size + half_size {
 				for y in 0 .. height {
-					img.set(p.x + (x - half_size), p.y + (y - (height / 2)), img.app.get_color())
+					img.set_raw(p.x + (x - half_size), p.y + (y - (height / 2)), img.app.get_color(), mut
+						this.change)
 				}
 			}
 		}
@@ -260,16 +273,20 @@ fn (mut this CustomPencilTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 }
 
 fn (mut this CustomPencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+	img.push(this.change)
+	this.change = Multichange.new()
 }
 
 // Fill Tool
 struct FillTool {
 	tool_name string = 'Fillcan'
 mut:
-	color gx.Color
-	img   &Image = unsafe { nil }
-	count int
-	next  []Point
+	color  gx.Color
+	img    &Image = unsafe { nil }
+	count  int
+	next   []Point
+	change Multichange = Multichange.new()
 }
 
 fn (mut this FillTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -310,7 +327,7 @@ fn (mut this FillTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
 	this.color = down_color
 	this.fill_points(x, y)
 
-	img.set(img.mx, img.my, img.app.get_color())
+	img.set_raw(img.mx, img.my, img.app.get_color(), mut this.change)
 	img.refresh()
 }
 
@@ -341,11 +358,13 @@ fn (mut this FillTool) fill_point_(x int, y int) {
 fn (mut this FillTool) fill_point(x int, y int) {
 	color := this.img.get(x, y)
 	if color == this.color {
-		this.img.set_no_undo(x, y, this.img.app.get_color())
+		this.img.set_raw(x, y, this.img.app.get_color(), mut this.change)
 		this.next << Point{x, y}
 	}
 }
 
 fn (mut this FillTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
-	// this.next = Point{-1, -1}
+	mut img := unsafe { &Image(a) }
+	img.push(this.change)
+	this.change = Multichange.new()
 }

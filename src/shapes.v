@@ -66,13 +66,16 @@ fn (mut this LineTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 	if this.sx != -1 {
 		pp := bresenham(this.sx, this.sy, img.mx, img.my)
+		mut change := Multichange.new()
 		for p in pp {
 			for x in 0 .. size {
 				for y in 0 .. size {
-					img.set(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color())
+					img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
+						change)
 				}
 			}
 		}
+		img.push(change)
 	}
 
 	img.refresh()
@@ -164,22 +167,25 @@ fn (mut this RectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 	c := img.app.get_color()
 
+	mut change := Multichange.new()
+
 	if this.sx != -1 {
 		for x in 0 .. size {
 			for y in 0 .. size {
 				for xx in x1 .. x2 {
-					img.set(xx + (x - half_size), y1 + (y - half_size), c)
-					img.set(xx + (x - half_size), y2 + (y - half_size), c)
+					img.set_raw(xx + (x - half_size), y1 + (y - half_size), c, mut change)
+					img.set_raw(xx + (x - half_size), y2 + (y - half_size), c, mut change)
 				}
 				for yy in y1 .. y2 {
-					img.set(x1 + (x - half_size), yy + (y - half_size), c)
-					img.set(x2 + (x - half_size), yy + (y - half_size), c)
+					img.set_raw(x1 + (x - half_size), yy + (y - half_size), c, mut change)
+					img.set_raw(x2 + (x - half_size), yy + (y - half_size), c, mut change)
 				}
 			}
 		}
 	}
 
-	img.set(x2, y2, c)
+	img.set_raw(x2, y2, c, mut change)
+	img.push(change)
 	img.refresh()
 
 	// Reset
@@ -278,6 +284,8 @@ fn (mut this OvalTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 		radius_x := (x2 - x1) / 2
 		radius_y := (y2 - y1) / 2
 
+		mut change := Multichange.new()
+
 		for angle in 0 .. 360 {
 			rad := f32(angle) * (f32(math.pi) / 180.0)
 			x := int(radius_x * math.cos(rad))
@@ -285,11 +293,12 @@ fn (mut this OvalTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 			for xx in 0 .. size {
 				for yy in 0 .. size {
-					img.set(center_x + x - half_size + xx, center_y + y - half_size + yy,
-						c)
+					img.set_raw(center_x + x - half_size + xx, center_y + y - half_size + yy,
+						c, mut change)
 				}
 			}
 		}
+		img.push(change)
 	}
 
 	img.refresh()

@@ -52,28 +52,30 @@ fn (mut this Image) resize(w int, h int) {
 }
 
 fn (mut this Image) grayscale_filter() {
-	this.note_multichange()
+	mut change := Multichange.new()
 	for x in 0 .. this.w {
 		for y in 0 .. this.h {
 			rgb := this.get(x, y)
 			gray := (rgb.r + rgb.g + rgb.b) / 3
 			new_color := gx.rgb(gray, gray, gray)
-			this.set2(x, y, new_color, true)
+			this.set_raw(x, y, new_color, mut change)
 		}
 	}
+	this.push(change)
 	this.refresh()
 }
 
 fn (mut this Image) invert_filter() {
-	this.note_multichange()
+	mut change := Multichange.new()
+
 	for x in 0 .. this.w {
 		for y in 0 .. this.h {
 			rgb := this.get(x, y)
-			new_color := gx.rgb(255 - rgb.r, 255 - rgb.g, 255 - rgb.b)
-			this.set(x, y, new_color)
-			this.mark_batch_change()
+			new_color := gx.rgba(255 - rgb.r, 255 - rgb.g, 255 - rgb.b, rgb.a)
+			this.set_raw(x, y, new_color, mut change)
 		}
 	}
+	this.push(change)
 	this.refresh()
 }
 

@@ -152,6 +152,8 @@ fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
 	return gx.rgba(r, g, b, a)
 }
 
+type Changes = Change | Multichange
+
 struct Change {
 	x    int
 	y    int
@@ -161,7 +163,34 @@ mut:
 	batch bool
 }
 
-fn (this Change) compare(b Change) u8 {
+fn Multichange.new() Multichange {
+	return Multichange{}
+}
+
+fn (mut mc Multichange) change_at(x int, y int, a gx.Color, b gx.Color) {
+	mc.changes << Change{
+		x:    x
+		y:    y
+		from: a
+		to:   b
+	}
+}
+
+fn (mut i Image) push(change Multichange) {
+	i.history.insert(0, change)
+}
+
+struct Multichange {
+	Change
+mut:
+	changes []Change
+}
+
+fn (this Changes) compare(b Changes) u8 {
+	if this == b {
+		return 3
+	}
+
 	same_pos := this.x == b.x && this.y == b.y
 	same_from := this.from == b.from
 	same_to := this.to == b.to
@@ -175,6 +204,7 @@ fn (this Change) compare(b Change) u8 {
 	return 0
 }
 
+@[deprecated]
 fn (mut this Image) note_multichange() {
 	change := Change{
 		x:     -1
@@ -191,6 +221,21 @@ fn (mut this Image) undo() {
 		return
 	}
 	last_change := this.history[0]
+
+	if last_change is Multichange {
+		for change in last_change.changes {
+			set_pixel(this.data.file, change.x, change.y, change.from)
+		}
+		this.history.delete(0)
+		if last_change.batch {
+			this.undo()
+			return
+		}
+
+		this.refresh()
+		return
+	}
+
 	old_color := last_change.from
 	x := last_change.x
 	y := last_change.y
@@ -215,6 +260,7 @@ fn (mut this Image) undo() {
 	this.refresh()
 }
 
+@[deprecated]
 fn (mut this Image) mark_batch_change() {
 	this.history[0].batch = true
 }
@@ -258,6 +304,16 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 
 	set_pix(this.data.file, x, y, color)
 	return true
+}
+
+fn (mut this Image) set_raw(x int, y int, color gx.Color, mut ch Multichange) bool {
+	from := this.get(x, y)
+	if from == color {
+		return true
+	}
+
+	ch.change_at(x, y, from, color)
+	return set_pixel(this.data.file, x, y, color)
 }
 
 fn (mut this Image) set_no_undo(x int, y int, color gx.Color) bool {
@@ -323,7 +379,7 @@ pub mut:
 	img           int
 	zoom          f32
 	loaded        bool
-	history       []Change
+	history       []Changes
 	history_index int
 	last_x        int = -1
 	last_y        int
