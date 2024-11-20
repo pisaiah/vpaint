@@ -66,7 +66,9 @@ fn undo_click(mut win ui.Window, com ui.MenuItem) {
 
 fn new_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
-	app.load_new(1024, 1024)
+	// app.load_new(1024, 1024)
+
+	app.show_new_modal(1024, 1024)
 }
 
 fn open_click(mut win ui.Window, com ui.MenuItem) {

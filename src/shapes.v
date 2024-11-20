@@ -8,8 +8,9 @@ struct LineTool {
 	tool_name string = 'Line'
 mut:
 	count int
-	sx    int = -1
-	sy    int = -1
+	sx    int  = -1
+	sy    int  = -1
+	round bool = true
 }
 
 fn (mut this LineTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
@@ -64,7 +65,10 @@ fn (mut this LineTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 	size := img.app.brush_size
 	half_size := size / 2
 
-	if this.sx != -1 {
+	round := this.round && size > 1
+
+	// Square Edges
+	if this.sx != -1 && !round {
 		pp := bresenham(this.sx, this.sy, img.mx, img.my)
 		mut change := Multichange.new()
 		for p in pp {
@@ -72,6 +76,32 @@ fn (mut this LineTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 				for y in 0 .. size {
 					img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
 						change)
+				}
+			}
+		}
+		img.push(change)
+	}
+
+	// Round Edges
+	if this.sx != -1 && round {
+		pp := bresenham(this.sx, this.sy, img.mx, img.my)
+		mut change := Multichange.new()
+		for p in pp {
+			for x in -half_size .. half_size {
+				for y in -half_size .. half_size {
+					if x * x + y * y <= half_size * half_size {
+						img.set_raw(p.x + x, p.y + y, img.app.get_color(), mut change)
+					}
+				}
+			}
+		}
+
+		// Draw circles at the start and end points to round the ends
+		for x in -half_size .. half_size {
+			for y in -half_size .. half_size {
+				if x * x + y * y <= half_size * half_size {
+					img.set_raw(this.sx + x, this.sy + y, img.app.get_color(), mut change)
+					img.set_raw(img.mx + x, img.my + y, img.app.get_color(), mut change)
 				}
 			}
 		}
@@ -286,17 +316,36 @@ fn (mut this OvalTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 		mut change := Multichange.new()
 
+		mut last_x := 0
+		mut last_y := 0
+
 		for angle in 0 .. 360 {
 			rad := f32(angle) * (f32(math.pi) / 180.0)
 			x := int(radius_x * math.cos(rad))
 			y := int(radius_y * math.sin(rad))
 
-			for xx in 0 .. size {
-				for yy in 0 .. size {
-					img.set_raw(center_x + x - half_size + xx, center_y + y - half_size + yy,
-						c, mut change)
+			px := center_x + x - half_size
+			py := center_y + y - half_size
+
+			if last_x != 0 && last_y != 0 {
+				pp := bresenham(last_x, last_y, px, py)
+				for p in pp {
+					for xx in 0 .. size {
+						for yy in 0 .. size {
+							img.set_raw(p.x + xx, p.y + yy, c, mut change)
+						}
+					}
+				}
+			} else {
+				for xx in 0 .. size {
+					for yy in 0 .. size {
+						img.set_raw(px + xx, py + yy, c, mut change)
+					}
 				}
 			}
+
+			last_x = px
+			last_y = py
 		}
 		img.push(change)
 	}

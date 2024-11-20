@@ -167,7 +167,7 @@ fn (mut cp ColorPicker) slid_draw_evnt(mut e ui.DrawEvent) {
 		vp := f32(v) / 100
 		color := hsv_to_rgb(cp.h, f32(cp.s) / 100, vp)
 		y := com.ry + (5 * i)
-		e.ctx.gg.draw_rect_filled(com.rx, y, com.width - 1, 5, color)
+		e.ctx.gg.draw_rect_filled(com.rx, y, com.width - 1, 6, color)
 	}
 
 	if mut com is ui.Slider {

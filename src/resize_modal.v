@@ -215,7 +215,7 @@ fn (mut app App) show_prop_modal() {
 	mut modal := ui.Modal.new(
 		title:  'Image Properties'
 		width:  245
-		height: 210
+		height: 240
 	)
 
 	txt := [
@@ -269,4 +269,111 @@ fn (mut app App) show_prop_modal() {
 
 	app.win.add_child(modal)
 	app.canvas.is_mouse_down = false
+}
+
+@[heap]
+struct NewModal {
+mut:
+	modal &ui.Modal
+	w_box &ui.TextField
+	h_box &ui.TextField
+	same  bool
+}
+
+// Resize Modal
+fn (mut app App) show_new_modal(cw int, ch int) {
+	mut modal := ui.Modal.new(
+		title:  'New Canvas'
+		width:  300
+		height: 250
+	)
+
+	mut width_box := ui.TextField.new(text: '${cw}')
+	mut heigh_box := ui.TextField.new(text: '${ch}')
+
+	mut width_lbl := ui.Label.new(text: 'Width')
+	mut blank_lbl := ui.Label.new(text: ' ')
+	mut heigh_lbl := ui.Label.new(text: 'Height')
+
+	mut nm := &NewModal{
+		modal: modal
+		w_box: width_box
+		h_box: heigh_box
+		same:  true
+	}
+
+	nm.w_box.subscribe_event('text_change', nm.text_change_fn)
+	nm.h_box.subscribe_event('text_change', nm.text_change_fn)
+
+	mut link := ui.Button.new(
+		text: '\ue167'
+		pack: true
+	)
+	link.set_accent_filled(true)
+	link.font = 1
+	link.subscribe_event('mouse_up', nm.button_click_fn)
+
+	mut p := ui.Panel.new(
+		layout: ui.GridLayout.new(cols: 3)
+	)
+	p.set_bounds(20, 20, 260, 90)
+
+	p.add_child(width_lbl)
+	p.add_child(blank_lbl)
+	p.add_child(heigh_lbl)
+	p.add_child(width_box)
+	p.add_child(link)
+	p.add_child(heigh_box)
+	modal.add_child(p)
+
+	modal.needs_init = false
+	nm.new_modal_close_btn(mut modal, app.win)
+
+	app.win.add_child(modal)
+}
+
+pub fn (mut nm NewModal) button_click_fn(mut e ui.MouseEvent) {
+	nm.same = !nm.same
+
+	mut tar := e.target
+	if mut tar is ui.Button {
+		tar.set_accent_filled(nm.same)
+	}
+}
+
+pub fn (mut nm NewModal) text_change_fn(mut e ui.TextChangeEvent) {
+	if nm.same {
+		nm.w_box.text = e.target.text
+		nm.h_box.text = e.target.text
+		nm.w_box.carrot_left = e.target.text.len
+		nm.h_box.carrot_left = e.target.text.len
+	}
+}
+
+pub fn (mut nm NewModal) new_modal_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
+	mut close := ui.Button.new(text: 'OK')
+	mut cancel := ui.Button.new(text: 'Cancel')
+
+	y := this.in_height - 45
+	close.set_accent_filled(true)
+	close.set_bounds(20, y, 150, 30)
+	cancel.set_bounds(175, y, 105, 30)
+
+	close.subscribe_event('mouse_up', nm.new_close_click)
+	cancel.subscribe_event('mouse_up', end_modal)
+
+	this.add_child(cancel)
+
+	nm.modal.children << close
+	nm.modal.close = close
+	return close
+}
+
+fn (mut nm NewModal) new_close_click(mut e ui.MouseEvent) {
+	e.ctx.win.components = e.ctx.win.components.filter(mut it !is ui.Modal)
+	mut app := e.ctx.win.get[&App]('app')
+
+	// TODO: Ask for Save
+
+	app.load_new(nm.w_box.text.int(), nm.h_box.text.int())
 }
