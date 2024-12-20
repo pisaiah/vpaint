@@ -100,7 +100,7 @@ fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
 
 fn img_prop_item_click(mut e ui.MouseEvent) {
 	mut app := e.ctx.win.get[&App]('app')
-	app.show_prop_modal()
+	app.show_prop_modal(e.ctx)
 }
 
 // Make menubar
@@ -110,7 +110,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	window.bar.set_animate(true)
 
 	// Win11 MSPaint has 7px padding on menu bar
-	window.bar.set_padding(7)
+	window.bar.set_padding(8)
 
 	// Add MenuItems
 	window.bar.add_child(make_file_menu())

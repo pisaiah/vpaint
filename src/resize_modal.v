@@ -211,11 +211,11 @@ fn end_modal(mut e ui.MouseEvent) {
 }
 
 // Prop Modal
-fn (mut app App) show_prop_modal() {
+fn (mut app App) show_prop_modal(g &ui.GraphicsContext) {
 	mut modal := ui.Modal.new(
 		title:  'Image Properties'
-		width:  245
-		height: 240
+		width:  250
+		height: 250
 	)
 
 	txt := [
@@ -255,6 +255,11 @@ fn (mut app App) show_prop_modal() {
 			)
 			fp.add_child(lbl)
 		}
+
+		w := g.text_width(line) + 40
+		if modal.in_width < w {
+			modal.in_width = w
+		}
 	}
 
 	mut p := ui.Panel.new(
@@ -273,8 +278,9 @@ fn (mut app App) show_prop_modal() {
 
 @[heap]
 struct NewModal {
+	ui.Modal
 mut:
-	modal &ui.Modal
+	// modal &ui.Modal
 	w_box &ui.TextField
 	h_box &ui.TextField
 	same  bool
@@ -282,12 +288,6 @@ mut:
 
 // Resize Modal
 fn (mut app App) show_new_modal(cw int, ch int) {
-	mut modal := ui.Modal.new(
-		title:  'New Canvas'
-		width:  300
-		height: 250
-	)
-
 	mut width_box := ui.TextField.new(text: '${cw}')
 	mut heigh_box := ui.TextField.new(text: '${ch}')
 
@@ -296,14 +296,18 @@ fn (mut app App) show_new_modal(cw int, ch int) {
 	mut heigh_lbl := ui.Label.new(text: 'Height')
 
 	mut nm := &NewModal{
-		modal: modal
-		w_box: width_box
-		h_box: heigh_box
-		same:  true
+		text:      'New!'
+		in_width:  300
+		in_height: 250
+		z_index:   500
+		close:     unsafe { nil }
+		w_box:     width_box
+		h_box:     heigh_box
+		same:      true
 	}
 
-	nm.w_box.subscribe_event('text_change', nm.text_change_fn)
-	nm.h_box.subscribe_event('text_change', nm.text_change_fn)
+	width_box.subscribe_event('text_change', nm.text_change_fn)
+	heigh_box.subscribe_event('text_change', nm.text_change_fn)
 
 	mut link := ui.Button.new(
 		text: '\ue167'
@@ -324,12 +328,15 @@ fn (mut app App) show_new_modal(cw int, ch int) {
 	p.add_child(width_box)
 	p.add_child(link)
 	p.add_child(heigh_box)
-	modal.add_child(p)
 
-	modal.needs_init = false
-	nm.new_modal_close_btn(mut modal, app.win)
+	nm.add_child(p)
 
-	app.win.add_child(modal)
+	nm.needs_init = false
+	nm.new_modal_close_btn()
+
+	nm.set_bounds(0, 0, 1280, 720)
+
+	app.win.add_child(nm)
 }
 
 pub fn (mut nm NewModal) button_click_fn(mut e ui.MouseEvent) {
@@ -350,30 +357,35 @@ pub fn (mut nm NewModal) text_change_fn(mut e ui.TextChangeEvent) {
 	}
 }
 
-pub fn (mut nm NewModal) new_modal_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
+pub fn (mut nm NewModal) new_modal_close_btn() &ui.Button {
 	mut close := ui.Button.new(text: 'OK')
 	mut cancel := ui.Button.new(text: 'Cancel')
 
-	y := this.in_height - 45
+	y := nm.in_height - 45
 	close.set_accent_filled(true)
 	close.set_bounds(20, y, 150, 30)
 	cancel.set_bounds(175, y, 105, 30)
 
 	close.subscribe_event('mouse_up', nm.new_close_click)
-	cancel.subscribe_event('mouse_up', end_modal)
+	cancel.subscribe_event('mouse_up', end_modal2)
 
-	this.add_child(cancel)
+	nm.add_child(cancel)
 
-	nm.modal.children << close
-	nm.modal.close = close
+	nm.children << close
+	nm.close = close
 	return close
 }
 
+fn end_modal2(mut e ui.MouseEvent) {
+	mut win := e.ctx.win
+	win.components = win.components.filter(mut it !is NewModal)
+}
+
 fn (mut nm NewModal) new_close_click(mut e ui.MouseEvent) {
-	e.ctx.win.components = e.ctx.win.components.filter(mut it !is ui.Modal)
+	// TODO: prompt 'do you want to save'
+
 	mut app := e.ctx.win.get[&App]('app')
-
-	// TODO: Ask for Save
-
 	app.load_new(nm.w_box.text.int(), nm.h_box.text.int())
+
+	e.ctx.win.components = e.ctx.win.components.filter(mut it !is NewModal)
 }

@@ -10,6 +10,10 @@
 	.myrow {margin-top:.6svh}
 	.mobile .myrow {margin-top:.3svh}
 
+
+	#loadstat { display: none; justify-content: center; align-items: center; background: rgb(30,30,30); color:white; width:100%; height:calc(98svh);}
+	#canvass { display: none; }
+
 	#canvas { width:100%; height:calc(98svh - 20px - 1rem); border:1px solid rgb(22,50,95);}
 	.mobile #canvas, .fulll #canvas { height:calc(100svh - .1svh); }
 	.mobile .titlebar { height:20px;position:fixed;right:0;width:150px;}
@@ -18,15 +22,33 @@
 	<title>vpaint Demo</title>
 <body>
 	<div id="mc" class="w3-auto myrow">
-		<div class="titlebar" id="tbar">
-			<span>vpaint 0.5 demo</span>
-			<span style="float:right;margin-right:1rem"></span>
+		<div id="loadstat">
+			<center><label id="lbl" for="file">Loading WASM: </label><br><progress id="lval" value="0" max="100"></progress></center>
 		</div>
 		<canvas id="canvas" tabindex=-1></canvas>
 	</div>
 	<script id="appjs" src="./app.js"></script>
 	<script type="module" src="iui_helper.js"></script>
 	<script>
+	function wasmLoadProgressCallback(a) {
+	
+		if (a <= 50 && $('canvas').style.display != 'none') {
+			$('loadstat').style.display = "flex";
+			$('canvas').style.display = "none";
+		}
+	
+		console.log('Hello! ' + a) ;
+		$('lbl').innerText = "Loading WebAssembly " + a.toFixed(0) + "%...";
+		$('lval').value = a;
+		
+		if (a > 99) {
+			$('loadstat').style.display = "none";
+			$('canvas').style.display = "block";
+		}
+	}
+	
+	function $(id) {return document.getElementById(id);}
+	
 	function calc_moble_size() {
 		var w = window.innerWidth;
 		var h = window.innerHeight;

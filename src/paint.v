@@ -4,12 +4,15 @@ import iui as ui
 import os
 import gx
 
+// Version
+const version = '0.6-dev'
+
 // About Info
 const about_text = [
 	'Simple Image Editor written in the V Language.',
-	'(version 0.6-dev) (iUI: ${ui.version})',
+	'(version ${version}) (iUI: ${ui.version})',
 	'\t ',
-	'Copyright \u00A9 2022-2024 Isaiah.',
+	'Copyright \u00A9 2022-2025 Isaiah.',
 	'Released under MIT License.',
 ]
 
@@ -63,7 +66,7 @@ fn (mut app App) set_color(c gx.Color) {
 fn main() {
 	// Create Window
 	mut window := ui.Window.new(
-		title:     'vPaint'
+		title:     'vPaint ${version}'
 		width:     550 // 700
 		height:    450
 		font_size: 16
@@ -148,7 +151,7 @@ fn main() {
 		)
 	)
 
-	pan.add_child_with_flag(app.ribbon, ui.borderlayout_north)
+	pan.add_child(app.ribbon, value: ui.borderlayout_north)
 	pan.add_child_with_flag(app.sidebar, ui.borderlayout_west)
 	pan.add_child_with_flag(app.sv, ui.borderlayout_center)
 	pan.add_child_with_flag(sb, ui.borderlayout_south)

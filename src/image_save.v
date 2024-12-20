@@ -165,7 +165,7 @@ fn (app &App) save_as() {
 	app.win.add_child(modal)
 }
 
-fn word_wrap(txt string, max int) string {
+fn word_wrap_a(txt string, max int) string {
 	mut words := txt.split(' ')
 	mut line_len := 0
 	mut output := ''
@@ -188,7 +188,7 @@ fn (app &App) show_error(title string, msg IError) {
 	)
 	modal.top_off = 20
 	modal.in_height = 110
-	text := word_wrap(msg.msg(), 40)
+	text := msg.msg()
 	mut txt := ui.Label.new(
 		text: 'Error Code: ${msg.code()}; Message:\n${text}'
 	)

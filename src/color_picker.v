@@ -40,11 +40,16 @@ pub fn (mut cp ColorPicker) default_modal_close_fn(mut e ui.MouseEvent) {
 
 fn modal_draw(mut e ui.DrawEvent) {
 	h := e.target.height
+
 	if h > 1 && h < 700 {
 		mut tar := e.target
 		if mut tar is ui.Modal {
-			tar.top_off = 2
+			// tar.top_off = top_off
 		}
+	}
+
+	if h < 0 {
+		return
 	}
 
 	// Responsive Size
@@ -60,6 +65,9 @@ fn modal_draw(mut e ui.DrawEvent) {
 			tar.in_width = modal_width
 			tar.in_height = 330
 		}
+
+		top_off := if h < tar.in_height + 120 { 2 } else { 50 }
+		tar.top_off = top_off
 
 		tar.children[0].width = tar.in_width
 		tar.children[1].y = tar.in_height - 50

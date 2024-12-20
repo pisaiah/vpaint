@@ -85,7 +85,7 @@ fn (mut this PencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 // Drag Tool
 struct DragTool {
-	tool_name string = 'Drag Selection'
+	tool_name string = 'Drag'
 mut:
 	dx int = -1
 	dy int
