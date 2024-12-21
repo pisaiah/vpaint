@@ -21,6 +21,7 @@ struct Settings {
 mut:
 	autohide_sidebar bool
 	theme            string = 'Default'
+	round_ends       bool   = true
 }
 
 // Our Paint App
@@ -79,7 +80,7 @@ fn main() {
 		data:       unsafe { nil }
 		canvas:     unsafe { nil }
 		win:        window
-		ribbon:     ui.Panel.new(layout: ui.FlowLayout.new(vgap: 4, hgap: 4))
+		ribbon:     ui.Panel.new(layout: ui.BoxLayout.new(vgap: 4, hgap: 4))
 		status_bar: unsafe { nil }
 		stat_lbl:   unsafe { nil }
 		tool:       &PencilTool{}

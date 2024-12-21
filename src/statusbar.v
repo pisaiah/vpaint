@@ -76,6 +76,7 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 			'Line',
 			'Rectangle',
 			'Oval',
+			'Triangle',
 		]
 	)
 

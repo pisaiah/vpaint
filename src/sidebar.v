@@ -68,6 +68,10 @@ fn sidebar_draw_event(mut e ui.DrawEvent) {
 	app.sidebar.children[0].width = w
 }
 
+// Shapes
+const shape_labels = ['Line', 'Rectangle', 'Oval', 'Triangle', 'Diamond'] // , 'Arrow Up', 'Arrow Right', 'Arrow Down']
+const shape_uicons = ['\ue937', '\ue003', '\uea57', '\uee4a', '\uE91A', '\uEA33'] // , '\uEA35', '\uEA39', '\uEA37']
+
 fn (mut app App) set_tool_by_name(name string) {
 	match name {
 		'Select' {
@@ -106,10 +110,47 @@ fn (mut app App) set_tool_by_name(name string) {
 		'Oval', 'Circle' {
 			app.tool = &OvalTool{}
 		}
+		'Triangle' {
+			app.tool = &TriangleTool{}
+		}
+		'Diamond' {
+			app.tool = &DiamondTool{}
+		}
 		else {
+			dump(name)
 			app.tool = &PencilTool{}
 		}
 	}
+}
+
+fn (mut app App) make_sidebar_test() &ui.NavPane {
+	mut p := ui.NavPane.new(
+		collapsed: true
+	)
+
+	/*
+	mut b0 := app.icon_btn_1(0, 0, 'Select')
+	mut b1 := app.icon_btn_1(1, 0, 'Pencil')
+	mut b2 := app.icon_btn_1(2, 0, 'Fill')
+	mut b3 := app.icon_btn_1(3, 0, 'Drag')
+	mut b4 := app.icon_btn_1(4, 0, 'Resize Canvas')
+	mut b5 := app.icon_btn_1(5, 0, 'Airbrush')
+	mut b6 := app.icon_btn_1(6, 0, 'Dropper')
+	mut b7 := app.icon_btn_1(7, 0, 'WidePencil')
+	*/
+
+	names := ['Select', 'Pencil', 'Fill', 'Drag', 'Resize Canvas', 'Airbrush', 'Dropper',
+		'WidePencil']
+
+	for name in names {
+		mut item := ui.NavPaneItem.new(
+			icon: 'A'
+			text: name
+		)
+		p.add_child(item)
+	}
+
+	return p
 }
 
 fn (mut app App) make_sidebar() {

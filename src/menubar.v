@@ -287,14 +287,11 @@ fn make_shape_menu() &ui.MenuItem {
 		text: 'Shapes'
 	)
 
-	labels := ['Line', 'Rectangle', 'Oval']
-	uicons := ['\ue937', '\ue003', '\uea57']
-
-	for i, label in labels {
+	for i, label in shape_labels {
 		item.add_child(ui.MenuItem.new(
 			text:           label
 			click_event_fn: tool_item_click
-			uicon:          uicons[i]
+			uicon:          shape_uicons[i]
 		))
 	}
 	return item

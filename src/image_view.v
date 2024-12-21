@@ -527,3 +527,58 @@ fn (this &Image) get_pos_point(x f32, y f32) (int, int) {
 fn refresh_img(mut storage ImageViewData, mut ctx gg.Context) {
 	ctx.update_pixel_data(storage.id, storage.file.data)
 }
+
+fn (mut img Image) set_line(x1 int, y1 int, x2 int, y2 int, c gx.Color, size int, mut change Multichange) {
+	dx := abs(x2 - x1)
+	dy := abs(y2 - y1)
+	sx := if x1 < x2 { 1 } else { -1 }
+	sy := if y1 < y2 { 1 } else { -1 }
+	mut err := dx - dy
+
+	mut x := x1
+	mut y := y1
+
+	no_round := !img.app.settings.round_ends
+
+	for {
+		if size == 1 {
+			img.set_raw(x, y, c, mut change)
+		} else {
+			for i in -size / 2 .. size / 2 {
+				for j in -size / 2 .. size / 2 {
+					if i * i + j * j <= (size / 2) * (size / 2) || no_round {
+						img.set_raw(x + i, y + j, c, mut change)
+					}
+				}
+			}
+		}
+		if x == x2 && y == y2 {
+			break
+		}
+		e2 := 2 * err
+		if e2 > -dy {
+			err -= dy
+			x += sx
+		}
+		if e2 < dx {
+			err += dx
+			y += sy
+		}
+	}
+
+	// Draw rounded edges
+	if !no_round {
+		draw_circle_filled(mut img, x1, y1, size / 2, c, mut change)
+		draw_circle_filled(mut img, x2, y2, size / 2, c, mut change)
+	}
+}
+
+fn draw_circle_filled(mut img &Image, x int, y int, radius int, c gx.Color, mut change Multichange) {
+	for i in -radius .. radius {
+		for j in -radius .. radius {
+			if i * i + j * j <= radius * radius {
+				img.set_raw(x + i, y + j, c, mut change)
+			}
+		}
+	}
+}

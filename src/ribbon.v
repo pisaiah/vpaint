@@ -19,9 +19,12 @@ fn (mut app App) make_ribbon() {
 	app.ribbon.height = 74
 
 	box1.set_x(5)
-	color_box.set_x(10)
+	color_box.set_x(11)
 	btn.set_x(5)
 	btn.border_radius = 2
+
+	btn.y = 0
+	btn.height = app.ribbon.height - 10
 
 	app.ribbon.add_child(box1)
 	app.ribbon.add_child(color_box)
@@ -36,12 +39,45 @@ fn (mut app App) make_ribbon() {
 	mut cim := 0
 	cim = gg.cache_image(gg_im)
 	app.win.id_map['HSL'] = &cim
+
+	mut sp := ui.Panel.new(layout: ui.FlowLayout.new(hgap: 1, vgap: 1))
+	sp.subscribe_event('draw', app.shape_box_draw)
+	sp.set_bounds(5, 0, 50, app.ribbon.height - 10)
+
+	for i, label in shape_labels {
+		mut sbtn := ui.Button.new(
+			text: shape_uicons[i]
+		)
+		sbtn.extra = label
+		sbtn.subscribe_event('mouse_up', app.shape_btn_click)
+		sbtn.set_bounds(0, 0, 23, 20)
+		sbtn.font_size = 12
+		sbtn.font = 1
+		sbtn.border_radius = -1
+		sbtn.set_area_filled_state(false, .normal)
+		sp.add_child(sbtn)
+	}
+
+	app.ribbon.add_child(sp)
+}
+
+fn (mut app App) shape_btn_click(e &ui.MouseEvent) {
+	mut tar := e.target
+	if mut tar is ui.Button {
+		app.set_tool_by_name(tar.extra)
+	}
+}
+
+fn draw_box_border(com &ui.Component, g &ui.GraphicsContext, mw int) {
+	g.draw_rounded_rect(com.x, com.y, com.width - mw, com.height, 4, g.theme.button_border_normal,
+		g.theme.textbox_background)
 }
 
 fn (mut app App) make_color_box() &ui.Panel {
 	mut color_box := ui.Panel.new(
 		layout: ui.GridLayout.new(rows: 2, vgap: 3, hgap: 3)
 	)
+
 	colors := [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
 		gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
 		gx.rgb(34, 177, 76), gx.rgb(0, 162, 232), gx.rgb(63, 72, 204),
@@ -83,6 +119,8 @@ fn (mut app App) make_color_box() &ui.Panel {
 		} else if color_box.width < 300 {
 			color_box.width = (24 + 6) * 10
 		}
+
+		draw_box_border(e.target, e.ctx, 6)
 	})
 
 	color_box.set_background(gx.rgba(0, 0, 0, 1))
@@ -151,4 +189,17 @@ fn ribbon_draw_fn(mut e ui.DrawEvent) {
 	color := e.ctx.theme.textbox_background
 	e.ctx.gg.draw_rect_filled(e.target.x, e.target.y - 1, e.target.width, e.target.height + 1,
 		color)
+
+	hid := e.target.width < 400
+	if e.target.children.len < 3 {
+		return
+	}
+	mut child := e.target.children[3]
+	if mut child is ui.Panel {
+		child.hidden = hid
+	}
+}
+
+fn (mut app App) shape_box_draw(mut e ui.DrawEvent) {
+	draw_box_border(e.target, e.ctx, 0)
 }

@@ -65,7 +65,7 @@ fn (mut this LineTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 	size := img.app.brush_size
 	half_size := size / 2
 
-	round := this.round && size > 1
+	round := this.round && size > 1 && img.app.settings.round_ends
 
 	// Square Edges
 	if this.sx != -1 && !round {
@@ -350,6 +350,199 @@ fn (mut this OvalTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 		img.push(change)
 	}
 
+	img.refresh()
+
+	// Reset
+	this.sx = -1
+	this.sy = -1
+}
+
+// Triangle Tool
+struct TriangleTool {
+	tool_name string = 'Triangle'
+mut:
+	count int
+	sx    int = -1
+	sy    int = -1
+}
+
+fn (mut this TriangleTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	size := img.app.brush_size
+	half_size := size / 2
+	pix := img.zoom
+
+	xpos := img.sx - (half_size * pix)
+	ypos := img.sy - (half_size * pix)
+
+	width := img.zoom + ((size - 1) * pix)
+
+	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, ctx.theme.accent_fill)
+
+	// Draw lines instead of individual rects;
+	// to reduce our drawing instructions.
+	for i in 0 .. size {
+		yy := ypos + (i * pix)
+		xx := xpos + (i * pix)
+
+		ctx.gg.draw_line(xpos, yy, xpos + width, yy, ctx.theme.accent_fill)
+		ctx.gg.draw_line(xx, ypos, xx, ypos + width, ctx.theme.accent_fill)
+	}
+}
+
+fn (mut this TriangleTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	if this.sx == -1 {
+		this.sx = img.mx
+		this.sy = img.my
+	}
+
+	size := img.app.brush_size * img.zoom
+
+	x_bottom_left := if img.mx >= this.sx { this.sx } else { img.mx }
+	x_bottom_right := if img.mx >= this.sx { img.mx } else { this.sx }
+	x_top_middle := (x_bottom_right + x_bottom_left) / 2
+
+	y_bottom := if img.my >= this.sy { img.my } else { this.sy }
+	y_top := if img.my >= this.sy { this.sy } else { img.my }
+
+	if this.sx != -1 {
+		aa, bb := img.get_point_screen_pos(x_top_middle, y_top)
+		cc, dd := img.get_point_screen_pos(x_bottom_left, y_bottom)
+		ee, ff := img.get_point_screen_pos(x_bottom_right, y_bottom)
+
+		// Draw triangle preview
+		g.gg.draw_line_with_config(aa, bb, cc, dd, color: g.theme.accent_fill, thickness: size)
+		g.gg.draw_line_with_config(cc, dd, ee, ff, color: g.theme.accent_fill, thickness: size)
+		g.gg.draw_line_with_config(ee, ff, aa, bb, color: g.theme.accent_fill, thickness: size)
+	}
+}
+
+fn (mut this TriangleTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	size := img.app.brush_size
+
+	c := img.app.get_color()
+
+	mut change := Multichange.new()
+
+	x_bottom_left := if img.mx >= this.sx { this.sx } else { img.mx }
+	x_bottom_right := if img.mx >= this.sx { img.mx } else { this.sx }
+	x_top_middle := (x_bottom_right + x_bottom_left) / 2
+
+	y_bottom := if img.my >= this.sy { img.my } else { this.sy }
+	y_top := if img.my >= this.sy { this.sy } else { img.my }
+
+	if this.sx != -1 {
+		// Draw the sides of the triangle with the specified size
+		img.set_line(x_top_middle, y_top, x_bottom_left, y_bottom, c, size, mut change)
+		img.set_line(x_bottom_left, y_bottom, x_bottom_right, y_bottom, c, size, mut change)
+		img.set_line(x_bottom_right, y_bottom, x_top_middle, y_top, c, size, mut change)
+	}
+
+	img.push(change)
+	img.refresh()
+
+	// Reset
+	this.sx = -1
+	this.sy = -1
+}
+
+// Diamond Tool
+struct DiamondTool {
+	tool_name string = 'Diamond'
+mut:
+	count int
+	sx    int = -1
+	sy    int = -1
+}
+
+fn (mut this DiamondTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	size := img.app.brush_size
+	half_size := size / 2
+	pix := img.zoom
+
+	xpos := img.sx - (half_size * pix)
+	ypos := img.sy - (half_size * pix)
+
+	width := img.zoom + ((size - 1) * pix)
+
+	// Draw lines instead of individual rects;
+	// to reduce our drawing instructions.
+	for i in 0 .. size {
+		yy := ypos + (i * pix)
+		xx := xpos + (i * pix)
+
+		ctx.gg.draw_line(xpos, yy, xpos + width, yy, ctx.theme.accent_fill)
+		ctx.gg.draw_line(xx, ypos, xx, ypos + width, ctx.theme.accent_fill)
+	}
+
+	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, pix, pix, 1, img.app.get_color())
+}
+
+fn (mut this DiamondTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	if this.sx == -1 {
+		this.sx = img.mx
+		this.sy = img.my
+	}
+
+	size := img.app.brush_size * img.zoom
+
+	x_left := if img.mx >= this.sx { this.sx } else { img.mx }
+	x_right := if img.mx >= this.sx { img.mx } else { this.sx }
+	x_middle := (x_right + x_left) / 2
+
+	y_bottom := if img.my >= this.sy { img.my } else { this.sy }
+	y_top := if img.my >= this.sy { this.sy } else { img.my }
+	y_middle := (y_top + y_bottom) / 2
+
+	if this.sx != -1 {
+		aa, bb := img.get_point_screen_pos(x_middle, y_top)
+		cc, dd := img.get_point_screen_pos(x_left, y_middle)
+		ee, ff := img.get_point_screen_pos(x_right, y_middle)
+		gg, hh := img.get_point_screen_pos(x_middle, y_bottom)
+
+		// Draw diamond preview
+		g.gg.draw_line_with_config(aa, bb, cc, dd, color: g.theme.accent_fill, thickness: size)
+		g.gg.draw_line_with_config(cc, dd, gg, hh, color: g.theme.accent_fill, thickness: size)
+		g.gg.draw_line_with_config(gg, hh, ee, ff, color: g.theme.accent_fill, thickness: size)
+		g.gg.draw_line_with_config(ee, ff, aa, bb, color: g.theme.accent_fill, thickness: size)
+	}
+}
+
+fn (mut this DiamondTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
+	mut img := unsafe { &Image(a) }
+
+	size := img.app.brush_size
+
+	c := img.app.get_color()
+
+	mut change := Multichange.new()
+
+	x_left := if img.mx >= this.sx { this.sx } else { img.mx }
+	x_right := if img.mx >= this.sx { img.mx } else { this.sx }
+	x_middle := (x_right + x_left) / 2
+
+	y_bottom := if img.my >= this.sy { img.my } else { this.sy }
+	y_top := if img.my >= this.sy { this.sy } else { img.my }
+	y_middle := (y_top + y_bottom) / 2
+
+	if this.sx != -1 {
+		// Draw the sides of the diamond with the specified size
+		img.set_line(x_middle, y_top, x_left, y_middle, c, size, mut change)
+		img.set_line(x_left, y_middle, x_middle, y_bottom, c, size, mut change)
+		img.set_line(x_middle, y_bottom, x_right, y_middle, c, size, mut change)
+		img.set_line(x_right, y_middle, x_middle, y_top, c, size, mut change)
+	}
+
+	img.push(change)
 	img.refresh()
 
 	// Reset

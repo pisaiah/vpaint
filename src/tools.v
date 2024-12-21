@@ -61,12 +61,17 @@ fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	half_size := size / 2
 
 	if img.last_x != -1 {
-		pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
-		for p in pp {
-			for x in 0 .. size {
-				for y in 0 .. size {
-					img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
-						this.change)
+		if img.app.settings.round_ends {
+			img.set_line(img.last_x, img.last_y, img.mx, img.my, img.app.get_color(),
+				size, mut this.change)
+		} else {
+			pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
+			for p in pp {
+				for x in 0 .. size {
+					for y in 0 .. size {
+						img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
+							this.change)
+					}
 				}
 			}
 		}
