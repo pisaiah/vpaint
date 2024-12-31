@@ -36,7 +36,7 @@ pub fn (mut app App) make_image_view(file string) &ui.Panel {
 	app.canvas = img
 	p.add_child(img)
 
-	p.subscribe_event('draw', img_panel_draw)
+	p.subscribe_event('after_draw', img_panel_draw)
 
 	if os.exists(file) {
 		file_size := format_size(os.file_size(file))
@@ -56,6 +56,8 @@ fn img_panel_draw(mut e ui.DrawEvent) {
 	mut app := e.ctx.win.get[&App]('app')
 	e.target.width = app.canvas.width + 2
 	e.target.height = app.canvas.height + 2
+
+	// e.ctx.gg.draw_rect_filled(e.target.x, e.target.y, e.target.width, e.target.height, e.ctx.theme.accent_fill)
 
 	if app.need_open {
 		$if emscripten ? {
@@ -444,7 +446,26 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	// Find mouse location data
 	this.calculate_mouse_pixel(ctx)
 
+	// Gridlines
+	if this.app.settings.show_gridlines {
+		a := ctx.theme.accent_fill
+		c := gx.rgba(a.r, a.g, a.b, 50)
+
+		for x in 0 .. this.w {
+			ctx.gg.draw_line(this.x + (x * this.zoom), this.y, this.x + (x * this.zoom),
+				this.y + this.height, c)
+		}
+
+		for y in 0 .. this.h {
+			ctx.gg.draw_line(this.x, this.y + (y * this.zoom), this.x + this.width, this.y +
+				(y * this.zoom), c)
+		}
+	}
+
 	// Tools
+	// TODO: note we need to do this for our parent too,
+	//       so we can catch outside mouse up events.
+
 	mut tool := this.app.tool
 	tool.draw_hover_fn(this, ctx)
 

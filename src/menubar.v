@@ -317,8 +317,19 @@ fn make_view_menu() &ui.MenuItem {
 				click_event_fn: menu_zoom_in_click
 				uicon:          '\ue988'
 			),
+			ui.MenuItem.new(
+				text:     'Gridlines'
+				click_fn: gridlines_item_click
+				uicon:    '\uEA72'
+			),
 		]
 	)
+}
+
+fn gridlines_item_click(mut e ui.MouseEvent) {
+	mut app := e.ctx.win.get[&App]('app')
+	app.settings.show_gridlines = !app.settings.show_gridlines
+	app.settings_save() or {}
 }
 
 fn size_menu_item(size int) &ui.MenuItem {

@@ -399,7 +399,7 @@ fn (mut this TriangleTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 		this.sy = img.my
 	}
 
-	size := img.app.brush_size * img.zoom
+	size := img.app.brush_size
 
 	x_bottom_left := if img.mx >= this.sx { this.sx } else { img.mx }
 	x_bottom_right := if img.mx >= this.sx { img.mx } else { this.sx }
@@ -409,15 +409,50 @@ fn (mut this TriangleTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	y_top := if img.my >= this.sy { this.sy } else { img.my }
 
 	if this.sx != -1 {
-		aa, bb := img.get_point_screen_pos(x_top_middle, y_top)
-		cc, dd := img.get_point_screen_pos(x_bottom_left, y_bottom)
-		ee, ff := img.get_point_screen_pos(x_bottom_right, y_bottom)
-
 		// Draw triangle preview
-		g.gg.draw_line_with_config(aa, bb, cc, dd, color: g.theme.accent_fill, thickness: size)
-		g.gg.draw_line_with_config(cc, dd, ee, ff, color: g.theme.accent_fill, thickness: size)
-		g.gg.draw_line_with_config(ee, ff, aa, bb, color: g.theme.accent_fill, thickness: size)
+		img.draw_line(x_top_middle, y_top, x_bottom_left, y_bottom, size, g)
+		img.draw_line(x_bottom_left, y_bottom, x_bottom_right, y_bottom, size, g)
+		img.draw_line(x_bottom_right, y_bottom, x_top_middle, y_top, size, g)
 	}
+}
+
+fn (mut img Image) draw_line(x1 int, y1 int, x2 int, y2 int, size int, g &ui.GraphicsContext) {
+	dx := abs(x2 - x1)
+	dy := abs(y2 - y1)
+	sx := if x1 < x2 { 1 } else { -1 }
+	sy := if y1 < y2 { 1 } else { -1 }
+	mut err := dx - dy
+
+	mut x := x1
+	mut y := y1
+
+	// no_round := true // !img.app.settings.round_ends
+
+	for {
+		aa, bb := img.get_point_screen_pos(x, y)
+		g.gg.draw_rect_empty(aa - ((size / 2) * img.zoom), bb - ((size / 2) * img.zoom),
+			img.zoom * size, img.zoom * size, g.theme.accent_fill)
+
+		if x == x2 && y == y2 {
+			break
+		}
+		e2 := 2 * err
+		if e2 > -dy {
+			err -= dy
+			x += sx
+		}
+		if e2 < dx {
+			err += dx
+			y += sy
+		}
+	}
+
+	// Draw rounded edges
+	// TODO
+	// if !no_round {
+	// draw_circle_filled(mut img, x1, y1, size / 2, c, mut change)
+	// draw_circle_filled(mut img, x2, y2, size / 2, c, mut change)
+	// }
 }
 
 fn (mut this TriangleTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
@@ -463,26 +498,10 @@ mut:
 fn (mut this DiamondTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
-	size := img.app.brush_size
-	half_size := size / 2
 	pix := img.zoom
 
-	xpos := img.sx - (half_size * pix)
-	ypos := img.sy - (half_size * pix)
-
-	width := img.zoom + ((size - 1) * pix)
-
-	// Draw lines instead of individual rects;
-	// to reduce our drawing instructions.
-	for i in 0 .. size {
-		yy := ypos + (i * pix)
-		xx := xpos + (i * pix)
-
-		ctx.gg.draw_line(xpos, yy, xpos + width, yy, ctx.theme.accent_fill)
-		ctx.gg.draw_line(xx, ypos, xx, ypos + width, ctx.theme.accent_fill)
-	}
-
-	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, pix, pix, 1, img.app.get_color())
+	ctx.gg.draw_rounded_rect_filled(img.sx, img.sy, pix, pix, 4, ctx.theme.accent_fill)
+	ctx.gg.draw_rounded_rect_filled(img.sx + 1, img.sy + 1, pix - 2, pix - 2, 4, img.app.get_color())
 }
 
 fn (mut this DiamondTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
@@ -493,7 +512,7 @@ fn (mut this DiamondTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 		this.sy = img.my
 	}
 
-	size := img.app.brush_size * img.zoom
+	size := img.app.brush_size
 
 	x_left := if img.mx >= this.sx { this.sx } else { img.mx }
 	x_right := if img.mx >= this.sx { img.mx } else { this.sx }
@@ -504,16 +523,11 @@ fn (mut this DiamondTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 	y_middle := (y_top + y_bottom) / 2
 
 	if this.sx != -1 {
-		aa, bb := img.get_point_screen_pos(x_middle, y_top)
-		cc, dd := img.get_point_screen_pos(x_left, y_middle)
-		ee, ff := img.get_point_screen_pos(x_right, y_middle)
-		gg, hh := img.get_point_screen_pos(x_middle, y_bottom)
-
 		// Draw diamond preview
-		g.gg.draw_line_with_config(aa, bb, cc, dd, color: g.theme.accent_fill, thickness: size)
-		g.gg.draw_line_with_config(cc, dd, gg, hh, color: g.theme.accent_fill, thickness: size)
-		g.gg.draw_line_with_config(gg, hh, ee, ff, color: g.theme.accent_fill, thickness: size)
-		g.gg.draw_line_with_config(ee, ff, aa, bb, color: g.theme.accent_fill, thickness: size)
+		img.draw_line(x_middle, y_top, x_left, y_middle, size, g)
+		img.draw_line(x_left, y_middle, x_middle, y_bottom, size, g)
+		img.draw_line(x_middle, y_bottom, x_right, y_middle, size, g)
+		img.draw_line(x_right, y_middle, x_middle, y_top, size, g)
 	}
 }
 

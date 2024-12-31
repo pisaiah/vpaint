@@ -12,11 +12,6 @@ fn (mut app App) show_settings() {
 
 	mut panel := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1))
 
-	mut box := ui.Checkbox.new(text: 'Autohide')
-	box.is_selected = app.settings.autohide_sidebar
-	box.set_bounds(0, 0, 100, 24)
-	box.subscribe_event('mouse_up', app.hide_sidebar_mouse_up)
-
 	// Auto-hide Sidebar
 	mut card := ui.SettingsCard.new(
 		uicon:       '\uE700'
@@ -24,6 +19,11 @@ fn (mut app App) show_settings() {
 		description: 'Choose to autohide the side toolbar.'
 		stretch:     true
 	)
+	mut box := ui.Checkbox.new(text: 'Autohide')
+	box.is_selected = app.settings.autohide_sidebar
+	box.set_bounds(0, 0, 100, 24)
+	box.subscribe_event('mouse_up', app.hide_sidebar_mouse_up)
+
 	card.add_child(box)
 
 	// App Theme
@@ -61,9 +61,26 @@ fn (mut app App) show_settings() {
 	rbox.subscribe_event('mouse_up', app.round_ends_mouse_up)
 	round_card.add_child(rbox)
 
+	// Gridlines
+	mut grid_card := ui.SettingsCard.new(
+		uicon:       '\uEA72'
+		text:        'Show Gridlines'
+		description: 'Choose to display gridlines on the Canvas.'
+		stretch:     true
+	)
+	mut box2 := ui.Checkbox.new(text: 'Gridlines')
+	box2.is_selected = app.settings.show_gridlines
+	box2.set_bounds(0, 0, 100, 24)
+	box2.subscribe_event('mouse_up', gridlines_item_click)
+
+	grid_card.add_child(box2)
+
 	panel.add_child(card)
 	panel.add_child(theme_card)
 	panel.add_child(round_card)
+	panel.add_child(grid_card)
+
+	// About Text
 
 	mut lbl := ui.Label.new(
 		text: 'About vPaint\n${about_text.join('\n')}\n'
@@ -160,6 +177,9 @@ fn (mut app App) settings_load() ! {
 			app.set_theme_bg(text)
 			app.settings.theme = text
 		}
+		if spl[0] == 'show_gridlines' {
+			app.settings.show_gridlines = spl[1].trim_space().bool()
+		}
 	}
 }
 
@@ -181,6 +201,7 @@ fn (mut app App) settings_save() ! {
 		'autohide_sidebar: ${app.settings.autohide_sidebar}',
 		'theme: ${app.settings.theme}',
 		'round_ends: ${app.settings.round_ends}',
+		'show_gridlines: ${app.settings.show_gridlines}',
 	]
 	os.write_file(file, txt.join('\n')) or { return err }
 

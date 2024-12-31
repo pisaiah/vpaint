@@ -22,6 +22,7 @@ mut:
 	autohide_sidebar bool
 	theme            string = 'Default'
 	round_ends       bool   = true
+	show_gridlines   bool   = true
 }
 
 // Our Paint App
