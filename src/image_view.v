@@ -1,7 +1,6 @@
 module main
 
 import stbi
-import gx
 import iui as ui
 import gg
 import os
@@ -119,15 +118,15 @@ fn make_gg_image(mut storage ImageViewData, mut win ui.Window, first bool) {
 }
 
 // Get RGB value from image loaded with STBI
-pub fn get_pixel(x int, y int, this stbi.Image) gx.Color {
+pub fn get_pixel(x int, y int, this stbi.Image) gg.Color {
 	if x == -1 || y == -1 {
-		return gx.rgba(0, 0, 0, 0)
+		return gg.rgba(0, 0, 0, 0)
 	}
 
 	x_oob := x < 0 || x >= this.width
 	y_oob := y < 0 || y >= this.height
 	if x_oob || y_oob {
-		return gx.rgba(0, 0, 0, 0)
+		return gg.rgba(0, 0, 0, 0)
 	}
 
 	unsafe {
@@ -137,11 +136,11 @@ pub fn get_pixel(x int, y int, this stbi.Image) gx.Color {
 		g := p[1]
 		b := p[2]
 		a := p[3]
-		return gx.Color{r, g, b, a}
+		return gg.Color{r, g, b, a}
 	}
 }
 
-fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
+fn mix_color(ca gg.Color, cb gg.Color) gg.Color {
 	if cb.a < 0 {
 		return ca
 	}
@@ -151,7 +150,7 @@ fn mix_color(ca gx.Color, cb gx.Color) gx.Color {
 	g := u8(ca.g * ratio) + u8(cb.g * ratio)
 	b := u8(ca.b * ratio) + u8(cb.b * ratio)
 	a := u8(ca.a * ratio) + u8(cb.a * ratio)
-	return gx.rgba(r, g, b, a)
+	return gg.rgba(r, g, b, a)
 }
 
 type Changes = Change | Multichange
@@ -159,8 +158,8 @@ type Changes = Change | Multichange
 struct Change {
 	x    int
 	y    int
-	from gx.Color
-	to   gx.Color
+	from gg.Color
+	to   gg.Color
 	// mut:
 	//	batch bool
 }
@@ -169,7 +168,7 @@ fn Multichange.new() Multichange {
 	return Multichange{}
 }
 
-fn (mut mc Multichange) change_at(x int, y int, a gx.Color, b gx.Color) {
+fn (mut mc Multichange) change_at(x int, y int, a gg.Color, b gg.Color) {
 	mc.changes << Change{
 		x:    x
 		y:    y
@@ -212,8 +211,8 @@ fn (mut this Image) note_multichange() {
 	change := Change{
 		x:    -1
 		y:    -1
-		from: gx.white
-		to:   gx.white
+		from: gg.white
+		to:   gg.white
 	}
 	this.history.insert(0, change)
 }
@@ -249,11 +248,11 @@ fn (mut this Image) undo() {
 	this.refresh()
 }
 
-fn (mut this Image) set(x int, y int, color gx.Color) bool {
+fn (mut this Image) set(x int, y int, color gg.Color) bool {
 	return this.set2(x, y, color, false)
 }
 
-fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
+fn (mut this Image) set2(x int, y int, color gg.Color, batch bool) bool {
 	if x < 0 || y < 0 || x >= this.w || y >= this.h {
 		return false
 	}
@@ -286,7 +285,7 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 	return true
 }
 
-fn (mut this Image) set_raw(x int, y int, color gx.Color, mut ch Multichange) bool {
+fn (mut this Image) set_raw(x int, y int, color gg.Color, mut ch Multichange) bool {
 	from := this.get(x, y)
 	if from == color {
 		return true
@@ -296,11 +295,11 @@ fn (mut this Image) set_raw(x int, y int, color gx.Color, mut ch Multichange) bo
 	return set_pixel(this.data.file, x, y, color)
 }
 
-fn (mut this Image) set_no_undo(x int, y int, color gx.Color) bool {
+fn (mut this Image) set_no_undo(x int, y int, color gg.Color) bool {
 	return set_pixel(this.data.file, x, y, color)
 }
 
-fn (mut this Image) get(x int, y int) gx.Color {
+fn (mut this Image) get(x int, y int) gg.Color {
 	return get_pixel(x, y, this.data.file)
 }
 
@@ -309,7 +308,7 @@ fn (mut this Image) refresh() {
 }
 
 // Get RGB value from image loaded with STBI
-fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
+fn set_pixel(image stbi.Image, x int, y int, color gg.Color) bool {
 	if x < 0 || x >= image.width {
 		return false
 	}
@@ -329,7 +328,7 @@ fn set_pixel(image stbi.Image, x int, y int, color gx.Color) bool {
 	}
 }
 
-fn set_pix(image stbi.Image, x int, y int, color gx.Color) {
+fn set_pix(image stbi.Image, x int, y int, color gg.Color) {
 	unsafe {
 		data := &u8(image.data)
 		p := data + (4 * (y * image.width + x))
@@ -425,7 +424,7 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	// Gridlines
 	if this.app.settings.show_gridlines && this.zoom >= 1 {
 		a := ctx.theme.accent_fill
-		c := gx.rgba(a.r, a.g, a.b, 50)
+		c := gg.rgba(a.r, a.g, a.b, 50)
 
 		for x in 0 .. this.w {
 			ctx.gg.draw_line(this.x + (x * this.zoom), this.y, this.x + (x * this.zoom),
@@ -529,7 +528,7 @@ fn refresh_img(mut storage ImageViewData, mut ctx gg.Context) {
 	ctx.update_pixel_data(storage.id, storage.file.data)
 }
 
-fn (mut img Image) set_line(x1 int, y1 int, x2 int, y2 int, c gx.Color, size int, mut change Multichange) {
+fn (mut img Image) set_line(x1 int, y1 int, x2 int, y2 int, c gg.Color, size int, mut change Multichange) {
 	dx := abs(x2 - x1)
 	dy := abs(y2 - y1)
 	sx := if x1 < x2 { 1 } else { -1 }
@@ -574,7 +573,7 @@ fn (mut img Image) set_line(x1 int, y1 int, x2 int, y2 int, c gx.Color, size int
 	}
 }
 
-fn draw_circle_filled(mut img Image, x int, y int, radius int, c gx.Color, mut change Multichange) {
+fn draw_circle_filled(mut img Image, x int, y int, radius int, c gg.Color, mut change Multichange) {
 	for i in -radius .. radius {
 		for j in -radius .. radius {
 			if i * i + j * j <= radius * radius {

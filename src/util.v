@@ -1,7 +1,7 @@
 // Excerpt from https://github.com/vlang/ui/blob/master/src/extra_draw.v
 module main
 
-import gx
+import gg
 import math
 
 fn wasm_keyboard_show(val bool) {
@@ -12,7 +12,7 @@ fn wasm_keyboard_show(val bool) {
 }
 
 // h, s, l in [0,1]
-pub fn hsv_to_rgb(h f64, s f64, v f64) gx.Color {
+pub fn hsv_to_rgb(h f64, s f64, v f64) gg.Color {
 	c := v * s
 	x := c * (1.0 - math.abs(math.fmod(h * 6.0, 2.0) - 1.0))
 	m := v - c
@@ -31,10 +31,10 @@ pub fn hsv_to_rgb(h f64, s f64, v f64) gx.Color {
 	} else {
 		r, b = c, x
 	}
-	return gx.rgb(u8((r + m) * 255.0), u8((g + m) * 255.0), u8((b + m) * 255.0))
+	return gg.rgb(u8((r + m) * 255.0), u8((g + m) * 255.0), u8((b + m) * 255.0))
 }
 
-pub fn rgb_to_hsv(col gx.Color) (f64, f64, f64) {
+pub fn rgb_to_hsv(col gg.Color) (f64, f64, f64) {
 	r, g, b := f64(col.r) / 255.0, f64(col.g) / 255.0, f64(col.b) / 255.0
 	v, m := f64_max(f64_max(r, g), b), -f64_max(f64_max(-r, -g), -b)
 	d := v - m

@@ -28,7 +28,7 @@ fn (mut app App) show_settings() {
 
 	mut cb := ui.Selectbox.new(
 		text:  app.win.theme.name
-		items: ui.get_all_themes().map(it.name)
+		items: app.win.get_theme_manager().get_themes().map(it.name)
 	)
 
 	cb.set_bounds(0, 0, 120, 30)
@@ -173,7 +173,7 @@ fn (mut app App) settings_load() ! {
 		}
 		if spl[0] == 'theme' {
 			text := spl[1].trim_space()
-			mut theme := ui.theme_by_name(text)
+			mut theme := app.win.get_theme(text)
 			app.win.set_theme(theme)
 			app.set_theme_bg(text)
 			app.settings.theme = text

@@ -1,16 +1,15 @@
 module main
 
-// import gg
-import gx
+import gg
 import iui as ui
 
-const rgb_colors = [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
-	gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
-	gx.rgb(34, 177, 76), gx.rgb(0, 162, 232), gx.rgb(63, 72, 204),
-	gx.rgb(163, 73, 164), gx.rgb(255, 255, 255), gx.rgb(195, 195, 195),
-	gx.rgb(185, 122, 87), gx.rgb(255, 174, 201), gx.rgb(255, 200, 15),
-	gx.rgb(239, 228, 176), gx.rgb(180, 230, 30), gx.rgb(153, 217, 235),
-	gx.rgb(112, 146, 190), gx.rgba(0, 0, 0, 0)]
+const rgb_colors = [gg.rgb(0, 0, 0), gg.rgb(127, 127, 127), gg.rgb(136, 0, 21),
+	gg.rgb(237, 28, 36), gg.rgb(255, 127, 39), gg.rgb(255, 242, 0),
+	gg.rgb(34, 177, 76), gg.rgb(0, 162, 232), gg.rgb(63, 72, 204),
+	gg.rgb(163, 73, 164), gg.rgb(255, 255, 255), gg.rgb(195, 195, 195),
+	gg.rgb(185, 122, 87), gg.rgb(255, 174, 201), gg.rgb(255, 200, 15),
+	gg.rgb(239, 228, 176), gg.rgb(180, 230, 30), gg.rgb(153, 217, 235),
+	gg.rgb(112, 146, 190), gg.rgba(0, 0, 0, 0)]
 
 fn (mut app App) make_ribbon() {
 	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 0))
@@ -52,11 +51,11 @@ fn (mut app App) make_ribbon() {
 	img_file := $embed_file('assets/hsv.png')
 	data := img_file.to_bytes()
 
-	mut gg := app.win.gg
-	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
+	mut gg_ctx := app.win.gg
+	gg_im := gg_ctx.create_image_from_byte_array(data) or { panic(err) }
 
 	mut cim := 0
-	cim = gg.cache_image(gg_im)
+	cim = gg_ctx.cache_image(gg_im)
 	app.win.id_map['HSL'] = &cim
 
 	app.ribbon.add_child(app.make_shape_box())
@@ -195,7 +194,7 @@ fn (mut app App) make_color_box() &ui.Panel {
 		draw_box_border(e.target, e.ctx, 6)
 	})
 
-	color_box.set_background(gx.rgba(0, 0, 0, 1))
+	color_box.set_background(gg.rgba(0, 0, 0, 1))
 	color_box.set_bounds(0, 0, (size + 6) * 10, 64)
 	return color_box
 }
@@ -210,9 +209,9 @@ fn make_c_btn(count int) &ui.Button {
 }
 
 fn (mut app App) ribbon_icon_btn(data []u8) &ui.Button {
-	mut gg := app.win.gg
-	gg_im := gg.create_image_from_byte_array(data) or { panic(err) }
-	cim := gg.cache_image(gg_im)
+	mut gg_ctx := app.win.gg
+	gg_im := gg_ctx.create_image_from_byte_array(data) or { panic(err) }
+	cim := gg_ctx.cache_image(gg_im)
 	mut btn := ui.Button.new(icon: cim)
 	btn.set_bounds(0, 14, 32, 36)
 	btn.icon_width = 32

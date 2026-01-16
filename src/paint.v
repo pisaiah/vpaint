@@ -2,17 +2,17 @@ module main
 
 import iui as ui
 import os
-import gx
+import gg
 
 // Version
-const version = '0.6-dev'
+const version = '0.7'
 
 // About Info
 const about_text = [
 	'Simple Image Editor written in the V Language.',
 	'(version ${version}) (iUI: ${ui.version})',
 	'\t ',
-	'Copyright \u00A9 2022-2025 Isaiah.',
+	'Copyright \u00A9 2022-2026 Isaiah.',
 	'Released under MIT License.',
 ]
 
@@ -35,8 +35,8 @@ mut:
 	canvas_zoom    int
 	data           &ImageViewData
 	canvas         &Image
-	color          gx.Color
-	color_2        gx.Color = gx.white
+	color          gg.Color
+	color_2        gg.Color = gg.white
 	sele_color     bool
 	tool           &Tool
 	ribbon         &ui.Panel
@@ -50,14 +50,14 @@ mut:
 	cp             &ColorPicker
 }
 
-fn (app &App) get_color() gx.Color {
+fn (app &App) get_color() gg.Color {
 	if app.sele_color {
 		return app.color_2
 	}
 	return app.color
 }
 
-fn (mut app App) set_color(c gx.Color) {
+fn (mut app App) set_color(c gg.Color) {
 	if app.sele_color {
 		app.color_2 = c
 		return
@@ -102,14 +102,11 @@ fn (mut app App) parse_args() {
 		return
 	}
 
-	dump(os.args)
-
 	if os.args.len == 4 && os.args[2].contains('-scale=') && os.args[3].contains('-t=') {
 		// hq3x
 
 		times := os.args[2].split('-scale=')[1]
 
-		dump('SCALE!')
 		// app.canvas.hq3x()
 
 		rs := os.args[3].split('-t=')[1].split(',')
@@ -218,7 +215,7 @@ fn main() {
 	cim := win.gg.cache_image(gg_im)
 	app.bg_id = cim
 
-	background := gx.rgb(210, 220, 240)
+	background := gg.rgb(210, 220, 240)
 	window.gg.set_bg_color(background)
 
 	app.set_theme_bg(app.win.theme.name)

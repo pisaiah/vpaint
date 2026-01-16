@@ -1,7 +1,6 @@
 module main
 
 import iui as ui
-import gx
 import math
 import gg
 
@@ -12,7 +11,7 @@ struct SelectTool {
 mut:
 	dx        int = -1
 	dy        int
-	selection Selection = Selection{-1, -1, -1, -1, [][]gx.Color{}, ui.Bounds{}}
+	selection Selection = Selection{-1, -1, -1, -1, [][]gg.Color{}, ui.Bounds{}}
 	sx        f32       = -1
 	sy        f32
 	moving    bool
@@ -24,7 +23,7 @@ mut:
 	y1 int
 	x2 int
 	y2 int
-	px [][]gx.Color
+	px [][]gg.Color
 	og ui.Bounds
 }
 
@@ -120,10 +119,10 @@ fn (mut this SelectTool) draw_moving(img &Image, ctx &ui.GraphicsContext) {
 
 	// Draw old rect
 	if !(x1 == x3 && y1 == y3) {
-		ctx.gg.draw_rounded_rect_empty(x3, y3, width, height, 1, gx.red)
-		ctx.gg.draw_rounded_rect_filled(x3, y3, width, height, 1, gx.rgba(255, 0, 0, 80))
-		ctx.gg.draw_line(x3, y3, x3 + width, y3 + height, gx.red)
-		ctx.gg.draw_line(x3, y3 + height, x3 + width, y3, gx.red)
+		ctx.gg.draw_rounded_rect_empty(x3, y3, width, height, 1, gg.red)
+		ctx.gg.draw_rounded_rect_filled(x3, y3, width, height, 1, gg.rgba(255, 0, 0, 80))
+		ctx.gg.draw_line(x3, y3, x3 + width, y3 + height, gg.red)
+		ctx.gg.draw_line(x3, y3 + height, x3 + width, y3, gg.red)
 	}
 
 	// Draw new rect
@@ -143,8 +142,8 @@ fn (mut this SelectTool) draw_moving(img &Image, ctx &ui.GraphicsContext) {
 		}
 	})
 
-	ctx.gg.draw_rounded_rect_empty(x1, y1, width, height, 1, gx.green)
-	ctx.gg.draw_rounded_rect_filled(x1, y1, width, height, 1, gx.rgba(0, 255, 0, 50))
+	ctx.gg.draw_rounded_rect_empty(x1, y1, width, height, 1, gg.green)
+	ctx.gg.draw_rounded_rect_filled(x1, y1, width, height, 1, gg.rgba(0, 255, 0, 50))
 
 	sx, sy := img.get_point_screen_pos(img.mx, img.my)
 
@@ -176,7 +175,7 @@ fn (mut this SelectTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	height := math.abs(img.zoom * yoff) + img.zoom
 
 	ctx.gg.draw_rounded_rect_empty(x, y, width, height, 1, ctx.theme.accent_fill)
-	ctx.gg.draw_rounded_rect_filled(x, y, width, height, 1, gx.rgba(0, 0, 255, 50))
+	ctx.gg.draw_rounded_rect_filled(x, y, width, height, 1, gg.rgba(0, 0, 255, 50))
 }
 
 fn (mut this SelectTool) draw_down_fn(a voidptr, b &ui.GraphicsContext) {
@@ -207,7 +206,7 @@ fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 			y1: y1
 			x2: x2
 			y2: y2
-			px: [][]gx.Color{len: (x2 - x1) + 1, init: []gx.Color{len: (y2 - y1) + 1}}
+			px: [][]gg.Color{len: (x2 - x1) + 1, init: []gg.Color{len: (y2 - y1) + 1}}
 			og: ui.Bounds{x1, y1, x2, y2}
 		}
 		this.selection.fill_px(img)
@@ -247,7 +246,7 @@ fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 			img.push(change)
 			img.refresh()
 
-			this.selection = Selection{-1, -1, -1, -1, [][]gx.Color{}, ui.Bounds{}}
+			this.selection = Selection{-1, -1, -1, -1, [][]gg.Color{}, ui.Bounds{}}
 		}
 	}
 

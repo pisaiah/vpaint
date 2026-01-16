@@ -1,7 +1,7 @@
 module main
 
 import iui as ui
-import gx
+import gg
 
 fn upscale_click(mut win ui.Window, com ui.MenuItem) {
 	mut app := win.get[&App]('app')
@@ -137,7 +137,7 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 	mut theme_menu := ui.MenuItem.new(
 		text: 'Theme'
 	)
-	mut themes := ui.get_all_themes()
+	mut themes := window.get_theme_manager().get_themes()
 	for theme2 in themes {
 		mut item := ui.MenuItem.new(text: theme2.name)
 		item.set_click(theme_click)
@@ -364,7 +364,8 @@ fn fit_zoom_click(mut e ui.MouseEvent) {
 // Change Window Theme
 fn theme_click(mut win ui.Window, com ui.MenuItem) {
 	text := com.text
-	mut theme := ui.theme_by_name(text)
+
+	mut theme := win.get_theme(text)
 	win.set_theme(theme)
 
 	mut app := win.get[&App]('app')
@@ -374,8 +375,9 @@ fn theme_click(mut win ui.Window, com ui.MenuItem) {
 }
 
 fn (mut app App) set_theme(name string) {
-	mut theme := ui.theme_by_name(name)
+	mut theme := app.win.get_theme(name)
 	app.win.set_theme(theme)
+
 	app.settings.theme = name
 	app.set_theme_bg(name)
 	app.settings_save() or {}
@@ -383,19 +385,19 @@ fn (mut app App) set_theme(name string) {
 
 fn (mut app App) set_theme_bg(text string) {
 	if text.contains('Dark') {
-		background := gx.rgb(25, 42, 77)
-		app.win.gg.set_bg_color(gx.rgb(25, 42, 77))
+		background := gg.rgb(25, 42, 77)
+		app.win.gg.set_bg_color(gg.rgb(25, 42, 77))
 		app.win.id_map['background'] = &background
 	} else if text.contains('Black') {
-		app.win.gg.set_bg_color(gx.rgb(0, 0, 0))
-		background := gx.rgb(0, 0, 0)
+		app.win.gg.set_bg_color(gg.rgb(0, 0, 0))
+		background := gg.rgb(0, 0, 0)
 		app.win.id_map['background'] = &background
 	} else if text.contains('Green Mono') {
-		app.win.gg.set_bg_color(gx.rgb(0, 16, 0))
-		background := gx.rgb(0, 16, 0)
+		app.win.gg.set_bg_color(gg.rgb(0, 16, 0))
+		background := gg.rgb(0, 16, 0)
 		app.win.id_map['background'] = &background
 	} else {
-		background := gx.rgb(210, 220, 240)
+		background := gg.rgb(210, 220, 240)
 		app.win.gg.set_bg_color(background)
 		app.win.id_map['background'] = &background
 	}

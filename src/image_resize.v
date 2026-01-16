@@ -1,7 +1,7 @@
 module main
 
 import stbi
-import gx
+import gg
 import os
 import iui.src.extra.file_dialog
 
@@ -57,7 +57,7 @@ fn (mut this Image) grayscale_filter() {
 		for y in 0 .. this.h {
 			rgb := this.get(x, y)
 			gray := (rgb.r + rgb.g + rgb.b) / 3
-			new_color := gx.rgb(gray, gray, gray)
+			new_color := gg.rgb(gray, gray, gray)
 			this.set_raw(x, y, new_color, mut change)
 		}
 	}
@@ -71,7 +71,7 @@ fn (mut this Image) invert_filter() {
 	for x in 0 .. this.w {
 		for y in 0 .. this.h {
 			rgb := this.get(x, y)
-			new_color := gx.rgba(255 - rgb.r, 255 - rgb.g, 255 - rgb.b, rgb.a)
+			new_color := gg.rgba(255 - rgb.r, 255 - rgb.g, 255 - rgb.b, rgb.a)
 			this.set_raw(x, y, new_color, mut change)
 		}
 	}
@@ -159,7 +159,7 @@ fn (mut this Image) bilinear_interpolation(new_width int, new_height int) {
 				bottom_a := (1.0 - dx) * c[3] + dx * d[3]
 				ca := u8((1.0 - dy) * top_a + dy * bottom_a)
 
-				set_pixel(en, x, y, gx.rgba(cr, cg, cb, ca))
+				set_pixel(en, x, y, gg.rgba(cr, cg, cb, ca))
 			}
 		}
 	}
@@ -167,14 +167,14 @@ fn (mut this Image) bilinear_interpolation(new_width int, new_height int) {
 	this.load_stbi(en)
 }
 
-fn (mut this Image) scale2x() [][]gx.Color {
+fn (mut this Image) scale2x() [][]gg.Color {
 	src_width := this.w
 	src_height := this.h
-	// mut dst := [][]gx.Color{len: src_height * 2, init: []gx.Color{len: src_width * 2}}
+	// mut dst := [][]gg.Color{len: src_height * 2, init: []gg.Color{len: src_width * 2}}
 
-	mut dst := [][]gx.Color{}
+	mut dst := [][]gg.Color{}
 	for _ in 0 .. src_height * 2 {
-		dst << []gx.Color{len: src_width * 2}
+		dst << []gg.Color{len: src_width * 2}
 	}
 
 	mut en := make_stbi(this.w * 2, this.h * 2)
@@ -258,7 +258,7 @@ fn (mut this Image) increase_alpha() {
 				continue
 			}
 
-			new_color := gx.rgba(color.r, color.g, color.b, color.a + 5)
+			new_color := gg.rgba(color.r, color.g, color.b, color.a + 5)
 			this.set(x, y, new_color)
 		}
 	}

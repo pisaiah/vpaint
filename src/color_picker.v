@@ -1,7 +1,7 @@
 module main
 
 import iui as ui
-import gx
+import gg
 import math
 
 const hue_deg = 359
@@ -22,7 +22,7 @@ mut:
 	v      f64
 	mx     int
 	my     int
-	color  gx.Color
+	color  gg.Color
 	events map[string][]fn (voidptr)
 }
 
@@ -93,7 +93,7 @@ fn ColorPicker.new() &ColorPicker {
 	}
 }
 
-fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
+fn (mut cp ColorPicker) open_color_picker(c ?gg.Color) &ui.Modal {
 	mut m := ui.Modal.new(
 		title:     ''
 		width:     modal_width
@@ -117,7 +117,7 @@ fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
 		on_resize: modal_draw
 	)
 
-	// Load Given gx.Color
+	// Load Given gg.Color
 	if c != none {
 		cp.load_rgb(c)
 		cp.update_text_fields()
@@ -181,7 +181,7 @@ fn (mut cp ColorPicker) slid_draw_evnt(mut e ui.DrawEvent) {
 		ts := 12
 		wid := (com.height * per) - per * ts
 		e.ctx.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, ts, 32, e.ctx.theme.scroll_bar_color)
-		e.ctx.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, ts, 32, gx.black)
+		e.ctx.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width, ts, 32, gg.black)
 	}
 }
 
@@ -193,13 +193,13 @@ fn (mut cp ColorPicker) aslid_draw_evnt(mut e ui.DrawEvent) {
 	lenth := 16
 	space := 16
 
-	aa := gx.rgb(150, 150, 150)
-	bb := gx.rgb(255, 255, 255)
+	aa := gg.rgb(150, 150, 150)
+	bb := gg.rgb(255, 255, 255)
 
 	mut cc := false
 	for i in 0 .. lenth {
 		val := 255 - (i * space)
-		color := gx.rgba(cpc.r, cpc.g, cpc.b, u8(val))
+		color := gg.rgba(cpc.r, cpc.g, cpc.b, u8(val))
 		y := com.ry + space * i
 
 		ca := if cc { aa } else { bb }
@@ -218,7 +218,7 @@ fn (mut cp ColorPicker) aslid_draw_evnt(mut e ui.DrawEvent) {
 		ts := 12
 		wid := (com.height * per) - per * ts
 		win.gg.draw_rounded_rect_filled(com.rx, com.ry + wid, com.width, ts, 8, win.theme.scroll_bar_color)
-		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width - 1, ts, 8, gx.black)
+		win.gg.draw_rounded_rect_empty(com.rx, com.ry + wid, com.width - 1, ts, 8, gg.black)
 	}
 }
 
@@ -330,7 +330,7 @@ fn (mut cp ColorPicker) rgb_num_box_change_evnt(mut e ui.TextChangeEvent) {
 	}
 
 	a := cp.fields[3].text.u8()
-	cp.load_rgb(gx.rgba(r, g, b, a))
+	cp.load_rgb(gg.rgba(r, g, b, a))
 }
 
 // Turn mouse down (mx, my) into HSV
@@ -352,7 +352,7 @@ fn (mut cp ColorPicker) do_hsv_mouse_down(wmx int, wmy int) {
 fn (mut cp ColorPicker) update_color() {
 	color := hsv_to_rgb(cp.h, f32(cp.s) / 100, f32(cp.v) / 100)
 	alpha := cp.fields[3].text.u8()
-	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+	cp.color = gg.rgba(color.r, color.g, color.b, alpha)
 }
 
 fn (mut cp ColorPicker) update_text_fields_if_need() {
@@ -384,8 +384,8 @@ fn (mut cp ColorPicker) hsl_btn_draw_evnt(mut e ui.DrawEvent) {
 	}
 
 	x := cp.mx - 7 + e.target.rx
-	e.ctx.gg.draw_rounded_rect_empty(x, cp.my - 7 + e.target.ry, 16, 16, 32, gx.white)
-	e.ctx.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + e.target.ry, 16, 16, 32, gx.black)
+	e.ctx.gg.draw_rounded_rect_empty(x, cp.my - 7 + e.target.ry, 16, 16, 32, gg.white)
+	e.ctx.gg.draw_rounded_rect_empty(x - 1, cp.my - 8 + e.target.ry, 16, 16, 32, gg.black)
 
 	ty := cp.btn.ry - 24 - 8 // cp.btn.ry + cp.btn.height + 4
 
@@ -395,16 +395,16 @@ fn (mut cp ColorPicker) hsl_btn_draw_evnt(mut e ui.DrawEvent) {
 	bg := f32(cp.color.g) * 587
 	bb := f32(cp.color.b) * 114
 	o := (br + bg + bb) / 1000
-	tco := if o > 125 { gx.black } else { gx.white }
+	tco := if o > 125 { gg.black } else { gg.white }
 
-	e.ctx.gg.draw_text(cp.btn.rx + 5, ty + 4, '${cp.color.to_css_string()}', gx.TextCfg{
+	e.ctx.gg.draw_text(cp.btn.rx + 5, ty + 4, '${cp.color.to_css_string()}', gg.TextCfg{
 		size:  e.ctx.font_size
 		color: tco
 	})
 
 	// Draw color
 	e.ctx.gg.draw_rect_empty(e.target.rx, e.target.ry, e.target.width, e.target.height,
-		gx.black)
+		gg.black)
 	e.ctx.gg.draw_rect_empty(e.target.rx - 1, e.target.ry - 1, e.target.width + 2,
 		e.target.height + 2, cp.color)
 }
@@ -438,7 +438,7 @@ fn (mut cp ColorPicker) load_hsv_int(h int, s int, v int) {
 	cp.update_hsv_m()
 }
 
-fn (mut cp ColorPicker) load_rgb(color gx.Color) {
+fn (mut cp ColorPicker) load_rgb(color gg.Color) {
 	mut h, s, v := rgb_to_hsv(color)
 
 	cp.h = h
@@ -449,7 +449,7 @@ fn (mut cp ColorPicker) load_rgb(color gx.Color) {
 	cp.fields[3].text = '${alpha}'
 	cp.slid.cur = f32(100 - cp.v)
 	cp.aslid.cur = 255 - alpha
-	cp.color = gx.rgba(color.r, color.g, color.b, alpha)
+	cp.color = gg.rgba(color.r, color.g, color.b, alpha)
 
 	cp.update_hsv_m()
 	cp.update_text_fields()

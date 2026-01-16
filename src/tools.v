@@ -1,7 +1,7 @@
 module main
 
 import iui as ui
-import gx
+import gg
 import math
 // import rand { intn }
 
@@ -254,7 +254,7 @@ fn (mut this DropperTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, ctx.theme.accent_fill)
 	str := 'RGBA: ${color.r}, ${color.g}, ${color.b}, ${color.a}'
 
-	ctx.gg.draw_text(int(xpos), int(ypos), str, gx.TextCfg{
+	ctx.gg.draw_text(int(xpos), int(ypos), str, gg.TextCfg{
 		size: 12
 	})
 
@@ -335,7 +335,7 @@ fn (mut this CustomPencilTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 struct FillTool {
 	tool_name string = 'Fillcan'
 mut:
-	color  gx.Color
+	color  gg.Color
 	img    &Image = unsafe { nil }
 	count  int
 	next   []Point
@@ -344,7 +344,7 @@ mut:
 
 fn (mut this FillTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
-	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, img.zoom, img.zoom, 1, gx.blue)
+	ctx.gg.draw_rounded_rect_empty(img.sx, img.sy, img.zoom, img.zoom, 1, gg.blue)
 
 	for p in this.next {
 		if p.x != -1 {
