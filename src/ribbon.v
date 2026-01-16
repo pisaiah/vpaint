@@ -4,10 +4,28 @@ module main
 import gx
 import iui as ui
 
+const rgb_colors = [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
+	gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
+	gx.rgb(34, 177, 76), gx.rgb(0, 162, 232), gx.rgb(63, 72, 204),
+	gx.rgb(163, 73, 164), gx.rgb(255, 255, 255), gx.rgb(195, 195, 195),
+	gx.rgb(185, 122, 87), gx.rgb(255, 174, 201), gx.rgb(255, 200, 15),
+	gx.rgb(239, 228, 176), gx.rgb(180, 230, 30), gx.rgb(153, 217, 235),
+	gx.rgb(112, 146, 190), gx.rgba(0, 0, 0, 0)]
+
 fn (mut app App) make_ribbon() {
 	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 0))
 
 	mut color_box := app.make_color_box()
+
+	color_box.subscribe_event('draw', fn [mut color_box] (mut e ui.DrawEvent) {
+		w := e.target.parent.width
+		if w < 385 {
+			color_box.width = 0
+		} else if color_box.width < 300 {
+			color_box.width = (24 + 6) * 10
+			// dump(color_box.width)
+		}
+	})
 
 	box1.add_child(make_c_btn(0))
 	box1.add_child(make_c_btn(10))
@@ -20,7 +38,7 @@ fn (mut app App) make_ribbon() {
 
 	box1.set_x(5)
 	color_box.set_x(11)
-	btn.set_x(5)
+	// btn.set_x(5)
 	btn.border_radius = 2
 
 	btn.y = 0
@@ -28,6 +46,7 @@ fn (mut app App) make_ribbon() {
 
 	app.ribbon.add_child(box1)
 	app.ribbon.add_child(color_box)
+	app.ribbon.add_child(app.make_color_popup())
 	app.ribbon.add_child(btn)
 
 	img_file := $embed_file('assets/hsv.png')
@@ -40,9 +59,13 @@ fn (mut app App) make_ribbon() {
 	cim = gg.cache_image(gg_im)
 	app.win.id_map['HSL'] = &cim
 
+	app.ribbon.add_child(app.make_shape_box())
+}
+
+fn (mut app App) make_shape_box() &ui.Panel {
 	mut sp := ui.Panel.new(layout: ui.FlowLayout.new(hgap: 1, vgap: 1))
 	sp.subscribe_event('draw', app.shape_box_draw)
-	sp.set_bounds(5, 0, 50, app.ribbon.height - 10)
+	sp.set_bounds(0, 0, 72 + 4, app.ribbon.height - 10)
 
 	for i, label in shape_labels {
 		mut sbtn := ui.Button.new(
@@ -50,15 +73,14 @@ fn (mut app App) make_ribbon() {
 		)
 		sbtn.extra = label
 		sbtn.subscribe_event('mouse_up', app.shape_btn_click)
-		sbtn.set_bounds(0, 0, 23, 20)
+		sbtn.set_bounds(0, 3, 24, 20)
 		sbtn.font_size = 12
 		sbtn.font = 1
 		sbtn.border_radius = -1
 		sbtn.set_area_filled_state(false, .normal)
 		sp.add_child(sbtn)
 	}
-
-	app.ribbon.add_child(sp)
+	return sp
 }
 
 fn (mut app App) shape_btn_click(e &ui.MouseEvent) {
@@ -73,24 +95,82 @@ fn draw_box_border(com &ui.Component, g &ui.GraphicsContext, mw int) {
 		g.theme.textbox_background)
 }
 
+// Draw down arrow
+fn draw_arrow(ctx &ui.GraphicsContext, x int, y int, w int, h int) {
+	a := x + w - 17
+	b := y + h - 10 //(h / 3) - 3
+	ctx.gg.draw_triangle_filled(a, b, a + 5, b + 5, a + 10, b, ctx.theme.text_color)
+}
+
+fn (mut app App) make_color_popup() &ui.Panel {
+	mut p := ui.Panel.new(
+		layout: ui.FlowLayout.new(
+			vgap: 0
+			hgap: 5
+		)
+	)
+
+	mut btn := ui.Button.new(
+		text: 'Colors'
+	)
+
+	btn.x = 5
+	btn.width = 60
+	btn.height = app.ribbon.height - 10
+
+	mut popup := ui.Popup.new()
+
+	mut cb := app.make_color_box()
+	cb.set_bounds(0, 0, 280, 75)
+
+	popup.add_child(cb)
+
+	btn.subscribe_event('after_draw', fn (mut e ui.DrawEvent) {
+		draw_arrow(e.ctx, e.target.rx, e.target.ry, (e.target.width / 2) + 10, e.target.height)
+	})
+
+	btn.subscribe_event('mouse_up', fn [mut popup, mut btn] (mut e ui.DrawEvent) {
+		if popup.is_shown(e.ctx) {
+			popup.hide(e.ctx)
+			return
+		}
+
+		if !btn.hidden {
+			popup.show(btn, btn.rx, btn.ry + btn.height + 5, e.ctx)
+		}
+	})
+
+	cb.subscribe_event('mouse_up', fn [mut popup] (mut e ui.DrawEvent) {
+		if popup.is_shown(e.ctx) {
+			popup.hide(e.ctx)
+			return
+		}
+	})
+
+	p.add_child(btn)
+
+	p.subscribe_event('draw', fn [mut p, mut btn] (mut e ui.DrawEvent) {
+		w := e.target.parent.width
+		if w > 385 {
+			p.width = 1
+			btn.set_hidden(true)
+		} else if p.width < btn.width {
+			p.width = btn.width + 10
+			btn.set_hidden(false)
+		}
+	})
+
+	return p
+}
+
 fn (mut app App) make_color_box() &ui.Panel {
 	mut color_box := ui.Panel.new(
 		layout: ui.GridLayout.new(rows: 2, vgap: 3, hgap: 3)
 	)
 
-	colors := [gx.rgb(0, 0, 0), gx.rgb(127, 127, 127), gx.rgb(136, 0, 21),
-		gx.rgb(237, 28, 36), gx.rgb(255, 127, 39), gx.rgb(255, 242, 0),
-		gx.rgb(34, 177, 76), gx.rgb(0, 162, 232), gx.rgb(63, 72, 204),
-		gx.rgb(163, 73, 164), gx.rgb(255, 255, 255), gx.rgb(195, 195, 195),
-		gx.rgb(185, 122, 87), gx.rgb(255, 174, 201), gx.rgb(255, 200, 15),
-		gx.rgb(239, 228, 176), gx.rgb(180, 230, 30), gx.rgb(153, 217, 235),
-		gx.rgb(112, 146, 190), gx.rgba(0, 0, 0, 0)]
-
-	// gx.rgba(200, 190, 230, 0)
-
 	size := 24
 
-	for color in colors {
+	for color in rgb_colors {
 		mut btn := ui.Button.new(text: ' ')
 		btn.set_background(color)
 		btn.border_radius = 32
@@ -111,15 +191,7 @@ fn (mut app App) make_color_box() &ui.Panel {
 		color_box.add_child(btn)
 	}
 
-	color_box.subscribe_event('draw', fn [mut color_box] (mut e ui.DrawEvent) {
-		w := e.target.parent.width
-		if w < 385 {
-			aa := w - 95
-			color_box.width = aa
-		} else if color_box.width < 300 {
-			color_box.width = (24 + 6) * 10
-		}
-
+	color_box.subscribe_event('draw', fn (mut e ui.DrawEvent) {
 		draw_box_border(e.target, e.ctx, 6)
 	})
 

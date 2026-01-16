@@ -233,7 +233,8 @@ fn (mut this SelectTool) draw_click_fn(a voidptr, b &ui.GraphicsContext) {
 
 			img.push(change)
 			change = Multichange.new()
-			change.batch = true
+
+			change.second = true
 
 			for x in 0 .. sw {
 				for y in 0 .. sh {

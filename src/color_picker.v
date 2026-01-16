@@ -5,8 +5,8 @@ import gx
 import math
 
 const hue_deg = 359
-const modal_width = 445
-const compact_width = 360
+const modal_width = 446
+const compact_width = 365
 
 @[heap]
 struct ColorPicker {
@@ -94,34 +94,34 @@ fn ColorPicker.new() &ColorPicker {
 }
 
 fn (mut cp ColorPicker) open_color_picker(c ?gx.Color) &ui.Modal {
-	mut m := ui.Modal.new(title: '')
-
-	m.subscribe_event('draw', modal_draw)
-	m.needs_init = false
-	m.in_width = modal_width
-	m.in_height = 335
-	m.top_off = 20
-
-	mut p := cp.make_picker_panel(m.in_width, m.in_height)
-	m.add_child(p)
+	mut m := ui.Modal.new(
+		title:     ''
+		width:     modal_width
+		height:    335
+		top:       50
+		children:  [
+			cp.make_picker_panel(modal_width, 335),
+			ui.Button.new(
+				text:     'Close'
+				on_click: cp.default_modal_close_fn
+				accent:   true
+				bounds:   ui.Bounds{20, 292, 200, 30}
+			),
+			ui.Button.new(
+				text:     'Cancel'
+				on_click: ui.default_modal_close_fn
+				bounds:   ui.Bounds{227, 292, 200, 30}
+			),
+		]
+		close_idx: 2
+		on_resize: modal_draw
+	)
 
 	// Load Given gx.Color
 	if c != none {
 		cp.load_rgb(c)
 		cp.update_text_fields()
 	}
-
-	// close btn
-	mut close := m.make_close_btn(false)
-	y := 292
-
-	close.subscribe_event('mouse_up', cp.default_modal_close_fn)
-	close.set_bounds(20, y, 200, 30)
-	close.set_accent_filled(true)
-
-	mut can := m.make_close_btn(true)
-	can.text = 'Cancel'
-	can.set_bounds(227, y, 200, 30)
 
 	return m
 }
@@ -131,24 +131,26 @@ fn (mut cp ColorPicker) make_picker_panel(w int, h int) &ui.Panel {
 		return cp.p
 	}
 
-	// Create panel
-	mut p := ui.Panel.new()
-	p.set_bounds(5, 0, w - 10, h)
-	cp.p = p
-
 	mut btn := cp.btn
 	mut slid := cp.slid
 	mut aslid := cp.aslid
 
 	// set bounds
 	btn.set_bounds(0, 0, cp.bw, cp.bw)
-	slid.set_bounds(0, 0, 38, 256)
-	aslid.set_bounds(0, 0, 30, 256) // old h: 192
+	slid.set_bounds(0, 0, 35, 256)
+	aslid.set_bounds(0, 0, 28, 256) // old h: 192
 
 	// Add to panel
-	p.add_child(btn)
-	p.add_child(slid)
-	p.add_child(aslid)
+	mut p := ui.Panel.new(
+		children: [
+			btn,
+			slid,
+			aslid,
+			cp.make_fields(),
+		]
+	)
+	p.set_bounds(5, 0, w - 10, h)
+	cp.p = p
 
 	// Add events
 	btn.subscribe_event('after_draw', cp.hsl_btn_draw_evnt)
@@ -156,10 +158,6 @@ fn (mut cp ColorPicker) make_picker_panel(w int, h int) &ui.Panel {
 	aslid.subscribe_event('after_draw', cp.aslid_draw_evnt)
 	slid.subscribe_event('value_change', cp.slid_value_change)
 	aslid.subscribe_event('value_change', cp.aslid_value_change)
-
-	mut fields_panel := cp.make_fields()
-	p.add_child(fields_panel)
-
 	return p
 }
 

@@ -15,13 +15,19 @@ fn statusbar_draw_event(mut e ui.DrawEvent) {
 	// win.gg.draw_rect_empty(sb.x, 26, sb.width, 1, win.theme.dropdown_border)
 }
 
+fn zoom_label_draw_event(mut e ui.DrawEvent) {
+	mut com := e.target
+	mut app := e.ctx.win.get[&App]('app')
+	zoom := int(app.canvas.get_zoom() * 100)
+	com.text = '${zoom}%'
+	if mut com is ui.Label {
+		com.center_text_y = true
+		com.width = e.ctx.text_width(com.text)
+		com.height = com.parent.height
+	}
+}
+
 fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
-	mut sb := ui.Panel.new(
-		layout: ui.BorderLayout.new(vgap: 4)
-	)
-
-	sb.subscribe_event('draw', statusbar_draw_event)
-
 	mut zoom_inc := app.zoom_btn(1)
 	zoom_inc.subscribe_event('mouse_up', app.on_zoom_inc)
 	zoom_inc.set_bounds(1, 0, 40, 26)
@@ -38,31 +44,20 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 
 	mut zoom_lbl := ui.Label.new(text: '100%')
 
-	zoom_lbl.subscribe_event('draw', fn (mut e ui.DrawEvent) {
-		mut com := e.target
-		mut app := e.ctx.win.get[&App]('app')
-		zoom := int(app.canvas.get_zoom() * 100)
-		com.text = '${zoom}%'
-		if mut com is ui.Label {
-			com.center_text_y = true
-			com.width = e.ctx.text_width(com.text)
-			com.height = com.parent.height
-		}
-	})
-
+	zoom_lbl.subscribe_event('draw', zoom_label_draw_event)
 	status.subscribe_event('draw', stat_lbl_draw_event)
 
 	mut stat_btn := ui.Button.new(
-		text: '\uE90E'
+		text:     '\uE90E'
+		width:    24
+		height:   24
+		on_click: fn (mut e ui.MouseEvent) {
+			mut app := e.ctx.win.get[&App]('app')
+			app.show_prop_modal(e.ctx)
+		}
 	)
 	status.set_bounds(0, 0, 0, 24)
-	stat_btn.set_bounds(0, 0, 24, 24)
 	stat_btn.font = 1
-
-	stat_btn.subscribe_event('mouse_up', fn (mut e ui.MouseEvent) {
-		mut app := e.ctx.win.get[&App]('app')
-		app.show_prop_modal(e.ctx)
-	})
 
 	mut tool_select := ui.Selectbox.new(
 		text:  'Pencil'
@@ -85,22 +80,29 @@ fn (mut app App) make_status_bar(window &ui.Window) &ui.Panel {
 	tool_select.set_bounds(0, 0, 90, 25)
 
 	mut west_panel := ui.Panel.new(
-		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
+		layout:   ui.BoxLayout.new(vgap: 0, hgap: 5)
+		children: [
+			stat_btn,
+			tool_select,
+			status,
+		]
 	)
-
 	west_panel.set_bounds(-5, 0, 250, 0)
 
-	west_panel.add_child(stat_btn)
-	west_panel.add_child(tool_select)
-	west_panel.add_child(status)
-
 	mut zp := ui.Panel.new(
-		layout: ui.BoxLayout.new(vgap: 0, hgap: 5)
+		layout:   ui.BoxLayout.new(vgap: 0, hgap: 5)
+		children: [
+			zoom_lbl,
+			zoom_dec,
+			zoom_inc,
+		]
 	)
+
+	mut sb := ui.Panel.new(
+		layout: ui.BorderLayout.new(vgap: 4)
+	)
+	sb.subscribe_event('draw', statusbar_draw_event)
 	sb.add_child_with_flag(west_panel, ui.borderlayout_west)
-	zp.add_child(zoom_lbl)
-	zp.add_child(zoom_dec)
-	zp.add_child(zoom_inc)
 	sb.add_child_with_flag(zp, ui.borderlayout_east)
 	return sb
 }

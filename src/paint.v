@@ -65,15 +65,96 @@ fn (mut app App) set_color(c gx.Color) {
 	app.color = c
 }
 
+fn get_load_path() string {
+	path := os.resource_abs_path('untitledv.png')
+
+	if os.args.len > 1 {
+		return os.real_path(os.args[1])
+	}
+
+	if !os.exists(path) {
+		return os.resource_abs_path('Untitled.png')
+	}
+	return path
+}
+
+// Command Line Arguments
+// 	Compile Time:
+// 		-d bigcanvas	= Start with a blank 4096x4096 Image
+// 		-d bigtool		= Start with a Tool Size of 2048px
+// 	Cmd Args:
+// 		input.png -upscale=N -path=output.png	= Run scale2x on input for N times
+fn (mut app App) parse_args() {
+	$if bigcanvas ? {
+		size := 4096
+		app.load_new(size, size)
+	}
+
+	$if bigtool ? {
+		app.brush_size = 2048
+	}
+
+	if '-upscale' in os.args {
+		println('Upscaling ${os.args[1]}...')
+		out_path := os.args[3].split('-path=')[1]
+		app.canvas.scale2x()
+		app.write_img(app.data.file, out_path)
+		return
+	}
+
+	dump(os.args)
+
+	if os.args.len == 4 && os.args[2].contains('-scale=') && os.args[3].contains('-t=') {
+		// hq3x
+
+		times := os.args[2].split('-scale=')[1]
+
+		dump('SCALE!')
+		// app.canvas.hq3x()
+
+		rs := os.args[3].split('-t=')[1].split(',')
+		rs0 := rs[0].int()
+		rs1 := rs[1].int()
+
+		for app.canvas.width < rs0 || app.canvas.height < rs1 {
+			// app.canvas.hq3x()
+			if times == 'hq3x' {
+				app.canvas.hq3x()
+			}
+			if times == 'scale2x' {
+				app.canvas.scale2x()
+			}
+		}
+
+		app.canvas.resize(rs[0].int(), rs[1].int())
+	}
+
+	if os.args.len == 4 && os.args[2].contains('-upscale=') {
+		times := os.args[2].split('-upscale=')[1].int()
+
+		println('Upscaling ${times}x "${os.args[1]}"...')
+		out_path := os.args[3].split('-path=')[1]
+
+		for _ in 0 .. times {
+			app.canvas.scale2x()
+		}
+		app.write_img(app.data.file, out_path)
+		return
+	}
+}
+
+// Main Function
 fn main() {
 	// Create Window
 	mut window := ui.Window.new(
 		title:     'vPaint ${version}'
-		width:     550 // 700
-		height:    450
+		width:     800 // 700
+		height:    600
 		font_size: 16
 		ui_mode:   false
 	)
+
+	path := get_load_path()
 
 	mut app := &App{
 		sv:         unsafe { nil }
@@ -93,39 +174,9 @@ fn main() {
 	app.settings_load() or { println('Error loading settings: ${err}') }
 	app.make_menubar(mut window)
 
-	mut path := os.resource_abs_path('untitledv.png')
-
-	if os.args.len > 1 {
-		path = os.real_path(os.args[1])
-	}
-
-	if !os.exists(path) {
-		mut blank_png := $embed_file('blank.png')
-		os.write_file_array(path, blank_png.to_bytes()) or { panic(error) }
-	}
-
 	mut image_panel := app.make_image_view(path)
 
-	if '-upscale' in os.args {
-		println('Upscaling ${os.args[1]}...')
-		out_path := os.args[3].split('-path=')[1]
-		app.canvas.scale2x()
-		app.write_img(app.data.file, out_path)
-		return
-	}
-
-	if os.args.len == 4 && os.args[2].contains('-upscale=') {
-		times := os.args[2].split('-upscale=')[1].int()
-
-		println('Upscaling ${times}x "${os.args[1]}"...')
-		out_path := os.args[3].split('-path=')[1]
-
-		for _ in 0 .. times {
-			app.canvas.scale2x()
-		}
-		app.write_img(app.data.file, out_path)
-		return
-	}
+	app.parse_args()
 
 	mut sv := &ui.ScrollView{
 		children:  [image_panel]

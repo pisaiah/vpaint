@@ -29,29 +29,77 @@ mut:
 	change Multichange = Multichange.new()
 }
 
+fn pos_in_circle(x f32, y f32, center_x f32, center_y f32, radius f32) bool {
+	dx := x - center_x
+	dy := y - center_y
+	return (dx * dx + dy * dy) <= (radius * radius)
+}
+
 fn (mut this PencilTool) draw_hover_fn(a voidptr, ctx &ui.GraphicsContext) {
 	mut img := unsafe { &Image(a) }
 
 	size := img.app.brush_size
 	half_size := size / 2
-	pix := img.zoom
+	pix_size := img.zoom
 
-	xpos := img.sx - (half_size * pix)
-	ypos := img.sy - (half_size * pix)
+	xpos := img.sx - (half_size * pix_size)
+	ypos := img.sy - (half_size * pix_size)
 
-	width := img.zoom + ((size - 1) * pix)
+	width := img.zoom + ((size - 1) * pix_size)
 
-	ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, ctx.theme.accent_fill)
+	round := img.app.settings.round_ends
+
+	// ctx.gg.draw_rounded_rect_empty(xpos, ypos, width, width, 1, ctx.theme.accent_fill)
 
 	// Draw lines instead of individual rects;
 	// to reduce our drawing instructions.
-	for i in 0 .. size {
-		yy := ypos + (i * pix)
-		xx := xpos + (i * pix)
 
-		ctx.gg.draw_line(xpos, yy, xpos + width, yy, ctx.theme.accent_fill)
-		ctx.gg.draw_line(xx, ypos, xx, ypos + width, ctx.theme.accent_fill)
+	if size == 1 {
+		ctx.gg.draw_rect_empty(xpos, ypos, width, width, ctx.theme.accent_fill)
+		return
 	}
+
+	if !round || size == 1 {
+		for i in 0 .. size + 1 {
+			yy := ypos + (i * pix_size)
+			xx := xpos + (i * pix_size)
+
+			// Draw a line to represent the border of the pixel
+			ctx.gg.draw_line(xpos, yy, xpos + width, yy, ctx.theme.accent_fill)
+			ctx.gg.draw_line(xx, ypos, xx, ypos + width, ctx.theme.accent_fill)
+		}
+		return
+	}
+
+	radius := half_size
+
+	// Draw lines only inside the circle
+	// Reduce draw instructions
+	mut sy := -1
+
+	c := img.app.get_color()
+	sr := radius * radius
+
+	for xx in -radius .. radius {
+		px := img.sx + (xx * pix_size)
+
+		for yy in -radius .. radius {
+			if xx * xx + yy * yy <= sr {
+				if sy == -1 {
+					sy = yy
+					break
+				}
+			}
+		}
+
+		py := img.sy + (sy * pix_size)
+		eey := if -sy >= radius { radius } else { -sy + 1 }
+		ey := img.sy + (eey * pix_size)
+
+		ctx.gg.draw_rect_filled(px, py, pix_size, ey - py, c)
+		sy = -1
+	}
+	// ctx.gg.draw_circle_line(img.sx, img.sy, int(size * pix_size) / 2, 100, ctx.theme.accent_fill)
 }
 
 fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
@@ -67,11 +115,11 @@ fn (mut this PencilTool) draw_down_fn(a voidptr, g &ui.GraphicsContext) {
 		} else {
 			pp := bresenham(img.last_x, img.last_y, img.mx, img.my)
 			for p in pp {
-				for x in 0 .. size {
-					for y in 0 .. size {
-						img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
-							this.change)
-					}
+				for offset in 0 .. size * size {
+					x := offset % size
+					y := offset / size
+					img.set_raw(p.x + (x - half_size), p.y + (y - half_size), img.app.get_color(), mut
+						this.change)
 				}
 			}
 		}

@@ -86,16 +86,10 @@ fn save_as_click(mut win ui.Window, com ui.MenuItem) {
 	app.save_as()
 }
 
-fn menu_zoom_out_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := win.get[&App]('app')
-	nz := app.canvas.zoom - 1
-	app.canvas.set_zoom(nz)
-}
-
-fn menu_zoom_in_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := win.get[&App]('app')
-	nz := app.canvas.zoom + 1
-	app.canvas.set_zoom(nz)
+fn menu_zoom_click(mut e ui.MouseEvent) {
+	mut app := e.ctx.win.get[&App]('app')
+	amount := if e.target.text.contains('out') { -1 } else { 1 }
+	app.canvas.set_zoom(app.canvas.zoom + amount)
 }
 
 fn img_prop_item_click(mut e ui.MouseEvent) {
@@ -111,6 +105,10 @@ fn (mut app App) make_menubar(mut window ui.Window) {
 
 	// Win11 MSPaint has 7px padding on menu bar
 	window.bar.set_padding(8)
+
+	$if customtitlebar ? {
+		window.bar.set_padding(9)
+	}
 
 	// Add MenuItems
 	window.bar.add_child(make_file_menu())
@@ -303,19 +301,19 @@ fn make_view_menu() &ui.MenuItem {
 		text:     'View'
 		children: [
 			ui.MenuItem.new(
-				text:           'Fit Canvas'
-				click_event_fn: menubar_fit_zoom_click
-				uicon:          '\uf002'
+				text:     'Fit Canvas'
+				click_fn: fit_zoom_click
+				uicon:    '\uf002'
 			),
 			ui.MenuItem.new(
-				text:           'Zoom-out'
-				uicon:          '\ue989'
-				click_event_fn: menu_zoom_out_click
+				text:     'Zoom-out'
+				uicon:    '\ue989'
+				click_fn: menu_zoom_click
 			),
 			ui.MenuItem.new(
-				text:           'Zoom-In'
-				click_event_fn: menu_zoom_in_click
-				uicon:          '\ue988'
+				text:     'Zoom-In'
+				click_fn: menu_zoom_click
+				uicon:    '\ue988'
 			),
 			ui.MenuItem.new(
 				text:     'Gridlines'
@@ -356,8 +354,8 @@ fn menu_size_click(mut win ui.Window, com ui.MenuItem) {
 	app.brush_size = size
 }
 
-fn menubar_fit_zoom_click(mut win ui.Window, com ui.MenuItem) {
-	mut app := win.get[&App]('app')
+fn fit_zoom_click(mut e ui.MouseEvent) {
+	mut app := e.ctx.win.get[&App]('app')
 	canvas_height := app.sv.height - 50
 	level := canvas_height / app.data.file.height
 	app.canvas.set_zoom(level)

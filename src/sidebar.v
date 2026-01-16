@@ -164,6 +164,13 @@ fn (mut app App) make_sidebar() {
 	cim := gg.cache_image(gg_im)
 	app.win.graphics_context.icon_cache['icons-3'] = cim
 
+	$if scale2x ? {
+		img_icon_file2 := $embed_file('assets/tools-big.png')
+		gg_im2 := gg.create_image_from_byte_array(img_icon_file2.to_bytes()) or { panic(err) }
+		cim2 := gg.cache_image(gg_im2)
+		app.win.graphics_context.icon_cache['icons-3'] = cim2
+	}
+
 	/*
 	img_sele_file := $embed_file('assets/select.png')
 	img_pencil_file := $embed_file('assets/pencil-tip.png')
@@ -216,16 +223,14 @@ fn draw_btn(mut e ui.DrawEvent) {
 	}
 }
 
-fn after_draw_btn(mut e ui.DrawEvent) {
-	if e.target.is_selected {
+fn (mut app App) after_draw_btn(mut e ui.DrawEvent) {
+	sel := app.tool.tool_name == e.target.text
+
+	if e.target.is_selected || sel {
 		mut btn := e.target
-		for i in 1 .. 2 {
-			x := btn.x + i
-			y := btn.y + i
-			w := btn.width - (2 * i)
-			h := btn.height - (2 * i)
-			e.ctx.gg.draw_rect_empty(x, y, w, h, e.ctx.theme.accent_fill)
-		}
+		// e.ctx.gg.draw_rect_empty(btn.x, btn.y, btn.width, btn.height, e.ctx.theme.accent_fill)
+		e.ctx.gg.draw_rounded_rect_filled(btn.x, btn.y + (btn.height / 4), 3, (btn.height / 2),
+			4, e.ctx.theme.accent_fill)
 	}
 }
 
@@ -237,9 +242,11 @@ fn (mut app App) icon_btn_1(xp int, yp int, name string) &ui.Button {
 		icon: -3
 	)
 
+	atlas_size := $if scale2x ? { 96 } $else { 32 }
+
 	btn.icon_info = ui.ButtonIconInfo{
 		id:         'icons-3'
-		atlas_size: 32
+		atlas_size: atlas_size
 		x:          xp
 		y:          yp
 		skip_text:  true
@@ -256,7 +263,7 @@ fn (mut app App) icon_btn_1(xp int, yp int, name string) &ui.Button {
 	btn.extra = name // tool.tool_name
 	btn.text = name
 
-	btn.subscribe_event('after_draw', after_draw_btn)
+	btn.subscribe_event('after_draw', app.after_draw_btn)
 	btn.subscribe_event('draw', draw_btn)
 
 	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {
@@ -282,7 +289,7 @@ fn (mut app App) icon_btn(data []u8, name string) &ui.Button {
 	btn.extra = name // tool.tool_name
 	btn.text = name
 
-	btn.subscribe_event('after_draw', after_draw_btn)
+	btn.subscribe_event('after_draw', app.after_draw_btn)
 	btn.subscribe_event('draw', draw_btn)
 
 	btn.subscribe_event('mouse_up', fn [mut app] (mut e ui.MouseEvent) {

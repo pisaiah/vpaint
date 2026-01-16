@@ -59,13 +59,6 @@ fn (app &App) save_as() {
 	modal.in_height = 280
 	w := modal.in_width - 10
 
-	mut p := ui.Panel.new(
-		layout: ui.BoxLayout.new(
-			ori: 1
-		)
-	)
-	// p.set_bounds(4, 0, w, modal.in_height)
-
 	folder := os.dir(data.file_name)
 	file_name := os.file_name(data.file_name)
 
@@ -99,25 +92,32 @@ fn (app &App) save_as() {
 
 	nam.set_bounds(0, 0, w - 210, 30)
 
-	mut tb_fn := ui.Titlebox.new(
-		text:     'File Name'
-		children: [nam]
+	mut p2 := ui.Panel.new(
+		layout:   ui.FlowLayout.new()
+		children: [
+			ui.Titlebox.new(
+				text:     'File Name'
+				children: [nam]
+			),
+			ui.Titlebox.new(
+				text:     'Save as Type'
+				children: [cb]
+			),
+		]
 	)
-
-	mut tb_cb := ui.Titlebox.new(
-		text:     'Save as Type'
-		children: [cb]
-	)
-
-	mut p2 := ui.Panel.new(layout: ui.FlowLayout.new())
 	p2.subscribe_event('draw', responsive_modal_panel)
-
 	p2.set_bounds(0, 0, w, 170)
-	p2.add_child(tb_fn)
-	p2.add_child(tb_cb)
 
-	p.add_child(tb_f)
-	p.add_child(p2)
+	mut p := ui.Panel.new(
+		layout:   ui.GridLayout.new(cols: 1)
+		children: [
+			ui.Panel.new(
+				children: [tb_f]
+			),
+			p2,
+		]
+	)
+
 	modal.add_child(p)
 
 	modal.needs_init = false

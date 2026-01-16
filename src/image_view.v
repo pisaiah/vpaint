@@ -161,8 +161,8 @@ struct Change {
 	y    int
 	from gx.Color
 	to   gx.Color
-mut:
-	batch bool
+	// mut:
+	//	batch bool
 }
 
 fn Multichange.new() Multichange {
@@ -186,6 +186,7 @@ struct Multichange {
 	Change
 mut:
 	changes []Change
+	second  bool
 }
 
 fn (this Changes) compare(b Changes) u8 {
@@ -209,11 +210,10 @@ fn (this Changes) compare(b Changes) u8 {
 @[deprecated]
 fn (mut this Image) note_multichange() {
 	change := Change{
-		x:     -1
-		y:     -1
-		from:  gx.white
-		to:    gx.white
-		batch: false
+		x:    -1
+		y:    -1
+		from: gx.white
+		to:   gx.white
 	}
 	this.history.insert(0, change)
 }
@@ -229,7 +229,8 @@ fn (mut this Image) undo() {
 			set_pixel(this.data.file, change.x, change.y, change.from)
 		}
 		this.history.delete(0)
-		if last_change.batch {
+
+		if last_change.second {
 			this.undo()
 			return
 		}
@@ -241,30 +242,11 @@ fn (mut this Image) undo() {
 	old_color := last_change.from
 	x := last_change.x
 	y := last_change.y
-	batch := last_change.batch
 
 	set_pixel(this.data.file, x, y, old_color)
 	this.history.delete(0)
 
-	if batch {
-		mut b := true
-		for b {
-			change := this.history[0]
-			set_pixel(this.data.file, change.x, change.y, change.from)
-			b = change.batch
-			this.history.delete(0)
-			if change.x == -1 {
-				break
-			}
-		}
-	}
-
 	this.refresh()
-}
-
-@[deprecated]
-fn (mut this Image) mark_batch_change() {
-	this.history[0].batch = true
 }
 
 fn (mut this Image) set(x int, y int, color gx.Color) bool {
@@ -273,7 +255,6 @@ fn (mut this Image) set(x int, y int, color gx.Color) bool {
 
 fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 	if x < 0 || y < 0 || x >= this.w || y >= this.h {
-		// dump('${x} ${y}')
 		return false
 	}
 
@@ -282,14 +263,11 @@ fn (mut this Image) set2(x int, y int, color gx.Color, batch bool) bool {
 		return true
 	}
 
-	// dump('debug: set2 ${this.history.len}')
-
 	change := Change{
-		x:     x
-		y:     y
-		from:  from
-		to:    color
-		batch: batch
+		x:    x
+		y:    y
+		from: from
+		to:   color
 	}
 
 	if this.history.len > 1000 {
@@ -327,8 +305,6 @@ fn (mut this Image) get(x int, y int) gx.Color {
 }
 
 fn (mut this Image) refresh() {
-	// mut data := this.data
-	// refresh_img(mut data, mut this.app.win.gg)
 	this.app.win.gg.update_pixel_data(this.data.id, this.data.file.data)
 }
 
@@ -447,7 +423,7 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	this.calculate_mouse_pixel(ctx)
 
 	// Gridlines
-	if this.app.settings.show_gridlines {
+	if this.app.settings.show_gridlines && this.zoom >= 1 {
 		a := ctx.theme.accent_fill
 		c := gx.rgba(a.r, a.g, a.b, 50)
 
@@ -470,6 +446,10 @@ pub fn (mut this Image) draw(ctx &ui.GraphicsContext) {
 	tool.draw_hover_fn(this, ctx)
 
 	if this.is_mouse_down {
+		if ctx.win.popups.len > 0 {
+			return
+		}
+
 		if ctx.win.bar.tik > 90 {
 			tool.draw_down_fn(this, ctx)
 		}
@@ -594,7 +574,7 @@ fn (mut img Image) set_line(x1 int, y1 int, x2 int, y2 int, c gx.Color, size int
 	}
 }
 
-fn draw_circle_filled(mut img &Image, x int, y int, radius int, c gx.Color, mut change Multichange) {
+fn draw_circle_filled(mut img Image, x int, y int, radius int, c gx.Color, mut change Multichange) {
 	for i in -radius .. radius {
 		for j in -radius .. radius {
 			if i * i + j * j <= radius * radius {

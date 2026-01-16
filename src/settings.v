@@ -4,14 +4,6 @@ import iui as ui
 import os
 
 fn (mut app App) show_settings() {
-	mut page := ui.Page.new(title: 'Settings')
-
-	mut p := ui.Panel.new(
-		layout: ui.FlowLayout.new()
-	)
-
-	mut panel := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1))
-
 	// Auto-hide Sidebar
 	mut card := ui.SettingsCard.new(
 		uicon:       '\uE700'
@@ -75,23 +67,29 @@ fn (mut app App) show_settings() {
 
 	grid_card.add_child(box2)
 
-	panel.add_child(card)
-	panel.add_child(theme_card)
-	panel.add_child(round_card)
-	panel.add_child(grid_card)
-
-	// About Text
-
-	mut lbl := ui.Label.new(
-		text: 'About vPaint\n${about_text.join('\n')}\n'
+	// Content Panel
+	mut p := ui.Panel.new(
+		layout:   ui.FlowLayout.new()
+		children: [
+			ui.Panel.new(
+				layout:   ui.BoxLayout.new(ori: 1)
+				children: [
+					card,
+					theme_card,
+					round_card,
+					grid_card,
+				]
+			),
+			ui.Panel.new(
+				layout:   ui.FlowLayout.new(hgap: 10, vgap: 10)
+				children: [
+					ui.Label.new(
+						text: 'About vPaint\n${about_text.join('\n')}\n'
+					),
+				]
+			),
+		]
 	)
-	lbl.pack()
-
-	mut about_p := ui.Panel.new(layout: ui.FlowLayout.new(hgap: 10, vgap: 10))
-	about_p.add_child(lbl)
-
-	p.add_child(panel)
-	p.add_child(about_p)
 
 	p.subscribe_event('draw', fn (mut e ui.DrawEvent) {
 		pw := e.ctx.gg.window_size().width
@@ -100,7 +98,10 @@ fn (mut app App) show_settings() {
 		e.target.children[0].width = size - 10
 	})
 
-	page.add_child(p)
+	mut page := ui.Page.new(
+		title:    'Settings'
+		children: [p]
+	)
 	app.win.add_child(page)
 }
 

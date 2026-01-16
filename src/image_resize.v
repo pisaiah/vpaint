@@ -170,22 +170,33 @@ fn (mut this Image) bilinear_interpolation(new_width int, new_height int) {
 fn (mut this Image) scale2x() [][]gx.Color {
 	src_width := this.w
 	src_height := this.h
-	mut dst := [][]gx.Color{len: src_height * 2, init: []gx.Color{len: src_width * 2}}
+	// mut dst := [][]gx.Color{len: src_height * 2, init: []gx.Color{len: src_width * 2}}
+
+	mut dst := [][]gx.Color{}
+	for _ in 0 .. src_height * 2 {
+		dst << []gx.Color{len: src_width * 2}
+	}
 
 	mut en := make_stbi(this.w * 2, this.h * 2)
 
 	for y in 0 .. src_height {
 		for x in 0 .. src_width {
-			c := this.get(x, y)
-			a := if y > 0 { this.get(x, y - 1) } else { c }
-			b := if x > 0 { this.get(x - 1, y) } else { c }
-			d := if x < src_width - 1 { this.get(x + 1, y) } else { c }
-			e := if y < src_height - 1 { this.get(x, y + 1) } else { c }
+			e := this.get(x, y)
+			a := if y > 0 { this.get(x, y - 1) } else { e }
+			b := if x > 0 { this.get(x - 1, y) } else { e }
+			c := if x < src_width - 1 { this.get(x + 1, y) } else { e }
+			d := if y < src_height - 1 { this.get(x, y + 1) } else { e }
 
-			dst[y * 2][x * 2] = if a == b { a } else { c }
-			dst[y * 2][x * 2 + 1] = if a == d { a } else { c }
-			dst[y * 2 + 1][x * 2] = if e == b { e } else { c }
-			dst[y * 2 + 1][x * 2 + 1] = if e == d { e } else { c }
+			// Scale2x rules
+			e0 := if b == a && a != c && b != d { a } else { e }
+			e1 := if a == c && a != b && c != d { c } else { e }
+			e2 := if b == d && b != a && d != c { b } else { e }
+			e3 := if d == c && d != b && c != a { d } else { e }
+
+			dst[y * 2][x * 2] = e0
+			dst[y * 2][x * 2 + 1] = e1
+			dst[y * 2 + 1][x * 2] = e2
+			dst[y * 2 + 1][x * 2 + 1] = e3
 		}
 	}
 

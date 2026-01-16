@@ -38,16 +38,19 @@ fn (mut app App) show_resize_modal(cw int, ch int) {
 }
 
 pub fn create_close_btn(mut this ui.Modal, app &ui.Window) &ui.Button {
-	mut close := ui.Button.new(text: 'OK')
-	mut cancel := ui.Button.new(text: 'Cancel')
+	mut close := ui.Button.new(
+		text:     'OK'
+		on_click: resize_close_click
+	)
+	mut cancel := ui.Button.new(
+		text:     'Cancel'
+		on_click: end_modal
+	)
 
 	y := this.in_height - 45
 	close.set_accent_filled(true)
 	close.set_bounds(24, y, 130, 30)
 	cancel.set_bounds(165, y, 105, 30)
-
-	close.subscribe_event('mouse_up', resize_close_click)
-	cancel.subscribe_event('mouse_up', end_modal)
 
 	this.add_child(cancel)
 
@@ -310,13 +313,12 @@ fn (mut app App) show_new_modal(cw int, ch int) {
 	heigh_box.subscribe_event('text_change', nm.text_change_fn)
 
 	mut link := ui.Button.new(
-		text: '\ue167'
-		pack: true
+		text:     '\ue167'
+		pack:     true
+		on_click: nm.button_click_fn
 	)
 	link.set_accent_filled(true)
 	link.font = 1
-	link.subscribe_event('mouse_up', nm.button_click_fn)
-
 	mut p := ui.Panel.new(
 		layout: ui.GridLayout.new(cols: 3)
 	)
