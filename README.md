@@ -1,6 +1,7 @@
-# vPaint ![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat) ![vlang](http://img.shields.io/badge/V-0.4.8-%236d8fc5?style=flat)
+# vPaint ![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat) ![vlang](http://img.shields.io/badge/V-0.5-%236d8fc5?style=flat)
 ## About
-Image Viewer & Editor written in the [V](https://vlang.io) Programming Language.
+Image Viewer & Editor written in the [V Programming Language](https://vlang.io).
+Supports Windows, Linux, macOS, Wasm.
 
 ![image](https://github.com/user-attachments/assets/86ba1ce5-1ac4-46ca-98e8-d447cf46b28e)
 
@@ -17,11 +18,14 @@ Online demo: [https://vpaint.app/demo](https://pisaiah.com/vpaint/demo/)
 
 ## Compile dependencies
 - [iUI](https://github.com/pisaiah/ui)
-- V 0.4.8 or higher
+- V 0.5.0 or higher
+
+- (for Linux): Graphics libs: `sudo apt install libgc-dev build-essential libxi-dev libxcursor-dev mesa-common-dev libgl1 libglx-mesa0 libxrandr-dev`
+- (for Wasm): Use [v-emscripten-script](https://github.com/pisaiah/v-emscripten-script) to patch closures.
 
 ## Credits
 - V - [https://vlang.io](https://vlang.io)
 - Icons by [Icons8.com](https://icons8.com/)
 
-> Copyright (c) 2022-2024 Isaiah.
+> Copyright © 2022-2026 Isaiah.
 [![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat)](https://opensource.org/license/mit/)
