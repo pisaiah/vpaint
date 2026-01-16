@@ -190,6 +190,7 @@ jobs:
           sudo apt install build-essential
           sudo apt-get --yes --force-yes install libxi-dev libxcursor-dev mesa-common-dev
           sudo apt-get --yes --force-yes install libgl1 libglx-mesa0
+          sudo apt-get --yes --force-yes install libxrandr-dev
           v install https://github.com/pisaiah/ui
           git clone https://github.com/pisaiah/ui iui
           cd iui
