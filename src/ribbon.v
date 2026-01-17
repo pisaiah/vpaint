@@ -12,8 +12,6 @@ const rgb_colors = [gg.rgb(0, 0, 0), gg.rgb(127, 127, 127), gg.rgb(136, 0, 21),
 	gg.rgb(112, 146, 190), gg.rgba(0, 0, 0, 0)]
 
 fn (mut app App) make_ribbon() {
-	mut box1 := ui.Panel.new(layout: ui.BoxLayout.new(ori: 1, hgap: 0))
-
 	mut color_box := app.make_color_box()
 
 	color_box.subscribe_event('draw', fn [mut color_box] (mut e ui.DrawEvent) {
@@ -26,8 +24,13 @@ fn (mut app App) make_ribbon() {
 		}
 	})
 
-	box1.add_child(make_c_btn(0))
-	box1.add_child(make_c_btn(10))
+	mut box1 := ui.Panel.new(
+		layout:   ui.BoxLayout.new(ori: 1, hgap: 0)
+		children: [
+			make_c_btn(0),
+			make_c_btn(10),
+		]
+	)
 
 	// Eye Dropper
 	img_picker_file := $embed_file('assets/rgb-picker.png')
@@ -37,7 +40,6 @@ fn (mut app App) make_ribbon() {
 
 	box1.set_x(5)
 	color_box.set_x(11)
-	// btn.set_x(5)
 	btn.border_radius = 2
 
 	btn.y = 0
@@ -110,12 +112,12 @@ fn (mut app App) make_color_popup() &ui.Panel {
 	)
 
 	mut btn := ui.Button.new(
-		text: 'Colors'
+		text:   'Colors'
+		width:  60
+		height: app.ribbon.height - 10
 	)
 
 	btn.x = 5
-	btn.width = 60
-	btn.height = app.ribbon.height - 10
 
 	mut popup := ui.Popup.new()
 
@@ -163,11 +165,13 @@ fn (mut app App) make_color_popup() &ui.Panel {
 }
 
 fn (mut app App) make_color_box() &ui.Panel {
+	size := 24
+
 	mut color_box := ui.Panel.new(
 		layout: ui.GridLayout.new(rows: 2, vgap: 3, hgap: 3)
+		width:  (size + 6) * 10
+		height: 64
 	)
-
-	size := 24
 
 	for color in rgb_colors {
 		mut btn := ui.Button.new(text: ' ')
@@ -195,7 +199,6 @@ fn (mut app App) make_color_box() &ui.Panel {
 	})
 
 	color_box.set_background(gg.rgba(0, 0, 0, 1))
-	color_box.set_bounds(0, 0, (size + 6) * 10, 64)
 	return color_box
 }
 

@@ -5,12 +5,12 @@ import os
 import gg
 
 // Version
-const version = '0.7'
+const version = '0.7.1'
 
 // About Info
 const about_text = [
 	'Simple Image Editor written in the V Language.',
-	'(version ${version}) (iUI: ${ui.version})',
+	'Version: ${version}, iUI: ${ui.version}',
 	'\t ',
 	'Copyright \u00A9 2022-2026 Isaiah.',
 	'Released under MIT License.',
@@ -48,6 +48,10 @@ mut:
 	settings       &Settings
 	wasm_load_tick int
 	cp             &ColorPicker
+}
+
+fn (app &App) get_image_data() &ImageViewData {
+	return app.canvas.data
 }
 
 fn (app &App) get_color() gg.Color {
@@ -94,11 +98,13 @@ fn (mut app App) parse_args() {
 		app.brush_size = 2048
 	}
 
+	file := app.get_image_data().file
+
 	if '-upscale' in os.args {
 		println('Upscaling ${os.args[1]}...')
 		out_path := os.args[3].split('-path=')[1]
 		app.canvas.scale2x()
-		app.write_img(app.data.file, out_path)
+		app.write_img(file, out_path)
 		return
 	}
 
@@ -135,7 +141,7 @@ fn (mut app App) parse_args() {
 		for _ in 0 .. times {
 			app.canvas.scale2x()
 		}
-		app.write_img(app.data.file, out_path)
+		app.write_img(file, out_path)
 		return
 	}
 }
@@ -186,8 +192,7 @@ fn main() {
 
 	app.make_ribbon()
 
-	mut sb := app.make_status_bar(window)
-	app.status_bar = sb
+	app.status_bar = app.make_status_bar(window)
 
 	mut pan := ui.Panel.new(
 		layout:   ui.BorderLayout.new(
@@ -197,7 +202,7 @@ fn main() {
 		children: [
 			app.sv,
 			app.ribbon,
-			sb,
+			app.status_bar,
 			ui.Panel.new(),
 			app.sidebar,
 		]

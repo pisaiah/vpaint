@@ -347,7 +347,7 @@ fn menu_size_click(mut win ui.Window, com ui.MenuItem) {
 fn fit_zoom_click(mut e ui.MouseEvent) {
 	mut app := e.ctx.win.get[&App]('app')
 	canvas_height := app.sv.height - 50
-	level := canvas_height / app.data.file.height
+	level := canvas_height / app.get_image_data().file.height
 	app.canvas.set_zoom(level)
 }
 

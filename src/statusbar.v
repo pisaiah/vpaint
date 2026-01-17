@@ -132,7 +132,7 @@ fn stat_lbl_draw_event(mut e ui.DrawEvent) {
 	if ww < 440 {
 		com.text = '${app.canvas.w}x${app.canvas.h} / ${mouse_details}'
 	} else {
-		com.text = '${app.canvas.w}x${app.canvas.h} / ${app.data.file_size} / m: ${mouse_details}'
+		com.text = '${app.canvas.w}x${app.canvas.h} / ${app.get_image_data().file_size} / m: ${mouse_details}'
 	}
 
 	if mut com is ui.Label {

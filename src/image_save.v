@@ -5,7 +5,7 @@ import stbi
 import os
 
 fn (app &App) save() {
-	mut this := app.data
+	mut this := app.get_image_data()
 
 	if this.file_name.ends_with('jpg') {
 		app.write_jpg(this.file, this.file_name)
@@ -47,7 +47,7 @@ fn responsive_modal_panel(mut e ui.DrawEvent) {
 }
 
 fn (app &App) save_as() {
-	mut data := app.data
+	mut data := app.get_image_data()
 
 	mut modal := ui.Modal.new(
 		title: 'Save As..'

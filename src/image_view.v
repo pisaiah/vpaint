@@ -15,13 +15,6 @@ mut:
 }
 
 pub fn (mut app App) make_image_view(file string) &ui.Panel {
-	mut p := ui.Panel.new(
-		layout: ui.FlowLayout.new(
-			hgap: 0
-			vgap: 0
-		)
-	)
-
 	mut png_file := stbi.load(file) or { make_stbi(0, 0) }
 
 	mut data := &ImageViewData{
@@ -30,23 +23,33 @@ pub fn (mut app App) make_image_view(file string) &ui.Panel {
 	}
 	app.data = data
 
-	mut img := image_from_data(data)
-	img.app = app
+	mut img := Image.new(
+		data: data
+		app:  app
+	)
 	app.canvas = img
-	p.add_child(img)
-
-	p.subscribe_event('after_draw', img_panel_draw)
 
 	if os.exists(file) {
 		file_size := format_size(os.file_size(file))
 		data.file_size = file_size
 	}
 
-	p.set_pos(24, 24)
-
-	if app.data.file_size.len == 0 {
-		app.load_new(32, 32)
+	if data.file_size.len == 0 {
+		app.load_new(64, 64)
 	}
+
+	mut p := ui.Panel.new(
+		layout:   ui.FlowLayout.new(
+			hgap: 0
+			vgap: 0
+		)
+		children: [
+			img,
+		]
+	)
+
+	p.subscribe_event('after_draw', img_panel_draw)
+	p.set_pos(24, 24)
 
 	return p
 }
@@ -55,8 +58,6 @@ fn img_panel_draw(mut e ui.DrawEvent) {
 	mut app := e.ctx.win.get[&App]('app')
 	e.target.width = app.canvas.width + 2
 	e.target.height = app.canvas.height + 2
-
-	// e.ctx.gg.draw_rect_filled(e.target.x, e.target.y, e.target.width, e.target.height, e.ctx.theme.accent_fill)
 
 	if app.need_open {
 		$if emscripten ? {
@@ -364,7 +365,27 @@ pub mut:
 	bh            int
 }
 
-pub fn image_from_data(data &ImageViewData) &Image {
+@[param]
+pub struct ImageConfig {
+	data &ImageViewData
+	app  &App
+}
+
+pub fn Image.new(c ImageConfig) &Image {
+	return &Image{
+		data:   c.data
+		img:    c.data.id
+		w:      c.data.file.width
+		h:      c.data.file.height
+		width:  c.data.file.width
+		height: c.data.file.height
+		zoom:   1
+		app:    c.app
+	}
+}
+
+@[deprecated]
+pub fn image_from_data(data &ImageViewData, app &App) &Image {
 	return &Image{
 		data:   data
 		img:    data.id
@@ -373,6 +394,7 @@ pub fn image_from_data(data &ImageViewData) &Image {
 		width:  data.file.width
 		height: data.file.height
 		zoom:   1
+		app:    app
 	}
 }
 
