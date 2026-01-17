@@ -145,7 +145,7 @@ fn main() {
 	// Create Window
 	mut window := ui.Window.new(
 		title:     'vPaint ${version}'
-		width:     800 // 700
+		width:     800
 		height:    600
 		font_size: 16
 		ui_mode:   false
@@ -154,7 +154,12 @@ fn main() {
 	path := get_load_path()
 
 	mut app := &App{
-		sv:         unsafe { nil }
+		sv:         ui.ScrollView.new(
+			increment: 2
+			padding:   50
+			width:     500
+			height:    210
+		)
 		sidebar:    ui.Panel.new(layout: ui.FlowLayout.new(vgap: 1, hgap: 1))
 		data:       unsafe { nil }
 		canvas:     unsafe { nil }
@@ -174,19 +179,9 @@ fn main() {
 	mut image_panel := app.make_image_view(path)
 
 	app.parse_args()
-
-	mut sv := &ui.ScrollView{
-		children:  [image_panel]
-		increment: 2
-		padding:   50
-	}
-	app.sv = sv
-	sv.set_bounds(0, 0, 500, 210)
-
+	app.sv.add_child(image_panel)
 	app.make_sidebar()
 
-	// Ribbon bar
-	// app.ribbon.z_index = 21
 	app.ribbon.subscribe_event('draw', ribbon_draw_fn)
 
 	app.make_ribbon()
@@ -195,30 +190,42 @@ fn main() {
 	app.status_bar = sb
 
 	mut pan := ui.Panel.new(
-		layout: ui.BorderLayout.new(
+		layout:   ui.BorderLayout.new(
 			hgap: 0
 			vgap: 0
 		)
+		children: [
+			app.sv,
+			app.ribbon,
+			sb,
+			ui.Panel.new(),
+			app.sidebar,
+		]
+		flags:    [
+			ui.borderlayout_center,
+			ui.borderlayout_north,
+			ui.borderlayout_south,
+			ui.borderlayout_east,
+			ui.borderlayout_west,
+		]
 	)
-
-	pan.add_child(app.ribbon, value: ui.borderlayout_north)
-	pan.add_child_with_flag(app.sidebar, ui.borderlayout_west)
-	pan.add_child_with_flag(app.sv, ui.borderlayout_center)
-	pan.add_child_with_flag(sb, ui.borderlayout_south)
 
 	window.add_child(pan)
 
-	mut win := app.win
-	tb_file := $embed_file('assets/checker2.png')
-	data := tb_file.to_bytes()
-	gg_im := win.gg.create_image_from_byte_array(data) or { panic(err) }
-	cim := win.gg.cache_image(gg_im)
-	app.bg_id = cim
-
+	// Set Background
+	app.make_checker_bg()
 	background := gg.rgb(210, 220, 240)
 	window.gg.set_bg_color(background)
+	app.set_theme_bg(window.theme.name)
 
-	app.set_theme_bg(app.win.theme.name)
-
+	// Show Window
 	window.gg.run()
+}
+
+fn (mut app App) make_checker_bg() {
+	tb_file := $embed_file('assets/checker2.png')
+	data := tb_file.to_bytes()
+	gg_im := app.win.gg.create_image_from_byte_array(data) or { panic(err) }
+	cim := app.win.gg.cache_image(gg_im)
+	app.bg_id = cim
 }

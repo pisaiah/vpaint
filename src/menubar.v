@@ -100,61 +100,51 @@ fn img_prop_item_click(mut e ui.MouseEvent) {
 // Make menubar
 fn (mut app App) make_menubar(mut window ui.Window) {
 	// Setup Menubar and items
-	window.bar = ui.Menubar.new()
-	window.bar.set_animate(true)
-
-	// Win11 MSPaint has 7px padding on menu bar
-	window.bar.set_padding(8)
-
-	$if customtitlebar ? {
-		window.bar.set_padding(9)
-	}
-
-	// Add MenuItems
-	window.bar.add_child(make_file_menu())
-	window.bar.add_child(make_edit_menu())
-	window.bar.add_child(make_view_menu())
-	window.bar.add_child(make_tool_menu())
-	window.bar.add_child(make_shape_menu())
-
-	window.bar.add_child(ui.MenuItem.new(
-		text:     'Size'
-		children: [
-			size_menu_item(1),
-			size_menu_item(2),
-			size_menu_item(4),
-			size_menu_item(8),
-			size_menu_item(16),
-			size_menu_item(32),
-			size_menu_item(64),
-			ui.MenuItem.new(
-				text:           'Custom'
-				click_event_fn: menu_size_custom_click
-			),
-		]
-	))
 
 	mut theme_menu := ui.MenuItem.new(
 		text: 'Theme'
 	)
+
+	window.bar = ui.Menubar.new(
+		animate:  true
+		padding:  $if customtitlebar ? { 9 } $else { 8 }
+		children: [
+			make_file_menu(),
+			make_edit_menu(),
+			make_view_menu(),
+			make_tool_menu(),
+			make_shape_menu(),
+			ui.MenuItem.new(
+				text:     'Size'
+				children: [
+					size_menu_item(1),
+					size_menu_item(2),
+					size_menu_item(4),
+					size_menu_item(8),
+					size_menu_item(16),
+					size_menu_item(32),
+					size_menu_item(64),
+					ui.MenuItem.new(
+						text:           'Custom'
+						click_event_fn: menu_size_custom_click
+					),
+				]
+			),
+			theme_menu,
+			ui.MenuItem.new(
+				click_event_fn: undo_click
+				uicon:          '\ue966'
+			),
+		]
+	)
+
+	// Add Themes
 	mut themes := window.get_theme_manager().get_themes()
 	for theme2 in themes {
 		mut item := ui.MenuItem.new(text: theme2.name)
 		item.set_click(theme_click)
 		theme_menu.add_child(item)
 	}
-
-	window.bar.add_child(theme_menu)
-
-	// undo_img := $embed_file('assets/undo.png')
-	// undo_icon := ui.image_from_bytes(mut window, undo_img.to_bytes(), 24, 24)
-
-	mut undo_item := ui.MenuItem.new(
-		click_event_fn: undo_click
-		uicon:          '\ue966'
-	)
-	undo_item.width = 30
-	window.bar.add_child(undo_item)
 }
 
 // File Item
@@ -193,9 +183,9 @@ fn make_file_menu() &ui.MenuItem {
 				uicon:          '\ue995'
 			),
 			ui.MenuItem.new(
-				text:           'About Paint'
-				click_event_fn: about_click
-				uicon:          '\ue949'
+				text:     'About Paint'
+				click_fn: about_click
+				uicon:    '\ue949'
 			),
 			ui.MenuItem.new(
 				text:  'About iUI'
@@ -384,22 +374,24 @@ fn (mut app App) set_theme(name string) {
 }
 
 fn (mut app App) set_theme_bg(text string) {
+	background := get_bg_from_theme(text)
+	app.win.gg.set_bg_color(background)
+	app.win.id_map['background'] = &background
+}
+
+fn get_bg_from_theme(text string) gg.Color {
 	if text.contains('Dark') {
-		background := gg.rgb(25, 42, 77)
-		app.win.gg.set_bg_color(gg.rgb(25, 42, 77))
-		app.win.id_map['background'] = &background
+		if text.contains('Green Accent') {
+			return gg.rgb(0, 16, 0)
+		}
+		if text.contains('Red Accent') {
+			return gg.rgb(16, 0, 0)
+		}
+		return gg.rgb(25, 42, 77)
 	} else if text.contains('Black') {
-		app.win.gg.set_bg_color(gg.rgb(0, 0, 0))
-		background := gg.rgb(0, 0, 0)
-		app.win.id_map['background'] = &background
-	} else if text.contains('Green Mono') {
-		app.win.gg.set_bg_color(gg.rgb(0, 16, 0))
-		background := gg.rgb(0, 16, 0)
-		app.win.id_map['background'] = &background
+		return gg.rgb(0, 0, 0)
 	} else {
-		background := gg.rgb(210, 220, 240)
-		app.win.gg.set_bg_color(background)
-		app.win.id_map['background'] = &background
+		return gg.rgb(210, 220, 240)
 	}
 }
 
@@ -408,71 +400,69 @@ fn settings_click(mut win ui.Window, com ui.MenuItem) {
 	app.show_settings()
 }
 
-fn about_click(mut win ui.Window, com ui.MenuItem) {
-	mut modal := ui.Modal.new(title: 'About vPaint')
-
-	modal.top_off = 25
-	modal.in_width = 300
-	modal.in_height = 290
-
-	mut title := ui.Label.new(
-		text:           'VPaint'
-		bold:           true
-		em_size:        2
-		vertical_align: .middle
-		pack:           true
+fn about_click(mut e ui.MouseEvent) {
+	mut modal := ui.Modal.new(
+		title:  'About vPaint'
+		width:  300
+		height: 290
 	)
 
 	mut p := ui.Panel.new(
-		layout: ui.BorderLayout.new(
+		layout:   ui.BoxLayout.new(
+			vgap: 20
 			hgap: 20
+			ori:  1
 		)
+		children: [
+			ui.Label.new(
+				text:           'VPaint'
+				bold:           true
+				em_size:        2
+				vertical_align: .middle
+				pack:           true
+			),
+			ui.Label.new(
+				text:           about_text.join('\n')
+				pack:           true
+				vertical_align: .middle
+			),
+			ui.Panel.new(
+				layout:   ui.BoxLayout.new(
+					ori:  0
+					hgap: 10
+				)
+				children: [
+					ui.link(
+						text: 'Icons8'
+						url:  'https://icons8.com/'
+						pack: true
+					),
+					ui.link(
+						text: 'Github'
+						url:  'https://github.com/pisaiah/vpaint'
+						pack: true
+					),
+					ui.link(
+						text: 'Donate'
+						url:  'https://www.patreon.com/c/isaiahp'
+						pack: true
+					),
+					ui.link(
+						text: 'About V'
+						url:  'https://vlang.io'
+						pack: true
+					),
+				]
+			),
+		]
 	)
-	p.add_child_with_flag(title, ui.borderlayout_north)
 
-	mut lbl := ui.Label.new(
-		text:           about_text.join('\n')
-		pack:           true
-		vertical_align: .middle
-	)
-	p.add_child_with_flag(lbl, ui.borderlayout_center)
-
-	mut lp := ui.Panel.new(
-		layout: ui.BoxLayout.new(
-			ori:  0
-			hgap: 30
-		)
-	)
-	lp.set_bounds(0, 0, modal.in_width - 32, 30)
-
-	icons8 := ui.link(
-		text: 'Icons8'
-		url:  'https://icons8.com/'
-		pack: true
-	)
-
-	git := ui.link(
-		text: 'Github'
-		url:  'https://github.com/pisaiah/vpaint'
-		pack: true
-	)
-
-	vlang := ui.link(
-		text: 'About V'
-		url:  'https://vlang.io'
-		pack: true
-	)
-
-	p.set_bounds(0, 9, modal.in_width, modal.in_height - 100)
-	lp.add_child(icons8)
-	lp.add_child(git)
-	lp.add_child(vlang)
-	p.add_child_with_flag(lp, ui.borderlayout_south)
+	p.set_bounds(5, 5, modal.in_width - 10, modal.in_height - 100)
 
 	modal.add_child(p)
 	modal.make_close_btn(true)
 	modal.close.set_bounds((modal.in_width / 2) - 50, modal.in_height - 45, 100, 30)
 	modal.needs_init = false
 
-	win.add_child(modal)
+	e.ctx.win.add_child(modal)
 }

@@ -10,13 +10,15 @@ fn (mut app App) show_settings() {
 		text:        'Sidebar Hidden'
 		description: 'Choose to autohide the side toolbar.'
 		stretch:     true
+		children:    [
+			ui.Checkbox.new(
+				text:     'Autohide'
+				selected: app.settings.autohide_sidebar
+				bounds:   ui.Bounds{0, 0, 100, 24}
+				on_click: app.hide_sidebar_mouse_up
+			),
+		]
 	)
-	mut box := ui.Checkbox.new(text: 'Autohide')
-	box.is_selected = app.settings.autohide_sidebar
-	box.set_bounds(0, 0, 100, 24)
-	box.subscribe_event('mouse_up', app.hide_sidebar_mouse_up)
-
-	card.add_child(box)
 
 	// App Theme
 	mut theme_card := ui.SettingsCard.new(
@@ -24,20 +26,16 @@ fn (mut app App) show_settings() {
 		text:        'App Theme'
 		description: 'Choose how the app looks'
 		stretch:     true
+		children:    [
+			ui.Selectbox.new(
+				text:      app.win.theme.name
+				items:     app.win.get_theme_manager().get_themes().map(it.name)
+				on_change: theme_select_change
+				width:     120
+				height:    30
+			),
+		]
 	)
-
-	mut cb := ui.Selectbox.new(
-		text:  app.win.theme.name
-		items: app.win.get_theme_manager().get_themes().map(it.name)
-	)
-
-	cb.set_bounds(0, 0, 120, 30)
-	cb.subscribe_event('item_change', fn (mut e ui.ItemChangeEvent) {
-		txt := e.target.text.replace('Light', 'Default')
-		mut app := e.ctx.win.get[&App]('app')
-		app.set_theme(txt)
-	})
-	theme_card.add_child(cb)
 
 	// Round card
 	mut round_card := ui.SettingsCard.new(
@@ -45,13 +43,15 @@ fn (mut app App) show_settings() {
 		text:        'Round End Points'
 		description: 'Round end-points of drawn lines'
 		stretch:     true
+		children:    [
+			ui.Switch.new(
+				text:     'Round'
+				selected: app.settings.round_ends
+				bounds:   ui.Bounds{0, 0, 100, 24}
+				on_click: app.round_ends_mouse_up
+			),
+		]
 	)
-
-	mut rbox := ui.Switch.new(text: 'Round')
-	rbox.is_selected = app.settings.round_ends
-	rbox.set_bounds(0, 0, 100, 24)
-	rbox.subscribe_event('mouse_up', app.round_ends_mouse_up)
-	round_card.add_child(rbox)
 
 	// Gridlines
 	mut grid_card := ui.SettingsCard.new(
@@ -59,13 +59,15 @@ fn (mut app App) show_settings() {
 		text:        'Show Gridlines'
 		description: 'Choose to display gridlines on the Canvas.'
 		stretch:     true
+		children:    [
+			ui.Checkbox.new(
+				text:     'Gridlines'
+				selected: app.settings.show_gridlines
+				bounds:   ui.Bounds{0, 0, 100, 24}
+				on_click: gridlines_item_click
+			),
+		]
 	)
-	mut box2 := ui.Checkbox.new(text: 'Gridlines')
-	box2.is_selected = app.settings.show_gridlines
-	box2.set_bounds(0, 0, 100, 24)
-	box2.subscribe_event('mouse_up', gridlines_item_click)
-
-	grid_card.add_child(box2)
 
 	// Content Panel
 	mut p := ui.Panel.new(
@@ -103,6 +105,12 @@ fn (mut app App) show_settings() {
 		children: [p]
 	)
 	app.win.add_child(page)
+}
+
+fn theme_select_change(mut e ui.ItemChangeEvent) {
+	txt := e.target.text.replace('Light', 'Default')
+	mut app := e.ctx.win.get[&App]('app')
+	app.set_theme(txt)
 }
 
 fn (mut app App) round_ends_mouse_up(mut e ui.MouseEvent) {
